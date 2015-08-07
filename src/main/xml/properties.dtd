@@ -1,0 +1,25 @@
+<!-- Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  This file is offered as-is,
+     without any warranty.
+-->
+
+<!ELEMENT properties (import*, property+)>
+<!ATTLIST properties
+    home-environment-var CDATA #REQUIRED
+    appName CDATA #REQUIRED
+    useXml (true|false) "true"
+    package CDATA #REQUIRED
+  >
+
+<!ELEMENT import EMPTY>
+<!ATTLIST import
+    class CDATA #REQUIRED>
+
+<!ELEMENT property EMPTY>
+<!ATTLIST property
+    doc CDATA #IMPLIED
+    default CDATA #REQUIRED
+    type (int|boolean|rectangle|string|URL) #REQUIRED
+    name NMTOKEN #REQUIRED
+  >
