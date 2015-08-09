@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,12 +22,12 @@ import java.util.List;
 import org.harctoolbox.harchardware.ir.ITransmitter;
 
 /**
- * This class does something interesting and useful. Or not...
+ * This class models transmitters as in HarcHardware.
  */
 public class Transmitters extends Module {
     private ITransmitter transmitter;
 
-    private class TransmittersCommand implements Command {
+    private class TransmittersCommand implements ICommand {
 
         @Override
         public String getName() {

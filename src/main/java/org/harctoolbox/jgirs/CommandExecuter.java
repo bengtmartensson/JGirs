@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
 /**
- *
+ * A container class for ICommand.
  */
 public class CommandExecuter {
 
-    private HashMap<String, Command> commands;
+    private HashMap<String, ICommand> commands;
 
     public ArrayList<String> getCommandNames(boolean sort) {
         ArrayList<String> commandNames = new ArrayList<>(commands.keySet());
@@ -49,17 +49,17 @@ public class CommandExecuter {
         return ((CommandWithSubcommands) commands.get(command)).getSubCommandNames(sort);
     }
 
-    public Collection<Command> getCommands() {
+    public Collection<ICommand> getCommands() {
         return commands.values();
     }
 
-    public List<String> exec(String[] args) throws ExecutionException, CommandSyntaxException, NoSuchModuleException, AmbigousCommandException, IOException, HarcHardwareException, IrpMasterException, NoSuchRemoteException, NoSuchParameterException, NonExistingCommandException, NoSuchCommandException {
+    public List<String> exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         String commandName = args[0];
-        Command cmd = null;
+        ICommand cmd = null;
         if (commands.containsKey(commandName))
             cmd = commands.get(commandName);
         else {
-            for (Map.Entry<String, Command> kvp : commands.entrySet()) {
+            for (Map.Entry<String, ICommand> kvp : commands.entrySet()) {
                 if (kvp.getKey().startsWith(commandName)) {
                     if (cmd == null)
                         cmd = kvp.getValue();
@@ -69,7 +69,7 @@ public class CommandExecuter {
             }
         }
         if (cmd == null)
-            throw new NonExistingCommandException("Command " + commandName + " not found.");
+            throw new NoSuchCommandException("Command " + commandName + " not found.");
         return cmd.exec(args);
     }
 
@@ -77,7 +77,7 @@ public class CommandExecuter {
         commands = new LinkedHashMap<>();
     }
 
-    public void addCommand(Command command) {
+    public void addCommand(ICommand command) {
         if (commands.containsKey(command.getName()))
             throw new RuntimeException("Multiply defined command: " + command.getName());
 

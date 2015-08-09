@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 /**
- * This class does something interesting and useful. Or not...
+ * This is thrown if a non-existing module is requested,
  */
 public class NoSuchModuleException extends JGirsException {
     private static final long serialVersionUID = 1L;

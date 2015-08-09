@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
 /**
- * This class does something interesting and useful. Or not...
+ * This is an abstract base class for commands containing subcommands.
  */
 public abstract class CommandWithSubcommands {
 
@@ -37,11 +37,11 @@ public abstract class CommandWithSubcommands {
         commandExecuter = new CommandExecuter();
     }
 
-    protected void addCommand(Command command) {
+    protected void addCommand(ICommand command) {
         commandExecuter.addCommand(command);
     }
 
-    public Collection<Command> getSubCommands() {
+    public Collection<ICommand> getSubCommands() {
         return commandExecuter.getCommands();
     }
 
@@ -49,7 +49,7 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommandNames(sort);
     }
 
-    public List<String> exec(String[] args) throws NoSuchCommandException, ExecutionException, CommandSyntaxException, NoSuchModuleException, AmbigousCommandException, IOException, HarcHardwareException, IrpMasterException, NoSuchRemoteException, NoSuchParameterException, NonExistingCommandException {
+    public List<String> exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         if (args == null || args.length == 0)
             throw new CommandSyntaxException(getName(), "subcommand missing");
         String[] rest = new String[args.length - 1];

@@ -1,10 +1,10 @@
 package org.harctoolbox.jgirs;
 
 /**
- *
+ * Defines the functions the Parameters must implement.
  *
  */
-public interface Parameter {
+public interface IParameter {
 
     public String getName();
 

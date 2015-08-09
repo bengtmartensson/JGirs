@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.ICapture;
 
 /**
- *
+ * Class for caputurinig raw signals.
  */
 public class Capture extends Module {
 
@@ -36,7 +36,7 @@ public class Capture extends Module {
     private EndTimeoutParameter endTimeoutParameter;
     private UseCcfCaptureParameter useCcfCaptureParameter;
 
-    private class AnalyzeCommand implements Command {
+    private class AnalyzeCommand implements ICommand {
 
         @Override
         public String getName() {

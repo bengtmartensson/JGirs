@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ package org.harctoolbox.jgirs;
 /**
  * This exception is thrown if an IR command is not found.
  */
-public class NoSuchCommandException extends Exception {
+public class NoSuchCommandException extends JGirsException {
     private static final long serialVersionUID = 1L;
     NoSuchCommandException() {
         super("Command not existing or abbreviation ambigous");

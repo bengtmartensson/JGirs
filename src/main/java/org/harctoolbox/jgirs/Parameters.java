@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- *
+ * Models parameters in the Girs server.
  */
 public class Parameters extends Module {
-    private HashMap<String, Parameter> allParameters;
+    private HashMap<String, IParameter> allParameters;
 
-    private class ParametersCommand implements Command {
+    private class ParametersCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -38,13 +38,13 @@ public class Parameters extends Module {
         @Override
         public List<String> exec(String[] args) {
             ArrayList<String> result = new ArrayList<>();
-            for (Parameter param : allParameters.values())
+            for (IParameter param : allParameters.values())
                 result.add(param.toString());
             return result;
         }
     }
 
-    private class SetParameterCommand implements Command {
+    private class SetParameterCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -57,14 +57,14 @@ public class Parameters extends Module {
             String name = args[index++];
             if (!allParameters.containsKey(name))
                 throw new NoSuchParameterException(name);
-            Parameter parameter = allParameters.get(name);
+            IParameter parameter = allParameters.get(name);
             parameter.set(args[index]);
             return new ArrayList<>();
         }
 
     }
 
-    private class GetParameterCommand implements Command {
+    private class GetParameterCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -77,7 +77,7 @@ public class Parameters extends Module {
             String name = args[index];
             if (!allParameters.containsKey(name))
                 throw new NoSuchParameterException(name);
-            final Parameter parameter = allParameters.get(name);
+            final IParameter parameter = allParameters.get(name);
             return new ArrayList<String>() {{ add(parameter.get()); }};
         }
     }

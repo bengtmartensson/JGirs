@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see http://www.gnu.org/licenses/.
 */
 
+/**
+ * An general execution engine.
+ */
 
 package org.harctoolbox.jgirs;
 
@@ -22,12 +25,16 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.EOFException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
@@ -40,6 +47,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
+import org.gnu.readline.Readline;
+import org.gnu.readline.ReadlineLibrary;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.IrpUtils;
@@ -141,7 +150,7 @@ public class Engine implements ICommandLine {
         if (module == null)
             return;
         modules.put(module.getName(), module);
-        for (Command cmd : module.getCommands()) {
+        for (ICommand cmd : module.getCommands()) {
             commandExecuter.addCommand(cmd);
         }
         parameters.addParameters(module);
@@ -167,13 +176,14 @@ public class Engine implements ICommandLine {
         return hw;
     }
 
-    public Engine(IHarcHardware hardware, Renderer renderer, Irp irp, NamedRemotes namedCommand, String appName, String charsetName, boolean verbose, int debug) throws FileNotFoundException, IncompatibleArgumentException {
+    public Engine(IHarcHardware hardware, Renderer renderer, Irp irp, NamedRemotes namedCommand, String appName, String charsetName, String prompt, boolean verbose, int debug) throws FileNotFoundException, IncompatibleArgumentException {
         this.appName = appName;
         this.verbose = verbose;
         this.debug = debug;
         this.charSet = Charset.forName(charsetName);
         this.hardware = hardware;
         this.namedCommand = namedCommand;
+        this.prompt = prompt;
         modules = new LinkedHashMap<>();
         commandExecuter = new CommandExecuter();
         parameters = new Parameters();
@@ -205,29 +215,141 @@ public class Engine implements ICommandLine {
         return moduleNames;
     }
 
-    public boolean readEvalPrint() {
-        return readEvalPrint(System.in, System.out, System.err, "JGirs> ", true);
+    interface ICommander extends Closeable {
+        /**
+         *
+         * @return line. Empty ("") if empty line, null if EOF.
+         * @throws IOException
+         */
+        public String readline() throws IOException;
     }
 
-    public boolean readEvalPrint(InputStream inputStream, PrintStream out, PrintStream err, String prompt, boolean joinLines) {
-        return readEvalPrint(new InputStreamReader(inputStream, charSet), out, err, prompt, joinLines);
+    class ReadlineCommander implements ICommander {
+        //private final String prompt;
+        private final String historyFile;
+
+        ReadlineCommander() {
+            this(null, null);
+        }
+
+        ReadlineCommander(String confFile, final String historyFile) {
+            //this.prompt = prompt;
+            this.historyFile = historyFile;
+
+            try {
+                Readline.load(ReadlineLibrary.GnuReadline);
+                Readline.initReadline(Version.appName);
+                if (confFile != null && new File(confFile).exists())
+                    try {
+                        Readline.readInitFile(confFile);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                if (historyFile != null && new File(historyFile).exists())
+                    try {
+                        Readline.readHistoryFile(historyFile);
+                    } catch (EOFException | UnsupportedEncodingException ex) {
+                        Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            } catch (UnsatisfiedLinkError ignore_me) {
+                Logger.getLogger(Engine.class.getName()).log(Level.INFO, "couldn't load readline lib. Using simple stdin.");
+            }
+
+            /*Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Readline.writeHistoryFile(historyFile);
+                    } catch (EOFException | UnsupportedEncodingException ex) {
+                        Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    Logger.getLogger(Engine.class.getName()).log(Level.FINE, "Readline.cleanup called");
+                    Readline.cleanup();
+                }
+            });*/
+        }
+
+        @Override
+        public String readline() throws IOException {
+            String line;
+            try {
+                line = Readline.readline(prompt, false);
+                int size = Readline.getHistorySize();
+                if ((line != null && !line.isEmpty())
+                        && (size == 0 || !line.equals(Readline.getHistoryLine(size-1))))
+                    Readline.addToHistory(line);
+            } catch (EOFException ex) {
+                return null;
+            }
+            return line == null ? "" : line;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (historyFile != null)
+                Readline.writeHistoryFile(historyFile);
+            Readline.cleanup();
+        }
     }
 
-    public boolean readEvalPrint(Reader reader, PrintStream out, PrintStream err, String prompt, boolean joinLines) {
-        BufferedReader in = new BufferedReader(reader);
-        while (!isQuitRequested()) {
+    class ReaderCommander implements ICommander {
+        private final BufferedReader reader;
+        private final PrintStream out;
+
+        ReaderCommander() {
+            this(System.in, charSet, System.out, prompt);
+        }
+
+        ReaderCommander(InputStream inputStream, Charset charset, PrintStream out, String prompt) {
+            this(new InputStreamReader(inputStream, charSet), out, prompt);
+        }
+
+        ReaderCommander(Reader reader, PrintStream out, String prompt) {
+            this.reader = new BufferedReader(reader);
+            this.out = out;
+        }
+
+        @Override
+        public String readline() throws IOException {
             out.print(prompt);
+            return reader.readLine();
+        }
+
+        @Override
+        public void close() throws IOException {
+            reader.close();
+        }
+    }
+
+    public boolean readEvalPrint(boolean joinLines) {
+        return readEvalPrint(System.in, System.out, System.err, joinLines);
+    }
+
+    public boolean readEvalPrint(String initFile, String historyFile, boolean joinLines) {
+        return readEvalPrint(new ReadlineCommander(initFile, historyFile), System.out, System.err, joinLines);
+    }
+
+    public boolean readEvalPrint(Reader in, PrintStream out, PrintStream err, boolean joinLines) {
+        return readEvalPrint(new ReaderCommander(in, out, prompt), out, err, joinLines);
+    }
+
+    public boolean readEvalPrint(InputStream in, PrintStream out, PrintStream err, boolean joinLines) {
+        return readEvalPrint(new InputStreamReader(in, charSet), out, err, joinLines);
+    }
+
+    private boolean readEvalPrint(ICommander commander, PrintStream out, PrintStream err, boolean joinLines) {
+        while (!isQuitRequested()) {
             String line = null;
             try {
-                line = in.readLine();
+                line = commander.readline();
             } catch (IOException ex) {
-                 err.println(ex.getMessage());
-                 continue;
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (line == null) { // EOF, bail out
-                err.println("EOF detected, quitting");
+            if (line == null) { // EOF
+                out.println();
                 break;
             }
+
             if (line.isEmpty())
                 continue;
 
@@ -238,13 +360,16 @@ public class Engine implements ICommandLine {
                 else
                     for (String str : result)
                         out.println(str);
-            } catch (ExecutionException | CommandSyntaxException | NoSuchModuleException | IOException | HarcHardwareException | IrpMasterException ex) {
-                err.println(ex.getMessage());
-            } catch (NoSuchCommandException | AmbigousCommandException ex) {
+            } catch (JGirsException ex) {
                 err.println("ERROR: " + ex.getMessage());
-                err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
-            } catch (NoSuchRemoteException | NoSuchParameterException | NonExistingCommandException ex) {
+                if (NoSuchCommandException.class.isInstance(ex)
+                        || AmbigousCommandException.class.isInstance(ex))
+                    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
+            } catch (IOException | HarcHardwareException | IrpMasterException ex) {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                // Something really unexpected happened
+                ex.printStackTrace();
             }
         }
         return isQuitRequested();
@@ -266,7 +391,7 @@ public class Engine implements ICommandLine {
     }
 
     @Override
-    public List<String> eval(String command) throws NoSuchCommandException, ExecutionException, CommandSyntaxException, NoSuchModuleException, AmbigousCommandException, IOException, HarcHardwareException, IrpMasterException, NoSuchRemoteException, NoSuchParameterException, NonExistingCommandException {
+    public List<String> eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         String[] tokens = command.split("\\s+");
         return commandExecuter.exec(tokens);
     }
@@ -341,8 +466,17 @@ public class Engine implements ICommandLine {
         @Parameter(names = {"-h", "--hardware"}, description = "Driver hardware")
         private String hardware = null;
 
+        @Parameter(names = {"--historyfile"}, description = "History file for readline")
+        private String historyfile = System.getProperty("user.home") + File.separator + ".jgirs.history";
+
         @Parameter(names = {"-i", "--irpprotocolsini"}, description = "IrpMaster protocol file")
         private String irpMasterIni = null;//"IrpProtocols.ini";
+
+        @Parameter(names = {"--initfile"}, description = "Initfile for readline")
+        private String initfile = System.getProperty("user.home") + File.separator + ".jgirs";
+
+        @Parameter(names = {"-r", "--readline"}, description = "Use readline")
+        private boolean readline = false;
 
         //@Parameter(names = {"--stringarg1"}, description = "First string argument to hardware")
         //private String hwsarg1 = null;
@@ -433,11 +567,11 @@ public class Engine implements ICommandLine {
         RemoteCommandDataBase.RemoteCommand rc = namedRemotes.getRemoteCommand("nec1", params);
         System.out.println(rc);*/
 
-
+        String prompt = "JGirs> "; // FIXME
         Engine engine = null;
         try {
             engine = new Engine(hardware, renderer, new Irp(), namedRemotes, commandLineArgs.appName,
-                    commandLineArgs.charSet, commandLineArgs.verbose, commandLineArgs.debug);
+                    commandLineArgs.charSet, prompt, commandLineArgs.verbose, commandLineArgs.debug);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(2);
@@ -450,12 +584,15 @@ public class Engine implements ICommandLine {
             try {
                 List<String> result = engine.eval(commandLineArgs.command);
                 System.out.println(result == null ? "FAIL" : result.isEmpty() ? "SUCCESS" : result);
-            } catch (NoSuchCommandException | ExecutionException | CommandSyntaxException | NoSuchModuleException | AmbigousCommandException | IOException | HarcHardwareException | IrpMasterException | NoSuchRemoteException | NoSuchParameterException | NonExistingCommandException ex) {
+            } catch (IOException | HarcHardwareException | IrpMasterException | JGirsException ex) {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             try {
-                engine.readEvalPrint();
+                if (commandLineArgs.readline)
+                    engine.readEvalPrint(commandLineArgs.initfile, commandLineArgs.historyfile, true);
+                else
+                    engine.readEvalPrint(true);
             } finally {
                 try {
                     if (hardware != null)

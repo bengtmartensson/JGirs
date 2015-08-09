@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.IReceive;
 
 /**
- *
+ * This class implements the receiving commands.
  */
 public class Receive extends Module {
 
@@ -40,7 +40,7 @@ public class Receive extends Module {
     private NamedRemotes namedRemotes;
     private final static String defaultReceiveFormat = "named-command";
 
-    private class ReceiveCommand implements Command {
+    private class ReceiveCommand implements ICommand {
 
         @Override
         public String getName() {

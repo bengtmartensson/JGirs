@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,18 +24,18 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
- *
+ * Abstract base class for the Girs modules.
  */
 public abstract class Module {
 
-    private HashMap<String, Command> commands;
-    private HashMap<String, Parameter> parameters;
+    private HashMap<String, ICommand> commands;
+    private HashMap<String, IParameter> parameters;
 
     public String getName() {
         return getClass().getSimpleName();
     }
 
-    public Collection<Command> getCommands() {
+    public Collection<ICommand> getCommands() {
         return commands.values();
     }
 
@@ -46,15 +46,15 @@ public abstract class Module {
         return al;
     }
 
-    protected void addCommand(Command command) {
+    protected void addCommand(ICommand command) {
         commands.put(command.getName(), command);
     }
 
-    public HashMap<String, Parameter> getParameters() {
+    public HashMap<String, IParameter> getParameters() {
         return parameters;
     }
 
-    protected void addParameter(Parameter parameter) {
+    protected void addParameter(IParameter parameter) {
         parameters.put(parameter.getName(), parameter);
     }
 

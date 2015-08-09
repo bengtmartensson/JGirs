@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ import org.harctoolbox.IrpMaster.UnassignedException;
 import org.harctoolbox.IrpMaster.UnknownProtocolException;
 
 /**
- *
+ * Implements rendering commands.
  */
 public class Renderer extends Module {
     private IrpMaster irpMaster;
 
-    private class ProtocolsCommand implements Command {
+    private class ProtocolsCommand implements ICommand {
 
         @Override
         public String getName() {

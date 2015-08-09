@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ import org.harctoolbox.harchardware.ir.NoSuchTransmitterException;
 import org.harctoolbox.harchardware.ir.Transmitter;
 
 /**
- *
+ * Transmitting commands.
  */
 public class Transmit extends Module {
     private Renderer renderer;
@@ -55,7 +55,7 @@ public class Transmit extends Module {
         }
     }
 
-    private class TransmitCommand extends CommandWithSubcommands implements Command {
+    private class TransmitCommand extends CommandWithSubcommands implements ICommand {
 
         private ArrayList<String> transmit(IrSignal irSignal, int count) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
             boolean result = ((IRawIrSender) hardware).sendIr(irSignal, count, transmitter);
@@ -80,7 +80,7 @@ public class Transmit extends Module {
             return "transmit";
         }
 
-        private class TransmitCcfCommand implements Command {
+        private class TransmitCcfCommand implements ICommand {
 
             @Override
             public String getName() {
@@ -88,14 +88,14 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws CommandSyntaxException, IrpMasterException, HarcHardwareException, NoSuchTransmitterException, IOException {
+            public List<String> exec(String[] args) throws IrpMasterException, HarcHardwareException, IOException, JGirsException {
                 int count = intParse(args[0]);
                 IrSignal irSignal = new IrSignal(args, 1);
                 return transmit(irSignal, count);
             }
         }
 
-        private class TransmitRawCommand implements Command {
+        private class TransmitRawCommand implements ICommand {
 
             @Override
             public String getName() {
@@ -126,7 +126,7 @@ public class Transmit extends Module {
             }
         }
 
-        private class TransmitIrpCommand implements Command {
+        private class TransmitIrpCommand implements ICommand {
 
             @Override
             public String getName() {
@@ -141,7 +141,7 @@ public class Transmit extends Module {
             }
         }
 
-        private class TransmitProtocolParameterCommand implements Command {
+        private class TransmitProtocolParameterCommand implements ICommand {
 
             @Override
             public String getName() {
@@ -157,7 +157,7 @@ public class Transmit extends Module {
             }
         }
 
-        private class TransmitNameCommand implements Command {
+        private class TransmitNameCommand implements ICommand {
 
             @Override
             public String getName() {
@@ -178,7 +178,7 @@ public class Transmit extends Module {
         }
     }
 
-    private class StopCommand implements Command {
+    private class StopCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -191,7 +191,7 @@ public class Transmit extends Module {
         }
     }
 
-    private class SetTransmitterCommand implements Command {
+    private class SetTransmitterCommand implements ICommand {
 
         @Override
         public String getName() {

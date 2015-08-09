@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 /**
- * 
+ * Thrown if a non-existing remote is requested.
  */
-public class NoSuchRemoteException extends Exception {
+public class NoSuchRemoteException extends JGirsException {
 
     public NoSuchRemoteException(String remoteName) {
         super("No such remote " + remoteName);

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.util.List;
 import org.harctoolbox.harchardware.IHarcHardware;
 
 /**
- *
+ * The Girs Base module that must be implemented.
  */
 public class Base extends Module {
 
@@ -33,7 +33,7 @@ public class Base extends Module {
     private IHarcHardware hardware;
     private boolean quitRequested = false;
 
-    private class VersionCommand implements Command {
+    private class VersionCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -44,12 +44,12 @@ public class Base extends Module {
         public List<String> exec(String[] args) throws IOException {
             ArrayList<String> result = new ArrayList<>();
             result.add(Version.versionString);
-            result.add(hardware.getVersion());
+            result.add(hardware != null ? hardware.getVersion() : "Hardware not available");
             return result;
         }
     }
 
-    private static class LicenseCommand implements Command {
+    private static class LicenseCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -64,7 +64,7 @@ public class Base extends Module {
         }
     }
 
-    private class ModulesCommand implements Command {
+    private class ModulesCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -77,7 +77,7 @@ public class Base extends Module {
         }
     }
 
-    private class QuitCommand implements Command {
+    private class QuitCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -91,7 +91,7 @@ public class Base extends Module {
         }
     }
 
-    private class GirsCommandsCommand implements Command {
+    private class GirsCommandsCommand implements ICommand {
         @Override
         public String getName() {
             return "girscommands";

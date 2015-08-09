@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 /**
- *
+ * This is thrown when a command fails.
  */
-public class ExecutionException extends Exception {
+public class ExecutionException extends JGirsException {
     private static final long serialVersionUID = 1L;
     ExecutionException() {
         super("Execution error.");

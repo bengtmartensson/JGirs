@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,14 +34,14 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- *
+ * Implementation of named remotes.
  */
 public class NamedRemotes extends Module {
     private final static boolean caseInsensitive = true;
     //private final RemoteSet remoteSet;
     private final RemoteCommandDataBase database;
 
-    private class RemotesCommand implements Command {
+    private class RemotesCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -57,7 +57,7 @@ public class NamedRemotes extends Module {
         }
     }
 
-    private class CommandsCommand implements Command {
+    private class CommandsCommand implements ICommand {
 
         @Override
         public String getName() {

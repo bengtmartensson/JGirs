@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,11 +22,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- *
+ * A pretty useless module, more as an example.
  */
 public class Dummy extends Module {
 
-    private static class DateCommand implements Command {
+    private static class DateCommand implements ICommand {
 
         @Override
         public String getName() {

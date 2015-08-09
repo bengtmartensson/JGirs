@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2014 Bengt Martensson.
+Copyright (C) 2015 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,7 +22,11 @@ import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
-public interface Command {
+/**
+ * Defines the functions the Commands must implements.
+ */
+
+public interface ICommand {
 
     /**
      *
@@ -36,15 +40,8 @@ public interface Command {
      * @return String to be returned to the client
      * @throws java.io.IOException
      * @throws org.harctoolbox.harchardware.HarcHardwareException
-     * @throws ExecutionException
-     * @throws org.harctoolbox.jgirs.NoSuchParameterException
-     * @throws org.harctoolbox.jgirs.AmbigousCommandException
-     * @throws org.harctoolbox.jgirs.NonExistingCommandException
-     * @throws org.harctoolbox.jgirs.NoSuchCommandException
-     * @throws org.harctoolbox.jgirs.NoSuchRemoteException
-     * @throws org.harctoolbox.jgirs.CommandSyntaxException
-     * @throws org.harctoolbox.jgirs.NoSuchModuleException
+     * @throws org.harctoolbox.jgirs.JGirsException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public List<String> exec(String[] args) throws IOException, HarcHardwareException, ExecutionException, NoSuchParameterException, AmbigousCommandException, NonExistingCommandException, NoSuchCommandException, NoSuchRemoteException, CommandSyntaxException, NoSuchModuleException, IrpMasterException;
+    public List<String> exec(String[] args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
 }
