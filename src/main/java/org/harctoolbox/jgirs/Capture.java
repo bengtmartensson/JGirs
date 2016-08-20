@@ -47,7 +47,7 @@ public class Capture extends Module {
         public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
             hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             final ModulatedIrSequence irSequence = hardware.capture();
-            return new ArrayList<String>() {{ add(useCcfCaptureParameter.value ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
+            return irSequence == null ? new ArrayList<String>() : new ArrayList<String>() {{ add(useCcfCaptureParameter.value ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
         }
     }
 
