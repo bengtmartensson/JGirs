@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,25 +28,25 @@ import org.harctoolbox.harchardware.IHarcHardware;
  */
 public class Base extends Module {
 
-    private HashMap<String, Module> modules;
-    private CommandExecuter commandExecuter;
-    private IHarcHardware hardware;
+    private final HashMap<String, Module> modules;
+    private final CommandExecuter commandExecuter;
+    private final IHarcHardware hardware;
     private boolean quitRequested = false;
 
-    private class VersionCommand implements ICommand {
+    public Base(HashMap<String, Module> modules, CommandExecuter commandExecuter, IHarcHardware hardware) {
+        super();
+        addCommand(new VersionCommand());
+        addCommand(new ModulesCommand());
+        addCommand(new LicenseCommand());
+        addCommand(new GirsCommandsCommand());
+        addCommand(new QuitCommand());
+        this.hardware = hardware;
+        this.modules = modules;
+        this.commandExecuter = commandExecuter;
+    }
 
-        @Override
-        public String getName() {
-            return "version";
-        }
-
-        @Override
-        public List<String> exec(String[] args) throws IOException {
-            ArrayList<String> result = new ArrayList<>();
-            result.add(Version.versionString);
-            result.add(hardware != null ? hardware.getVersion() : "Hardware not available");
-            return result;
-        }
+    public boolean isQuitRequested() {
+        return quitRequested;
     }
 
     private static class LicenseCommand implements ICommand {
@@ -57,9 +57,24 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) {
-            ArrayList<String> result = new ArrayList<>();
+        public List<String> exec(List<String> args) {
+            ArrayList<String> result = new ArrayList<>(1);
             result.add(Version.licenseString);
+            return result;
+        }
+    }
+    private class VersionCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "version";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) throws IOException {
+            ArrayList<String> result = new ArrayList<>(1);
+            result.add(Version.versionString);
+            result.add(hardware != null ? hardware.getVersion() : "Hardware not available");
             return result;
         }
     }
@@ -72,7 +87,7 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) {
+        public List<String> exec(List<String> args) {
             return new ArrayList<>(modules.keySet());
         }
     }
@@ -85,7 +100,7 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) {
+        public List<String> exec(List<String> args) {
             quitRequested = true;
             return new ArrayList<String>() {{ add("Bye!"); }};
         }
@@ -98,33 +113,17 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws NoSuchModuleException {
+        public List<String> exec(List<String> args) throws NoSuchModuleException {
             ArrayList<String> cmds;
             boolean sort = true;
-            if (args.length > 1) {
-                Module module = modules.get(args[1]);
+            if (args.size() > 1) {
+                Module module = modules.get(args.get(1));
                 if (module == null)
-                    throw new NoSuchModuleException(args[1]);
+                    throw new NoSuchModuleException(args.get(1));
                 cmds = module.getCommandNames(sort);
             } else
                 cmds = commandExecuter.getCommandNames(sort);
            return cmds;
         }
-    }
-
-    public boolean isQuitRequested() {
-        return quitRequested;
-    }
-
-    public Base(HashMap<String, Module> modules, CommandExecuter commandExecuter, IHarcHardware hardware) {
-        super();
-        addCommand(new VersionCommand());
-        addCommand(new ModulesCommand());
-        addCommand(new LicenseCommand());
-        addCommand(new GirsCommandsCommand());
-        addCommand(new QuitCommand());
-        this.hardware = hardware;
-        this.modules = modules;
-        this.commandExecuter = commandExecuter;
     }
 }

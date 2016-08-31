@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ package org.harctoolbox.jgirs;
  * Thrown if a command fragment matches more than one command name.
  */
 public class AmbigousCommandException extends JGirsException {
-    private static final long serialVersionUID = 1L;
 
     AmbigousCommandException(String name){
         super("Ambigous command abbreviation: " + name);

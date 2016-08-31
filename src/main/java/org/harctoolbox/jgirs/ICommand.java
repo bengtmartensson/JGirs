@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import org.harctoolbox.harchardware.HarcHardwareException;
 /**
  * Defines the functions the Commands must implements.
  */
-
 public interface ICommand {
 
     /**
@@ -43,5 +42,5 @@ public interface ICommand {
      * @throws org.harctoolbox.jgirs.JGirsException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public List<String> exec(String[] args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
+    public List<String> exec(List<String> args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
 }

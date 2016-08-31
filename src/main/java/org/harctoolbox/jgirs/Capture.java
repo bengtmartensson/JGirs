@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,29 +26,27 @@ import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.ICapture;
 
 /**
- * Class for caputurinig raw signals.
+ * Class for capturing raw signals.
  */
 public class Capture extends Module {
 
-    private ICapture hardware;
-    private StartTimeoutParameter startTimeoutParameter;
-    private MaxCaptureLengthParameter maxCaptureLengthParameter;
-    private EndTimeoutParameter endTimeoutParameter;
-    private UseCcfCaptureParameter useCcfCaptureParameter;
+    private final ICapture hardware;
+    private final StartTimeoutParameter startTimeoutParameter;
+    private final MaxCaptureLengthParameter maxCaptureLengthParameter;
+    private final EndTimeoutParameter endTimeoutParameter;
+    private final UseCcfCaptureParameter useCcfCaptureParameter;
 
-    private class AnalyzeCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "analyze";
-        }
-
-        @Override
-        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
-            hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
-            final ModulatedIrSequence irSequence = hardware.capture();
-            return irSequence == null ? new ArrayList<String>() : new ArrayList<String>() {{ add(useCcfCaptureParameter.value ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
-        }
+    public Capture(ICapture capture) {
+        this.hardware = capture;
+        addCommand(new AnalyzeCommand());
+        startTimeoutParameter = new StartTimeoutParameter(2000);
+        addParameter(startTimeoutParameter);
+        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
+        addParameter(maxCaptureLengthParameter);
+        endTimeoutParameter = new EndTimeoutParameter(200);
+        addParameter(endTimeoutParameter);
+        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
+        addParameter(useCcfCaptureParameter);
     }
 
     private static class StartTimeoutParameter extends IntegerParameter {
@@ -114,19 +112,20 @@ public class Capture extends Module {
         public String getDocumentation() {
             return "If true, present captures in CCF form.";
         }
-
     }
 
-    public Capture(ICapture capture) {
-        this.hardware = capture;
-        addCommand(new AnalyzeCommand());
-        startTimeoutParameter = new StartTimeoutParameter(2000);
-        addParameter(startTimeoutParameter);
-        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
-        addParameter(maxCaptureLengthParameter);
-        endTimeoutParameter = new EndTimeoutParameter(200);
-        addParameter(endTimeoutParameter);
-        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
-        addParameter(useCcfCaptureParameter);
+    private class AnalyzeCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "analyze";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) throws HarcHardwareException, IOException, IrpMasterException {
+            //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
+            final ModulatedIrSequence irSequence = hardware.capture();
+            return irSequence == null ? new ArrayList<>(8) : new ArrayList<String>(8) {{ add(useCcfCaptureParameter.getValue() ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
+        }
     }
 }

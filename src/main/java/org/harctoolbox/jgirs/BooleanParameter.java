@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,7 +21,14 @@ package org.harctoolbox.jgirs;
  * Class for boolean parameters.
  */
 abstract class BooleanParameter implements IParameter {
-    boolean value;
+
+    private boolean value;
+
+    private BooleanParameter() {}
+
+    BooleanParameter(boolean initValue) {
+        this.value = initValue;
+    }
 
     @Override
     public void set(String str) {
@@ -38,9 +45,10 @@ abstract class BooleanParameter implements IParameter {
         return getName() + "=" + get();
     }
 
-    private BooleanParameter() {}
-
-    BooleanParameter(boolean initValue) {
-        this.value = initValue;
+    /**
+     * @return the value
+     */
+    public boolean getValue() {
+        return value;
     }
 }

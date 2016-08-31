@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015  Bengt Martensson.
+Copyright (C) 2016  Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
 
@@ -39,10 +40,56 @@ public class RemoteCommandDataBase {
     private Map<String, Remote> remotes;
     private TreeMap<ParameterSet, RemoteCommand> data;
 
+    public RemoteCommandDataBase(boolean caseInsensitive) {
+        this.data = new TreeMap<>();
+        this.remotes = caseInsensitive ? new TreeMap<>(String.CASE_INSENSITIVE_ORDER) : new TreeMap<>();
+    }
+
+    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets, boolean caseInsensitive) throws IrpMasterException {
+        this(caseInsensitive);
+        for (RemoteSet remoteSet : remoteSets)
+            load (remoteSet);
+    }
+
+    private void load(RemoteSet remoteSet) throws IrpMasterException {
+        for (Remote remote : remoteSet.getRemotes()) {
+            remotes.put(remote.getName(), remote);
+            for (org.harctoolbox.girr.Command command : remote.getCommands().values()) {
+                RemoteCommand rc = new RemoteCommand(remote, command);
+                String protocol = command.getProtocolName();
+                Map<String, Long> parameters = command.getParameters();
+                ParameterSet params = new ParameterSet(protocol, parameters);
+                this.data.put(params, rc);
+            }
+        }
+    }
+
+    public Remote getRemote(String remoteName) {
+        return remotes.get(remoteName);
+    }
+
+    public Collection<Remote> getRemotes() {
+        return remotes.values();
+    }
+
+    public org.harctoolbox.girr.Command getCommand(String remoteName, String commandName) {
+        Remote remote = remotes.get(remoteName);
+        return remote.getCommand(commandName);
+    }
+
+    public RemoteCommand getRemoteCommand(String protocol, Map<String, Long>parameters) {
+        ParameterSet params = new ParameterSet(protocol, parameters);
+        return this.data.get(params);
+    }
+
     public static class RemoteCommand {
 
-        private Remote remote;
-        private org.harctoolbox.girr.Command command;
+        private final Remote remote;
+        private final org.harctoolbox.girr.Command command;
+        public RemoteCommand(Remote remote, org.harctoolbox.girr.Command command) {
+            this.remote = remote;
+            this.command = command;
+        }
 
         @Override
         public boolean equals(Object obj) {
@@ -63,10 +110,6 @@ public class RemoteCommandDataBase {
             return hash;
         }
 
-        public RemoteCommand(Remote remote, org.harctoolbox.girr.Command command) {
-            this.remote = remote;
-            this.command = command;
-        }
 
         /**
          * @return the remote
@@ -88,18 +131,17 @@ public class RemoteCommandDataBase {
         }
 
     }
-
     public static class ParameterSet implements Comparable<ParameterSet>, Cloneable {
-        private Map<String, Long> parameters;
-        private String protocol;
+        private final Map<String, Long> parameters;
+        private final String protocol;
 
         @SuppressWarnings("unchecked")
         public ParameterSet(String protocol, Map<String, Long> parameters) {
             this.protocol = protocol.toLowerCase(Locale.US);
-            this.parameters = new HashMap<>();
-            for (Map.Entry<String, Long> kvp : parameters.entrySet()) {
+            this.parameters = new HashMap<>(parameters.size());
+            parameters.entrySet().stream().forEach((kvp) -> {
                 this.parameters.put(kvp.getKey(), kvp.getValue());
-            }
+            });
         }
 
         @Override
@@ -140,29 +182,30 @@ public class RemoteCommandDataBase {
         public String toString() {
             ArrayList<String> list = parameterNamesSorted();
             StringBuilder str = new StringBuilder(protocol);
-            for (String param : list)
+            list.stream().forEach((param) -> {
                 str.append(" ").append(param).append("=").append(parameters.get(param));
+            });
             return str.toString();
         }
 
         /*@Override
         public int compare(ParameterSet p1, ParameterSet p2) {
-            int c1 = p1.protocol.compareToIgnoreCase(p2.protocol);
-            if (c1 != 0)
-                return c1;
-            ArrayList<String> params1 = p1.parameterNamesSorted();
-            ArrayList<String> params2 = p2.parameterNamesSorted();
-            for (int i = 0; i < params1.size(); i++) {
-                String param1 = params1.get(i);
-                String param2 = params1.get(i);
-                int c2 = param1.compareTo(param2);
-                if (c2 != 0)
-                    return c2;
-                int c3 = Long.compare(p1.parameters.get(param1), p2.parameters.get(param2));
-                if (c3 != 0)
-                    return c3;
-            }
-            return params1.size() == params2.size() ? 0 : 1;
+        int c1 = p1.protocol.compareToIgnoreCase(p2.protocol);
+        if (c1 != 0)
+        return c1;
+        ArrayList<String> params1 = p1.parameterNamesSorted();
+        ArrayList<String> params2 = p2.parameterNamesSorted();
+        for (int i = 0; i < params1.size(); i++) {
+        String param1 = params1.get(i);
+        String param2 = params1.get(i);
+        int c2 = param1.compareTo(param2);
+        if (c2 != 0)
+        return c2;
+        int c3 = Long.compare(p1.parameters.get(param1), p2.parameters.get(param2));
+        if (c3 != 0)
+        return c3;
+        }
+        return params1.size() == params2.size() ? 0 : 1;
         }*/
 
         @Override
@@ -193,51 +236,9 @@ public class RemoteCommandDataBase {
         }
     }
 
-    public RemoteCommandDataBase(boolean caseInsensitive) {
-        this.data = new TreeMap<>();
-        this.remotes = caseInsensitive ? new TreeMap<String, Remote>(String.CASE_INSENSITIVE_ORDER) : new TreeMap<String, Remote>();
-    }
-
-    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets, boolean caseInsensitive) {
-        this(caseInsensitive);
-        for (RemoteSet remoteSet : remoteSets)
-            load (remoteSet);
-    }
-
-    private void load(RemoteSet remoteSet) {
-        for (Remote remote : remoteSet.getRemotes()) {
-            remotes.put(remote.getName(), remote);
-            for (org.harctoolbox.girr.Command command : remote.getCommands().values()) {
-                RemoteCommand rc = new RemoteCommand(remote, command);
-                String protocol = command.getProtocol();
-                Map<String, Long> parameters = command.getParameters();
-                ParameterSet params = new ParameterSet(protocol, parameters);
-                this.data.put(params, rc);
-            }
-        }
-    }
-
-    public Remote getRemote(String remoteName) {
-        return remotes.get(remoteName);
-    }
-
-    public Collection<Remote> getRemotes() {
-        return remotes.values();
-    }
-
-    public org.harctoolbox.girr.Command getCommand(String remoteName, String commandName) {
-        Remote remote = remotes.get(remoteName);
-        return remote.getCommand(commandName);
-    }
-
-    public RemoteCommand getRemoteCommand(String protocol, Map<String, Long>parameters) {
-        ParameterSet params = new ParameterSet(protocol, parameters);
-        return this.data.get(params);
-    }
-
     public static void main(String[] args) {
         TreeMap<ParameterSet, String> db = new TreeMap<>();
-        Map<String, Long> params = new HashMap<>();
+        Map<String, Long> params = new HashMap<>(16);
         params.put("C", 3L);
         params.put("A", 1L);
         ParameterSet ba21 = new ParameterSet("proto", params);
@@ -247,7 +248,7 @@ public class RemoteCommandDataBase {
         params.put("B", 2L);
         ba21 = new ParameterSet("aproto", params);
         db.put(ba21, "ba21xx");
-        Map<String, Long> ps = new HashMap<>();
+        Map<String, Long> ps = new HashMap<>(16);
         ps.put("A", 1L);
         ps.put("B", 2L);
         ps.put("C", 3L);
@@ -260,8 +261,8 @@ public class RemoteCommandDataBase {
         }
         db.put(pb, "godzilla");
 
-        for (Map.Entry<ParameterSet, String> kvp : db.entrySet()) {
+        db.entrySet().stream().forEach((kvp) -> {
             System.out.println(kvp.getKey() + "\t" + kvp.getValue());
-        }
+        });
     }
 }

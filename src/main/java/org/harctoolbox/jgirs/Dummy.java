@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,6 +26,11 @@ import java.util.List;
  */
 public class Dummy extends Module {
 
+    public Dummy() {
+        super();
+        addCommand(new DateCommand());
+    }
+
     private static class DateCommand implements ICommand {
 
         @Override
@@ -34,15 +39,10 @@ public class Dummy extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) {
-            ArrayList<String> result = new ArrayList<>();
+        public List<String> exec(List<String> args) {
+            ArrayList<String> result = new ArrayList<>(1);
             result.add((new Date()).toString());
             return result;
         }
-    }
-
-    public Dummy() {
-        super();
-        addCommand(new DateCommand());
     }
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,58 +32,25 @@ import org.harctoolbox.harchardware.ir.IReceive;
  * This class implements the receiving commands.
  */
 public class Receive extends Module {
-
-    private IReceive hardware;
-    private TimeoutParameter timeoutParameter;
-    private FallbackFrequencyParameter fallbackFrequencyParameter;
-    private ReceiveFormatParameter receiveFormatParameter;
-    private NamedRemotes namedRemotes;
     private final static String defaultReceiveFormat = "named-command";
 
-    private class ReceiveCommand implements ICommand {
+    private final IReceive hardware;
+    private final TimeoutParameter timeoutParameter;
+    private final FallbackFrequencyParameter fallbackFrequencyParameter;
+    private final ReceiveFormatParameter receiveFormatParameter;
+    private final NamedRemotes namedRemotes;
 
-        @Override
-        public String getName() {
-            return "receive";
-        }
+    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
+        this.namedRemotes = namedRemotes;
+        this.hardware = receiver;
+        addCommand(new ReceiveCommand());
+        timeoutParameter = new TimeoutParameter(2000);
+        addParameter(timeoutParameter);
+        this.fallbackFrequencyParameter = new FallbackFrequencyParameter((int) IrpUtils.defaultFrequency);
+        addParameter(this.fallbackFrequencyParameter);
+        this.receiveFormatParameter = new ReceiveFormatParameter(defaultReceiveFormat);
+        addParameter(this.receiveFormatParameter);
 
-        @Override
-        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
-            hardware.setTimeout(timeoutParameter.value);
-            final IrSequence irSequence = hardware.receive();
-
-            final IrSignal irSignal = new IrSignal(fallbackFrequencyParameter.value, (double) IrpUtils.invalid, irSequence, null, null);
-            switch (receiveFormatParameter.value) {
-                case "ccf":
-                    return new ArrayList<String>() {{ add(irSignal.ccfString()); }};
-                case "protocol-parameter":
-                {
-                    boolean success = DecodeIR.loadLibrary();
-                    if (!success)
-                        return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.value);
-                    ArrayList<String> result = new ArrayList<>();
-                    int i = 0;
-                    for (DecodeIR.DecodedSignal decode : decodes)
-                        result.add(decode.toString());
-
-                    return result;
-                }
-                case "named-command":
-                {
-                    boolean success = DecodeIR.loadLibrary();
-                    if (!success)
-                        return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.value);
-                    if (decodes.length == 0)
-                        return null;
-                    final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
-                    return cmd != null ? new ArrayList<String>() {{ add(cmd.toString()); }} : null;
-                }
-                default:
-                    return new ArrayList<String>() {{ add(irSequence.toPrintString(true, false)); }};
-            }
-        }
     }
 
     private static class TimeoutParameter extends IntegerParameter {
@@ -137,16 +104,49 @@ public class Receive extends Module {
         }
     }
 
-    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
-        this.namedRemotes = namedRemotes;
-        this.hardware = receiver;
-        addCommand(new ReceiveCommand());
-        timeoutParameter = new TimeoutParameter(2000);
-        addParameter(timeoutParameter);
-        this.fallbackFrequencyParameter = new FallbackFrequencyParameter((int) IrpUtils.defaultFrequency);
-        addParameter(this.fallbackFrequencyParameter);
-        this.receiveFormatParameter = new ReceiveFormatParameter(defaultReceiveFormat);
-        addParameter(this.receiveFormatParameter);
+    private class ReceiveCommand implements ICommand {
 
+        @Override
+        public String getName() {
+            return "receive";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) throws HarcHardwareException, IOException, IrpMasterException {
+            hardware.setTimeout(timeoutParameter.getValue());
+            final IrSequence irSequence = hardware.receive();
+
+            final IrSignal irSignal = new IrSignal(fallbackFrequencyParameter.getValue(), IrpUtils.invalid, irSequence, null, null);
+            switch (receiveFormatParameter.getValue()) {
+                case "ccf":
+                    return new ArrayList<String>() {{ add(irSignal.ccfString()); }};
+                case "protocol-parameter":
+                {
+                    boolean success = DecodeIR.loadLibrary();
+                    if (!success)
+                        return null;
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.getValue());
+                    ArrayList<String> result = new ArrayList<>(4);
+                    int i = 0;
+                    for (DecodeIR.DecodedSignal decode : decodes)
+                        result.add(decode.toString());
+
+                    return result;
+                }
+                case "named-command":
+                {
+                    boolean success = DecodeIR.loadLibrary();
+                    if (!success)
+                        return null;
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.getValue());
+                    if (decodes.length == 0)
+                        return null;
+                    final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
+                    return cmd != null ? new ArrayList<String>() {{ add(cmd.toString()); }} : null;
+                }
+                default:
+                    return new ArrayList<String>() {{ add(irSequence.toPrintString(true, false)); }};
+            }
+        }
     }
 }

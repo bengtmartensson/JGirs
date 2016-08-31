@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,7 +33,10 @@ import org.harctoolbox.harchardware.HarcHardwareException;
  */
 public class CommandExecuter {
 
-    private HashMap<String, ICommand> commands;
+    private final HashMap<String, ICommand> commands;
+    public CommandExecuter() {
+        commands = new LinkedHashMap<>(8);
+    }
 
     public ArrayList<String> getCommandNames(boolean sort) {
         ArrayList<String> commandNames = new ArrayList<>(commands.keySet());
@@ -53,8 +56,8 @@ public class CommandExecuter {
         return commands.values();
     }
 
-    public List<String> exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
-        String commandName = args[0];
+    public List<String> exec(List<String> args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+        String commandName = args.get(0);
         ICommand cmd = null;
         if (commands.containsKey(commandName))
             cmd = commands.get(commandName);
@@ -71,10 +74,6 @@ public class CommandExecuter {
         if (cmd == null)
             throw new NoSuchCommandException("Command " + commandName + " not found.");
         return cmd.exec(args);
-    }
-
-    public CommandExecuter() {
-        commands = new LinkedHashMap<>();
     }
 
     public void addCommand(ICommand command) {

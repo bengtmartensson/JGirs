@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,8 +28,37 @@ import java.util.LinkedHashMap;
  */
 public abstract class Module {
 
-    private HashMap<String, ICommand> commands;
-    private HashMap<String, IParameter> parameters;
+    public static String join(Iterable<String> strings) {
+        return join(strings, " ");
+    }
+
+    public static String join(Iterable<String> strings, String separator) {
+        StringBuilder str = new StringBuilder(32);
+        for (String name : strings)
+            str.append(name).append(separator);
+
+        return str.substring(0, str.length() - separator.length());
+    }
+
+    public static <T extends Object> String joinObjects(Iterable<T> objects) {
+        return joinObjects(objects, " ");
+    }
+
+    public static <T extends Object> String joinObjects(Iterable<T> objects, String separator) {
+        StringBuilder str = new StringBuilder(32);
+        for (Object object : objects)
+            str.append(object.toString()).append(separator);
+
+        return str.substring(0, Math.max(str.length() - separator.length(), 0));
+    }
+
+    private final HashMap<String, ICommand> commands;
+    private final HashMap<String, IParameter> parameters;
+
+    protected Module() {
+        commands = new LinkedHashMap<>(8);
+        parameters = new LinkedHashMap<>(8);
+    }
 
     public String getName() {
         return getClass().getSimpleName();
@@ -46,44 +75,19 @@ public abstract class Module {
         return al;
     }
 
-    protected void addCommand(ICommand command) {
+    protected final void addCommand(ICommand command) {
         commands.put(command.getName(), command);
     }
 
-    public HashMap<String, IParameter> getParameters() {
-        return parameters;
-    }
+//    public HashMap<String, IParameter> getParameters() {
+//        return parameters;
+//    }
 
-    protected void addParameter(IParameter parameter) {
+    protected final void addParameter(IParameter parameter) {
         parameters.put(parameter.getName(), parameter);
     }
 
-    protected Module() {
-        commands = new LinkedHashMap<>();
-        parameters = new LinkedHashMap<>();
-    }
-
-    public static String join(Iterable<String> strings) {
-        return join(strings, " ");
-    }
-
-    public static String join(Iterable<String> strings, String separator) {
-        StringBuilder str = new StringBuilder();
-        for (String name : strings)
-            str.append(name).append(separator);
-
-        return str.substring(0, str.length() - separator.length());
-    }
-
-    public static <T extends Object> String joinObjects(Iterable<T> objects) {
-        return joinObjects(objects, " ");
-    }
-
-    public static <T extends Object> String joinObjects(Iterable<T> objects, String separator) {
-        StringBuilder str = new StringBuilder();
-        for (Object object : objects)
-            str.append(object.toString()).append(separator);
-
-        return str.substring(0, Math.max(str.length() - separator.length(), 0));
+    void addParametersTo(Parameters parameters) {
+        parameters.addAll(this.parameters);
     }
 }

@@ -19,6 +19,7 @@ Any value defined here will override the pom.xml file value but is only applicab
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
         <configurations>
             <configuration id="nullhardware" profiles=""/>
+            <configuration id="help" profiles=""/>
         </configurations>
     </config-data>
 </project-shared-configuration>

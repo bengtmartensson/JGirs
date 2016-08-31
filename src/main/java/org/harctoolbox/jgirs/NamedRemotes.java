@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,42 +38,35 @@ import org.xml.sax.SAXException;
  */
 public class NamedRemotes extends Module {
     private final static boolean caseInsensitive = true;
+
+    private static RemoteSet readRemoteSet(String file) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false);
+        factory.setXIncludeAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(new File(file));
+        return new RemoteSet(doc);
+    }
+
+    private static List<RemoteSet> readRemoteSet(Iterable<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+        ArrayList<RemoteSet> result = new ArrayList<>(16);
+        for (String file : files)
+            result.add(readRemoteSet(file));
+        return result;
+    }
+
     //private final RemoteSet remoteSet;
     private final RemoteCommandDataBase database;
 
-    private class RemotesCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "remotes";
-        }
-
-        @Override
-        public List<String> exec(String[] args) {
-            ArrayList<String> result = new ArrayList<>();
-            for (Remote remote : database.getRemotes())
-                result.add(remote.getName());
-            return result;
-        }
+    public NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+        super();
+        this.database = new RemoteCommandDataBase(remoteSets, caseInsensitive);
+        addCommand(new RemotesCommand());
+        addCommand(new CommandsCommand());
     }
 
-    private class CommandsCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "commands";
-        }
-
-        @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException {
-            if (args.length <= 1)
-                throw new CommandSyntaxException("No remote given");
-            String remoteName = args[1];
-            Remote remote = database.getRemote(remoteName);
-            if (remote == null)
-                throw new NoSuchRemoteException(remoteName);
-            return new ArrayList<>(remote.getCommands().keySet());
-        }
+    public NamedRemotes(List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+        this(readRemoteSet(files));
     }
 
     public RemoteCommandDataBase.RemoteCommand getRemoteCommand(String protocol, Map<String, Long> parameters) {
@@ -91,30 +84,39 @@ public class NamedRemotes extends Module {
         return irSignal;
     }
 
-    private static RemoteSet readRemoteSet(String file) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(false);
-        factory.setXIncludeAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(new File(file));
-        return new RemoteSet(doc);
+    private class RemotesCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "remotes";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) {
+            ArrayList<String> result = new ArrayList<>(database.getRemotes().size());
+            database.getRemotes().stream().forEach((remote) -> {
+                result.add(remote.getName());
+            });
+            return result;
+        }
     }
 
-    private static List<RemoteSet> readRemoteSet(Iterable<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
-        ArrayList<RemoteSet> result = new ArrayList<>();
-        for (String file : files)
-            result.add(readRemoteSet(file));
-        return result;
-    }
+    private class CommandsCommand implements ICommand {
 
-    public NamedRemotes(Iterable<RemoteSet> remoteSets) {
-        super();
-        this.database = new RemoteCommandDataBase(remoteSets, caseInsensitive);
-        addCommand(new RemotesCommand());
-        addCommand(new CommandsCommand());
-    }
+        @Override
+        public String getName() {
+            return "commands";
+        }
 
-    public NamedRemotes(List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
-        this(readRemoteSet(files));
+        @Override
+        public List<String> exec(List<String> args) throws CommandSyntaxException, NoSuchRemoteException {
+            if (args.size() <= 1)
+                throw new CommandSyntaxException("No remote given");
+            String remoteName = args.get(1);
+            Remote remote = database.getRemote(remoteName);
+            if (remote == null)
+                throw new NoSuchRemoteException(remoteName);
+            return new ArrayList<>(remote.getCommands().keySet());
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,18 +37,13 @@ import org.harctoolbox.IrpMaster.UnknownProtocolException;
 public class Renderer extends Module {
     private IrpMaster irpMaster;
 
-    private class ProtocolsCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "protocols";
-        }
-
-        @Override
-        public List<String> exec(String[] args) {
-            return new ArrayList<>(irpMaster.getNames());
-        }
-
+    public Renderer(String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
+        super();
+        if (irpMasterIniName == null)
+            throw new NullPointerException();
+        irpMaster = new IrpMaster(irpMasterIniName);
+        org.harctoolbox.girr.Command.setIrpMaster(irpMaster);
+        addCommand(new ProtocolsCommand());
     }
 
     public IrSignal render(String[] args, int skip) throws UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException {
@@ -59,12 +54,16 @@ public class Renderer extends Module {
         return irSignal;
     }
 
-    public Renderer(String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
-        super();
-        if (irpMasterIniName == null)
-            throw new NullPointerException();
-        irpMaster = new IrpMaster(irpMasterIniName);
-        org.harctoolbox.girr.Command.setIrpMaster(irpMaster);
-        addCommand(new ProtocolsCommand());
+    private class ProtocolsCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "protocols";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) {
+            return new ArrayList<>(irpMaster.getNames());
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,15 +29,15 @@ import org.harctoolbox.harchardware.HarcHardwareException;
  */
 public abstract class CommandWithSubcommands {
 
-    public abstract String getName();
-
-    private CommandExecuter commandExecuter;
+    private final CommandExecuter commandExecuter;
 
     protected CommandWithSubcommands() {
         commandExecuter = new CommandExecuter();
     }
 
-    protected void addCommand(ICommand command) {
+    public abstract String getName();
+
+    protected final void addCommand(ICommand command) {
         commandExecuter.addCommand(command);
     }
 
@@ -49,11 +49,12 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommandNames(sort);
     }
 
-    public List<String> exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
-        if (args == null || args.length == 0)
+    public List<String> exec(List<String> args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+        if (args == null || args.isEmpty())
             throw new CommandSyntaxException(getName(), "subcommand missing");
-        String[] rest = new String[args.length - 1];
-        System.arraycopy(args, 1, rest, 0, args.length - 1);
-        return commandExecuter.exec(rest);
+        //String[] rest = new String[args.length - 1];
+        //System.arraycopy(args, 1, rest, 0, args.length - 1);
+        args.remove(0);
+        return commandExecuter.exec(args);
     }
 }

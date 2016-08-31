@@ -9,12 +9,6 @@
     <packaging>jar</packaging>
     <version>0.0.1</version>
     <name>JGirs</name>
-    <!--parent>
-        <groupId>org.harctoolbox</groupId>
-        <artifactId>HarctoolboxBundle</artifactId>
-        <version>1.0.0</version>
-        <relativePath>..</relativePath>
-    </parent-->
     <licenses>
         <license>
             <name>GPL 3+</name>
@@ -25,8 +19,8 @@
     <url>http://www.harctoolbox.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <!--distributionManagement>
         <repository>
@@ -101,12 +95,12 @@
                     </catalogs>
                 </configuration>
 
-                <!-- Use xalan instead of builtin parser which doesn't really work -->
+                <!-- Use Saxon for xslt 2 -->
                 <dependencies>
                     <dependency>
-                        <groupId>xalan</groupId>
-                        <artifactId>xalan</artifactId>
-                        <version>2.7.2</version>
+                        <groupId>net.sf.saxon</groupId>
+                        <artifactId>saxon</artifactId>
+                        <version>8.7</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -115,6 +109,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -198,12 +193,17 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>HarcHardware</artifactId>
-            <version>0.9.3</version>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.harctoolbox</groupId>
+            <artifactId>ReadlineCommander</artifactId>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>Girr</artifactId>
-            <version>1.0.3</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>org.gnu</groupId>

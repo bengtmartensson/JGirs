@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,7 +21,13 @@ package org.harctoolbox.jgirs;
  *
  */
 abstract class IntegerParameter implements IParameter {
-    int value;
+    private int value;
+
+    private IntegerParameter() {}
+
+    IntegerParameter(int initValue) {
+        this.value = initValue;
+    }
 
     @Override
     public void set(String str) {
@@ -30,7 +36,7 @@ abstract class IntegerParameter implements IParameter {
 
     @Override
     public String get() {
-        return Integer.toString(value);
+        return Integer.toString(getValue());
     }
 
     @Override
@@ -38,9 +44,10 @@ abstract class IntegerParameter implements IParameter {
         return getName() + "=" + get();
     }
 
-    private IntegerParameter() {}
-
-    IntegerParameter(int initValue) {
-        this.value = initValue;
+    /**
+     * @return the value
+     */
+    public int getValue() {
+        return value;
     }
 }

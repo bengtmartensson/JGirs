@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -46,106 +47,15 @@ import org.harctoolbox.IrpMaster.IrpUtils;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ICommandLineDevice;
 import org.harctoolbox.harchardware.IHarcHardware;
-import org.harctoolbox.harchardware.comm.ReadlineCommander;
 import org.harctoolbox.harchardware.ir.ICapture;
 import org.harctoolbox.harchardware.ir.IReceive;
 import org.harctoolbox.harchardware.ir.ITransmitter;
+import org.harctoolbox.readlinecommander.ReadlineCommander;
 import org.xml.sax.SAXException;
 
 public final class Engine implements ICommandLineDevice, Closeable {
-
-    private HashMap<String, Module> modules;
-    private Base base;
-    private Parameters parameters;
-    private CommandExecuter commandExecuter;
-    private IHarcHardware hardware;
-    private Charset charSet;
-    private boolean verbosity;
-    private int debug;
-    private final NamedRemotes namedCommand;
-    List<String> outBuffer;
-
-    private static class HardwareParameter {
-        private Class<?> clazz;
-        private String svalue;
-        private int ivalue;
-        private boolean bvalue;
-        private Object object;
-
-        HardwareParameter(String par) {
-            String[] p = par.split(":");
-            if (p.length == 1) {
-                clazz = String.class;
-                svalue = par;
-            } else {
-                switch (p[0]) {
-                    case "string":
-                        clazz = String.class;
-                        svalue = p[1];
-                        object = svalue;
-                        break;
-                    case "int":
-                        clazz = int.class;
-                        ivalue = Integer.parseInt(p[1]);
-                        object = ivalue;
-                        break;
-                    case "bool":
-                    case "boolean":
-                        clazz = boolean.class;
-                        bvalue = Boolean.parseBoolean(p[1]);
-                        object = bvalue;
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Type " + p[0] + " unknown");
-                }
-            }
-        }
-
-        /**
-         * @return the clazz
-         */
-        public Class<?> getClazz() {
-            return clazz;
-        }
-
-        /**
-         * @return the svalue
-         */
-        public String getSvalue() {
-            return svalue;
-        }
-
-        /**
-         * @return the ivalue
-         */
-        public int getIvalue() {
-            return ivalue;
-        }
-
-        /**
-         * @return the bvalue
-         */
-        public boolean isBvalue() {
-            return bvalue;
-        }
-
-        /**
-         * @return the object
-         */
-        public Object getObject() {
-            return object;
-        }
-    }
-
-    private void registerModule(Module module) {
-        if (module == null)
-            return;
-        modules.put(module.getName(), module);
-        for (ICommand cmd : module.getCommands()) {
-            commandExecuter.addCommand(cmd);
-        }
-        parameters.addParameters(module);
-    }
+    private static JCommander argumentParser;
+    private static final CommandLineArgs commandLineArgs = new CommandLineArgs();
 
     public static IHarcHardware newHardware(String hardwareName, ArrayList<String> parameters,
             int openDelay, boolean verbose, int debug)
@@ -183,14 +93,45 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return hw;
     }
 
+    private static void usage(int exitcode) {
+        StringBuilder str = new StringBuilder(128);
+        argumentParser.usage(str);
+
+        (exitcode == IrpUtils.exitSuccess ? System.out : System.err).println(str);
+        doExit(exitcode); // placifying FindBugs...
+    }
+
+    private static void doExit(int exitcode) {
+        System.exit(exitcode);
+    }
+
+    private static String join(Iterable<String> strings) {
+        StringBuilder str = new StringBuilder(128);
+        for (String s : strings) {
+            str.append(" ").append(s);
+        }
+        return str.substring(1);
+    }
+
+    private final HashMap<String, Module> modules;
+    private final Base base;
+    private final Parameters parameters;
+    private final CommandExecuter commandExecuter;
+    private final IHarcHardware hardware;
+    private final Charset charSet;
+    private boolean verbosity;
+    private int debug;
+    private final NamedRemotes namedCommand;
+    private final List<String> outBuffer;
+
     public Engine(IHarcHardware hardware, Renderer renderer, Irp irp, NamedRemotes namedCommand, String charsetName, boolean verbosity, int debug) throws FileNotFoundException, IncompatibleArgumentException {
-        this.outBuffer = new ArrayList<>();
+        this.outBuffer = new ArrayList<>(8);
         this.verbosity = verbosity;
         this.debug = debug;
         this.charSet = Charset.forName(charsetName);
         this.hardware = hardware;
         this.namedCommand = namedCommand;
-        modules = new LinkedHashMap<>();
+        modules = new LinkedHashMap<>(16);
         commandExecuter = new CommandExecuter();
         parameters = new Parameters();
         registerModule(parameters);
@@ -210,6 +151,22 @@ public final class Engine implements ICommandLineDevice, Closeable {
         if (IReceive.class.isInstance(hardware))
             registerModule(new Receive((IReceive)hardware, namedCommand));
         registerModule(Transmit.newTransmit(hardware, renderer, irp, namedCommand));
+    }
+
+    @Override
+    public void flushInput() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private void registerModule(Module module) {
+        if (module == null)
+            return;
+        modules.put(module.getName(), module);
+        module.getCommands().stream().forEach((cmd) -> {
+            commandExecuter.addCommand(cmd);
+        });
+        //parameters.addParameters(module);
+        module.addParametersTo(parameters);
     }
 
     public ArrayList<String> getModuleNames(boolean sort) {
@@ -454,33 +411,85 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return commandExecuter.getSubCommandNames(command, sort);
     }
 
-    private boolean isQuitRequested() {
-        return base.isQuitRequested();
-    }
+//    private boolean isQuitRequested() {
+//        return base.isQuitRequested();
+//    }
 
     private List<String> eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         String[] tokens = command.split("\\s+");
-        return commandExecuter.exec(tokens);
+        return commandExecuter.exec(Arrays.asList(tokens));
     }
 
-    private static void usage(int exitcode) {
-        StringBuilder str = new StringBuilder();
-        argumentParser.usage(str);
+    private static class HardwareParameter {
+        private Class<?> clazz;
+        private String svalue;
+        private int ivalue;
+        private boolean bvalue;
+        private Object object;
 
-        (exitcode == IrpUtils.exitSuccess ? System.out : System.err).println(str);
-        doExit(exitcode); // placifying FindBugs...
-    }
-
-    private static void doExit(int exitcode) {
-        System.exit(exitcode);
-    }
-
-    private static String join(Iterable<String> strings) {
-        StringBuilder str = new StringBuilder();
-        for (String s : strings) {
-            str.append(" ").append(s);
+        HardwareParameter(String par) {
+            String[] p = par.split(":");
+            if (p.length == 1) {
+                clazz = String.class;
+                svalue = par;
+            } else {
+                switch (p[0]) {
+                    case "string":
+                        clazz = String.class;
+                        svalue = p[1];
+                        object = svalue;
+                        break;
+                    case "int":
+                        clazz = int.class;
+                        ivalue = Integer.parseInt(p[1]);
+                        object = ivalue;
+                        break;
+                    case "bool":
+                    case "boolean":
+                        clazz = boolean.class;
+                        bvalue = Boolean.parseBoolean(p[1]);
+                        object = bvalue;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Type " + p[0] + " unknown");
+                }
+            }
         }
-        return str.substring(1);
+
+        /**
+         * @return the clazz
+         */
+        public Class<?> getClazz() {
+            return clazz;
+        }
+
+        /**
+         * @return the svalue
+         */
+        public String getSvalue() {
+            return svalue;
+        }
+
+        /**
+         * @return the ivalue
+         */
+        public int getIvalue() {
+            return ivalue;
+        }
+
+        /**
+         * @return the bvalue
+         */
+        public boolean isBvalue() {
+            return bvalue;
+        }
+
+        /**
+         * @return the object
+         */
+        public Object getObject() {
+            return object;
+        }
     }
 
     private final static class CommandLineArgs {
@@ -501,7 +510,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         private int debug = 0;
 
         @Parameter(names = {"-g", "--girr"}, description = "Remotes and commands in Girr files")
-        private List<String> girr = new ArrayList<>();
+        private List<String> girr = new ArrayList<>(8);
 
         @Parameter(names = {"--help", "-?"}, description = "Display help message")
         private boolean helpRequested = false;
@@ -591,13 +600,10 @@ public final class Engine implements ICommandLineDevice, Closeable {
         //private boolean udp;
 
         @Parameter(description = "[parameters]")
-        private ArrayList<String> parameters = new ArrayList<>();
+        private ArrayList<String> parameters = new ArrayList<>(8);
     }
 
-    private static JCommander argumentParser;
-    private static CommandLineArgs commandLineArgs = new CommandLineArgs();
-
-    /**
+   /**
      * @param args the command line arguments.
      */
     public static void main(String[] args) {
@@ -652,7 +658,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         }
 
         NamedRemotes namedRemotes = null;
-        if (commandLineArgs.girr == null || commandLineArgs.girr.size() == 0) {
+        if (commandLineArgs.girr == null || commandLineArgs.girr.isEmpty()) {
             System.err.println("Warning: no remotes");
         } else {
             try {
@@ -668,9 +674,9 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 // read-eval-print
                 //FramedDevice.Framer framer = new FramedDevice.Framer();
                 /*        commandLineArgs.prefix + "{0}" + commandLineArgs.suffix
-                        + (commandLineArgs.appendReturn ? "\r" : "")
-                        + (commandLineArgs.appendNewline ? "\n" : ""),
-                        commandLineArgs.toUpper);*/
+                + (commandLineArgs.appendReturn ? "\r" : "")
+                + (commandLineArgs.appendNewline ? "\n" : ""),
+                commandLineArgs.toUpper);*/
 
                 //FramedDevice framedDevice = new FramedDevice((ICommandLineDevice) hardware, framer);
                 //FramedDevice framedDevice = new FramedDevice(engine, framer);

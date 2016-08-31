@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 Bengt Martensson.
+Copyright (C) 2016 Bengt Martensson.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,16 +31,13 @@ import org.harctoolbox.IrpMaster.UnassignedException;
  */
 public class Irp extends Module {
 
-    public IrSignal render(String[] args, int skip) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
-        int index = skip;
-        String irp = args[index++];
-        Protocol protocol = new Protocol("dummy", irp, null);
-        HashMap<String, Long> params = Protocol.parseParams(args, index);
-        IrSignal irSignal = protocol.renderIrSignal(params);
-        return irSignal;
-    }
-
     public Irp() {
         super();
+    }
+
+    public IrSignal render(String protocolName, HashMap<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
+        Protocol protocol = new Protocol("dummy", protocolName, null);
+        IrSignal irSignal = protocol.renderIrSignal(parameters);
+        return irSignal;
     }
 }
