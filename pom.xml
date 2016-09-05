@@ -193,7 +193,7 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>HarcHardware</artifactId>
-            <version>1.3</version>
+            <version>1.3.1dev</version>
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>
@@ -203,7 +203,12 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>Girr</artifactId>
-            <version>1.3</version>
+            <version>1.3.1dev</version>
+        </dependency>
+        <dependency>
+            <groupId>org.harctoolbox</groupId>
+            <artifactId>Jirc</artifactId>
+            <version>1.3.1dev</version>
         </dependency>
         <dependency>
             <groupId>org.gnu</groupId>

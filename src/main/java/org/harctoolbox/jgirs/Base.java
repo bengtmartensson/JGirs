@@ -28,10 +28,12 @@ import org.harctoolbox.harchardware.IHarcHardware;
  */
 public class Base extends Module {
 
+    public static final String goodbyeWord = "Bye!";
+
     private final HashMap<String, Module> modules;
     private final CommandExecuter commandExecuter;
     private final IHarcHardware hardware;
-    private boolean quitRequested = false;
+    //private boolean quitRequested = false;
 
     public Base(HashMap<String, Module> modules, CommandExecuter commandExecuter, IHarcHardware hardware) {
         super();
@@ -45,9 +47,9 @@ public class Base extends Module {
         this.commandExecuter = commandExecuter;
     }
 
-    public boolean isQuitRequested() {
-        return quitRequested;
-    }
+//    public boolean isQuitRequested() {
+//        return quitRequested;
+//    }
 
     private static class LicenseCommand implements ICommand {
 
@@ -63,6 +65,23 @@ public class Base extends Module {
             return result;
         }
     }
+
+    private static class QuitCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "quit";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) {
+            //quitRequested = true;
+            ArrayList<String> result = new ArrayList<>(1);
+            result.add(goodbyeWord);
+            return result;
+        }
+    }
+
     private class VersionCommand implements ICommand {
 
         @Override
@@ -89,20 +108,6 @@ public class Base extends Module {
         @Override
         public List<String> exec(List<String> args) {
             return new ArrayList<>(modules.keySet());
-        }
-    }
-
-    private class QuitCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "quit";
-        }
-
-        @Override
-        public List<String> exec(List<String> args) {
-            quitRequested = true;
-            return new ArrayList<String>() {{ add("Bye!"); }};
         }
     }
 

@@ -39,6 +39,25 @@ public class Parameters extends Module {
         allParameters.putAll(newParameters);
     }
 
+    private static class GetParameterCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "getparameter";
+        }
+
+        @Override
+        public List<String> exec(List<String> args) throws NoSuchParameterException {
+//            int index = 1;
+//            String name = args[index];
+//            if (!allParameters.containsKey(name))
+//                throw new NoSuchParameterException(name);
+//            final IParameter parameter = allParameters.get(name);
+//            return new ArrayList<String>() {{ add(parameter.get()); }};
+            return new ArrayList<>(8);
+        }
+    }
+
 //    public void addParameters(Module module) {
 //        allParameters.putAll(module.getParameters());
 //    }
@@ -78,24 +97,5 @@ public class Parameters extends Module {
             return new ArrayList<>(0);
         }
 
-    }
-
-    private class GetParameterCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "getparameter";
-        }
-
-        @Override
-        public List<String> exec(List<String> args) throws NoSuchParameterException {
-//            int index = 1;
-//            String name = args[index];
-//            if (!allParameters.containsKey(name))
-//                throw new NoSuchParameterException(name);
-//            final IParameter parameter = allParameters.get(name);
-//            return new ArrayList<String>() {{ add(parameter.get()); }};
-            return new ArrayList<String>();
-        }
     }
 }

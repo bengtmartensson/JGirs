@@ -17,39 +17,47 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Abstract base class for the Girs modules.
  */
 public abstract class Module {
 
-    public static String join(Iterable<String> strings) {
-        return join(strings, " ");
+    public static Module newModule(String className, Class<?>[] classArray, Object[] objectArray)
+            throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        String fullHardwareClassName = (className.contains(".") ? "" : "org.harctoolbox.jgirs.") + className;
+        Class<?> clazz = Class.forName(fullHardwareClassName);
+        Constructor<?> constructor = clazz.getConstructor(classArray);
+        return (Module) constructor.newInstance(objectArray);
     }
 
-    public static String join(Iterable<String> strings, String separator) {
-        StringBuilder str = new StringBuilder(32);
-        for (String name : strings)
-            str.append(name).append(separator);
-
-        return str.substring(0, str.length() - separator.length());
+    public static Module newModule(Element element) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        NodeList nodeList = element.getElementsByTagName("argument");
+        Class<?>[] classArray = new Class<?>[nodeList.getLength()];
+        Object[] objectArray = new Object[nodeList.getLength()];
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element e = (Element) nodeList.item(i);
+            String type = e.getAttribute("type");
+            classArray[i] = Utils.name2class(type);
+            objectArray[i] = parseObject(type, e.getTextContent());
+        }
+        return newModule(element.getAttribute("class"), classArray, objectArray);
     }
 
-    public static <T extends Object> String joinObjects(Iterable<T> objects) {
-        return joinObjects(objects, " ");
-    }
-
-    public static <T extends Object> String joinObjects(Iterable<T> objects, String separator) {
-        StringBuilder str = new StringBuilder(32);
-        for (Object object : objects)
-            str.append(object.toString()).append(separator);
-
-        return str.substring(0, Math.max(str.length() - separator.length(), 0));
+    public static Object parseObject(String type, String value) {
+        return
+                type.equals("int") ? Integer.parseInt(value)
+                : type.equals("boolean") ? Boolean.parseBoolean(value)
+                : value;
     }
 
     private final HashMap<String, ICommand> commands;

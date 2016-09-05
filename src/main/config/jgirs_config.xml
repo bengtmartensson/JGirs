@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example configuration -->
+<jgirs version="0.0.0">
+    <options>
+        <option name="irpProtocolsIni">/usr/local/share/irscrutinizer/IrpProtocols.ini</option>
+        <option name="lircTcpAddress">0.0.0.0</option>
+        <option type="int" name="lircTcpPort">8765</option>
+        <option name="lircSocketPath">/run/lircd/jlirc</option>
+        <!--option type="string" name="protection">666</option>
+        <option type="boolean" name="write-decodes">true</option-->
+        <option name="serverAddress">0.0.0.0</option>
+        <option type="int" name="serverPort">33333</option>
+        <option name="amxBeacon">JGirs</option>
+        <option name="logfilePath">/tmp/jgirs.log</option>
+        <option type="boolean" name="logappend">true</option>
+        <option name="protection">644</option>
+        <option name="loglevel">INFO</option>
+        <option name="clientPassword">LetsReplaceLirc</option>
+    </options>
+
+    <modules>
+        <module class="org.harctoolbox.jgirs.DummyModule">
+            <arguments>
+                <argument type="String" description="dummy argument">Let's replace Lirc!</argument>
+            </arguments>
+        </module>
+    </modules>
+
+    <named-remotes>
+        <named-remote type="girr" url="file:///home/bengt/harctoolbox/GirrLib/Girr/Yamaha/yamaha_rxv1400.girr"/>
+        <named-remote             url="file:///home/bengt/harctoolbox/GirrLib/Girr/Coolstream/coolstream_neo.girr"/>
+        <!--named-remote type="lircd" url="http://lirc.sourceforge.net/remotes/yamaha/RX-V995"/-->
+    </named-remotes>
+
+    <hardware>
+        <hardware-item default="true" name="myirtoy" class="org.harctoolbox.harchardware.ir.IrToy">
+            <arguments>
+                <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>
+            </arguments>
+        </hardware-item>
+        <hardware-item name="old-globalcache" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
+            <description>The old GC-100-06. Connectors: 1: Main blaster; 2: Bedroom; 3: Desktop amplifier (Yamaha RX-V 1400)</description>
+            <www url="http://globalcache.earth"/>
+            <arguments>
+                <argument type="java.lang.String" description="ip">globalcache.earth</argument>
+            </arguments>
+        </hardware-item>
+        <!--hardware-item name="hp-mce" class="org.harctoolbox.harchardware.ir.DevLirc">
+            <arguments>
+                <argument description="device name">/dev/lirc0</argument>
+            </arguments>
+        </hardware-item-->
+    </hardware>
+
+    <girs-servers>
+        <girs-server ip="arduino" port="33333"/>
+    </girs-servers>
+</jgirs>

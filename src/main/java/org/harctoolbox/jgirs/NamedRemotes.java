@@ -69,6 +69,11 @@ public class NamedRemotes extends Module {
         this(readRemoteSet(files));
     }
 
+    public NamedRemotes(RemoteCommandDataBase remoteCommandsDataBase) {
+        super();
+        this.database = remoteCommandsDataBase;
+    }
+
     public RemoteCommandDataBase.RemoteCommand getRemoteCommand(String protocol, Map<String, Long> parameters) {
         return database.getRemoteCommand(protocol, parameters);
     }
@@ -82,6 +87,10 @@ public class NamedRemotes extends Module {
             throw new NoSuchCommandException(commandName);
         IrSignal irSignal = command.toIrSignal();
         return irSignal;
+    }
+
+    public boolean isEmpty() {
+        return database.isEmpty();
     }
 
     private class RemotesCommand implements ICommand {

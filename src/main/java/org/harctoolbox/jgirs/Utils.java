@@ -17,32 +17,23 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
-/**
- * A pretty useless module, more as an example.
- */
-public class Dummy extends Module {
+public class Utils {
 
-    public Dummy() {
-        super();
-        addCommand(new DateCommand());
+    public static Object parseObject(String type, String value) {
+        return
+                type.equals("int") ? Integer.parseInt(value)
+                : type.equals("boolean") ? Boolean.parseBoolean(value)
+                : value;
     }
 
-    private static class DateCommand implements ICommand {
+    public static Class<?> name2class(String type) throws ClassNotFoundException {
+        return type.equals("int") ? int.class
+                : type.equals("boolean") ? boolean.class
+                : type.equalsIgnoreCase("string") || type.isEmpty() ? String.class
+                : Class.forName(type);
+    }
 
-        @Override
-        public String getName() {
-            return "date";
-        }
-
-        @Override
-        public List<String> exec(List<String> args) {
-            ArrayList<String> result = new ArrayList<>(1);
-            result.add((new Date()).toString());
-            return result;
-        }
+    private Utils() {
     }
 }

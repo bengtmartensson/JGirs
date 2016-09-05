@@ -17,6 +17,9 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.io.IOException;
+import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,8 +29,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import org.harctoolbox.IrpMaster.IrpMasterException;
+import org.harctoolbox.IrpMaster.XmlUtils;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * This class implements a data base for Remotes and Commands. It is not claimed to be very efficient,
@@ -36,6 +43,44 @@ import org.harctoolbox.girr.RemoteSet;
  * TODO: take left-out default parameters into account.
  */
 public class RemoteCommandDataBase {
+
+    public static void main(String[] args) {
+        TreeMap<ParameterSet, String> db = new TreeMap<>();
+        Map<String, Long> params = new HashMap<>(16);
+        params.put("C", 3L);
+        params.put("A", 1L);
+        ParameterSet ba21 = new ParameterSet("proto", params);
+        db.put(ba21, "ba21");
+        ba21 = new ParameterSet("proto", params);
+        db.put(ba21, "ba21xxx");
+        params.put("B", 2L);
+        ba21 = new ParameterSet("aproto", params);
+        db.put(ba21, "ba21xx");
+        Map<String, Long> ps = new HashMap<>(16);
+        ps.put("A", 1L);
+        ps.put("B", 2L);
+        ps.put("C", 3L);
+        ParameterSet pa = new ParameterSet("proto", ps);
+        db.put(pa, "xxx");
+        ParameterSet pb = null;
+        try {
+            pb = (ParameterSet) pa.clone();
+        } catch (CloneNotSupportedException ex) {
+        }
+        db.put(pb, "godzilla");
+
+        db.entrySet().stream().forEach((kvp) -> {
+            System.out.println(kvp.getKey() + "\t" + kvp.getValue());
+        });
+    }
+    private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
+        return parseGirr(new URL(element.getAttribute("url")));
+    }
+    private static RemoteSet parseGirr(URL url) throws java.text.ParseException, IOException, SAXException {
+        Document doc = XmlUtils.openXmlUrl(url, null, true, true);
+        RemoteSet remoteSet = new RemoteSet(doc);
+        return remoteSet;
+    }
 
     private Map<String, Remote> remotes;
     private TreeMap<ParameterSet, RemoteCommand> data;
@@ -64,6 +109,13 @@ public class RemoteCommandDataBase {
         }
     }
 
+    public void add(Iterable<String> urls) throws ParseException, IOException, SAXException, IrpMasterException {
+        for (String url : urls) {
+            RemoteSet remoteSet = parseGirr(new URL(url));
+            load(remoteSet);
+        }
+    }
+    
     public Remote getRemote(String remoteName) {
         return remotes.get(remoteName);
     }
@@ -82,10 +134,15 @@ public class RemoteCommandDataBase {
         return this.data.get(params);
     }
 
+    public boolean isEmpty() {
+        return remotes.isEmpty();
+    }
+
     public static class RemoteCommand {
 
         private final Remote remote;
         private final org.harctoolbox.girr.Command command;
+
         public RemoteCommand(Remote remote, org.harctoolbox.girr.Command command) {
             this.remote = remote;
             this.command = command;
@@ -110,7 +167,6 @@ public class RemoteCommandDataBase {
             return hash;
         }
 
-
         /**
          * @return the remote
          */
@@ -131,6 +187,7 @@ public class RemoteCommandDataBase {
         }
 
     }
+
     public static class ParameterSet implements Comparable<ParameterSet>, Cloneable {
         private final Map<String, Long> parameters;
         private final String protocol;
@@ -234,35 +291,5 @@ public class RemoteCommandDataBase {
             ParameterSet dolly = new ParameterSet(protocol, parameters);
             return dolly;
         }
-    }
-
-    public static void main(String[] args) {
-        TreeMap<ParameterSet, String> db = new TreeMap<>();
-        Map<String, Long> params = new HashMap<>(16);
-        params.put("C", 3L);
-        params.put("A", 1L);
-        ParameterSet ba21 = new ParameterSet("proto", params);
-        db.put(ba21, "ba21");
-        ba21 = new ParameterSet("proto", params);
-        db.put(ba21, "ba21xxx");
-        params.put("B", 2L);
-        ba21 = new ParameterSet("aproto", params);
-        db.put(ba21, "ba21xx");
-        Map<String, Long> ps = new HashMap<>(16);
-        ps.put("A", 1L);
-        ps.put("B", 2L);
-        ps.put("C", 3L);
-        ParameterSet pa = new ParameterSet("proto", ps);
-        db.put(pa, "xxx");
-        ParameterSet pb = null;
-        try {
-            pb = (ParameterSet) pa.clone();
-        } catch (CloneNotSupportedException ex) {
-        }
-        db.put(pb, "godzilla");
-
-        db.entrySet().stream().forEach((kvp) -> {
-            System.out.println(kvp.getKey() + "\t" + kvp.getValue());
-        });
     }
 }

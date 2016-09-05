@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
@@ -27,8 +22,6 @@ import org.testng.annotations.Test;
  */
 public class IrHardwareNGTest {
 
-    public IrHardwareNGTest() {
-    }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -36,6 +29,9 @@ public class IrHardwareNGTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+    }
+
+    public IrHardwareNGTest() {
     }
 
     @BeforeMethod
@@ -53,30 +49,29 @@ public class IrHardwareNGTest {
     public void testSingleHardware() {
         System.out.println("singleHardware");
         String className = "IrDummy";
+        List<String> parameters = new ArrayList<>(2);
+        parameters.add(className);
 
         try {
-            List<IrHardware> result = IrHardware.singleHardware(className, null);
-            IrHardware hw = result.get(0);
+            List<GirsHardware> result = GirsHardware.singleHardware(parameters);
+            GirsHardware hw = result.get(0);
             String version = hw.getHardware().getVersion();
             Assert.assertEquals(IrDummy.defaultVersion, version);
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | IOException ex) {
             Logger.getLogger(IrHardwareNGTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
-        
-        List<String> parameters = new ArrayList<>(1);
+
         String silly = "Godzilla";
         parameters.add(silly);
         try {
-            List<IrHardware> result = IrHardware.singleHardware(className, parameters);
-            IrHardware hw = result.get(0);
+            List<GirsHardware> result = GirsHardware.singleHardware(parameters);
+            GirsHardware hw = result.get(0);
             String version = hw.getHardware().getVersion();
             Assert.assertEquals(silly, version);
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | IOException ex) {
             Logger.getLogger(IrHardwareNGTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
-
-
     }
 }
