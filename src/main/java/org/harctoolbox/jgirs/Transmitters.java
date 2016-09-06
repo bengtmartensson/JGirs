@@ -26,11 +26,18 @@ import org.harctoolbox.harchardware.ir.ITransmitter;
  */
 public class Transmitters extends Module {
     private final ITransmitter transmitter;
+    private Engine engine;
 
     public Transmitters(ITransmitter transmitter) {
         super();
         this.transmitter = transmitter;
         addCommand(new TransmittersCommand());
+    }
+
+    public Transmitters(Engine engine) {
+        super();
+        this.engine = engine;
+        transmitter = null; // FIXME
     }
 
     private class TransmittersCommand implements ICommand {

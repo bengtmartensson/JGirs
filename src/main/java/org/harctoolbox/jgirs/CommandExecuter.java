@@ -64,9 +64,10 @@ public class CommandExecuter {
         else {
             for (Map.Entry<String, ICommand> kvp : commands.entrySet()) {
                 if (kvp.getKey().startsWith(commandName)) {
-                    if (cmd == null)
+                    if (cmd == null) {
                         cmd = kvp.getValue();
-                    else
+                        break;
+                    } else
                         throw new AmbigousCommandException("Command " + commandName + " is ambigous.");
                 }
             }

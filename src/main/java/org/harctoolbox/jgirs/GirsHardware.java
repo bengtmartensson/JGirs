@@ -40,7 +40,7 @@ public final class GirsHardware {
 
     public static List<GirsHardware> singleHardware(List<String> params) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
         List<GirsHardware> list = new ArrayList<>(1);
-        GirsHardware irHardware = new GirsHardware(params, "default", true);
+        GirsHardware irHardware = new GirsHardware(params, "default", true, true);
         list.add(irHardware);
         return list;
     }
@@ -96,11 +96,13 @@ public final class GirsHardware {
     private final IHarcHardware hardware;
     private final String url;
     private final String description;
-    private final boolean dflt;
     private final String name;
+    private final boolean outputDefault;
+    private final boolean inputDefault;
 
     public GirsHardware(IHarcHardware hardware) {
-        this.dflt = false;
+        this.outputDefault = false;
+        this.inputDefault = false;
         this.description = null;
         this.url = null;
         this.name = null;
@@ -108,7 +110,8 @@ public final class GirsHardware {
     }
 
     public GirsHardware(Element element) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        dflt = Boolean.parseBoolean(element.getAttribute("default"));
+        inputDefault = Boolean.parseBoolean(element.getAttribute("inputdefault"));
+        outputDefault = Boolean.parseBoolean(element.getAttribute("outputdefault"));
         name = element.getAttribute("name");
         description = getChildContent(element, "description");
         url = getChildContent(element, "www");
@@ -125,8 +128,9 @@ public final class GirsHardware {
         hardware = newIrHardware(element.getAttribute("class"), classArray, objectArray);
     }
 
-    GirsHardware(List<String> params, String name, boolean deflt) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        dflt = deflt;
+    GirsHardware(List<String> params, String name, boolean inputDefault, boolean outputDefault) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
+        this.inputDefault = inputDefault;
+        this.outputDefault = outputDefault;
         this.name = name;
         description = null;
         url = null;
@@ -155,17 +159,18 @@ public final class GirsHardware {
     }
 
     /**
-     * @return the isDefault
-     */
-    public boolean isDefault() {
-        return dflt;
-    }
-
-    /**
      * @return the name
      */
     public String getName() {
         return name;
+    }
+
+    boolean isOutputDefault() {
+        return outputDefault;
+    }
+
+    boolean isInputDefault() {
+        return inputDefault;
     }
 
 //    private Object[] toObjects(List<String> parameters) {

@@ -33,23 +33,29 @@
     </named-remotes>
 
     <hardware>
-        <hardware-item default="true" name="myirtoy" class="org.harctoolbox.harchardware.ir.IrToy">
+        <hardware-item inputdefault="true" name="myirtoy" displayname="IrToy" class="org.harctoolbox.harchardware.ir.IrToy">
             <arguments>
                 <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>
             </arguments>
         </hardware-item>
-        <hardware-item name="old-globalcache" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
+        <hardware-item outputdefault="true" name="old-globalcache" displayname="Global Caché" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
             <description>The old GC-100-06. Connectors: 1: Main blaster; 2: Bedroom; 3: Desktop amplifier (Yamaha RX-V 1400)</description>
             <www url="http://globalcache.earth"/>
             <arguments>
                 <argument type="java.lang.String" description="ip">globalcache.earth</argument>
             </arguments>
         </hardware-item>
-        <!--hardware-item name="hp-mce" class="org.harctoolbox.harchardware.ir.DevLirc">
+        <hardware-item name="hp-mce" displayname="HP MCE" class="org.harctoolbox.harchardware.ir.DevLirc">
             <arguments>
                 <argument description="device name">/dev/lirc0</argument>
             </arguments>
-        </hardware-item-->
+        </hardware-item>
+        <hardware-item name="nano" displayname="Arduino Nano" class="org.harctoolbox.harchardware.ir.SerialGirsClient">
+            <arguments>
+                <argument description="device name">/dev/arduino_nano_qinheng</argument>
+                <argument type="int" description="baud rate">115200</argument>
+            </arguments>
+        </hardware-item>
     </hardware>
 
     <girs-servers>

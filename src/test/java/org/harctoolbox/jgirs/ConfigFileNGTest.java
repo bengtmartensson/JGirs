@@ -5,6 +5,7 @@
  */
 package org.harctoolbox.jgirs;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.harctoolbox.IrpMaster.IrpMasterException;
+import org.harctoolbox.devslashlirc.LircHardware;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -32,15 +34,18 @@ public class ConfigFileNGTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+        LircHardware.loadLibrary(new File("/local/lib64/libdevslashlirc.so"));
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     private ConfigFile instance = null;
 
     public ConfigFileNGTest() {
+        System.load("/usr/lib64/rxtx/librxtxSerial.so");
+        LircHardware.loadLibrary(new File("/local/lib64/libdevslashlirc.so"));
         try {
             instance = new ConfigFile(configFilePath);
         } catch (IOException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | ParseException | IrpMasterException ex) {
@@ -64,7 +69,7 @@ public class ConfigFileNGTest {
     public void testGetIrHardwareList() {
         System.out.println("getIrHardwareList");
         List<GirsHardware> result = instance.getIrHardwareList();
-        assertEquals(result.size(), 2);
+        assertEquals(result.size(), 4);
     }
 
     /**

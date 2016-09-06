@@ -34,23 +34,30 @@ import org.harctoolbox.harchardware.ir.IReceive;
 public class Receive extends Module {
     private final static String defaultReceiveFormat = "named-command";
 
+    private Engine engine;
     private final IReceive hardware;
-    private final TimeoutParameter timeoutParameter;
-    private final FallbackFrequencyParameter fallbackFrequencyParameter;
-    private final ReceiveFormatParameter receiveFormatParameter;
+    private final TimeoutParameter timeoutParameter = null;
+    private final FallbackFrequencyParameter fallbackFrequencyParameter = null;
+    private final ReceiveFormatParameter receiveFormatParameter = null;
     private final NamedRemotes namedRemotes;
 
-    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
-        this.namedRemotes = namedRemotes;
-        this.hardware = receiver;
-        addCommand(new ReceiveCommand());
-        timeoutParameter = new TimeoutParameter(2000);
-        addParameter(timeoutParameter);
-        this.fallbackFrequencyParameter = new FallbackFrequencyParameter((int) IrpUtils.defaultFrequency);
-        addParameter(this.fallbackFrequencyParameter);
-        this.receiveFormatParameter = new ReceiveFormatParameter(defaultReceiveFormat);
-        addParameter(this.receiveFormatParameter);
+//    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
+//        this.namedRemotes = namedRemotes;
+//        this.hardware = receiver;
+//        addCommand(new ReceiveCommand());
+//        timeoutParameter = new TimeoutParameter(2000);
+//        addParameter(timeoutParameter);
+//        this.fallbackFrequencyParameter = new FallbackFrequencyParameter((int) IrpUtils.defaultFrequency);
+//        addParameter(this.fallbackFrequencyParameter);
+//        this.receiveFormatParameter = new ReceiveFormatParameter(defaultReceiveFormat);
+//        addParameter(this.receiveFormatParameter);
+//
+//    }
 
+    Receive(Engine engine, NamedRemotes namedRemotes) {
+        this.engine = engine;
+        this.namedRemotes = namedRemotes;
+        hardware = null; // FIXME
     }
 
     private static class TimeoutParameter extends IntegerParameter {

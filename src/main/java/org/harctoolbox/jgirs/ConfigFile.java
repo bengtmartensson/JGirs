@@ -82,6 +82,9 @@ public class ConfigFile {
 
     public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, IrpMasterException {
         this();
+        if (doc == null)
+            return;
+
         NodeList nodeList = doc.getElementsByTagName("hardware-item");
         for (int i = 0; i < nodeList.getLength(); i++) {
             GirsHardware hw = new GirsHardware((Element) nodeList.item(i));
@@ -121,15 +124,7 @@ public class ConfigFile {
     }
 
     public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException {
-        this(XmlUtils.openXmlUrl(url, (Schema) null, false, true));
-    }
-
-    public GirsHardware getDefaultHardware() {
-        for (GirsHardware hardware : irHardwareList)
-            if (hardware.isDefault())
-                return hardware;
-
-        return null;
+        this(url != null ? XmlUtils.openXmlUrl(url, (Schema) null, false, true) : null);
     }
 
     /**
@@ -195,6 +190,22 @@ public class ConfigFile {
 
     void addGirs(List<String> girr) throws ParseException, IOException, SAXException, IrpMasterException {
         remoteCommandsDataBase.add(girr);
+    }
+
+    public GirsHardware getDefaultOutputHardware() {
+        for (GirsHardware hardware : irHardwareList)
+            if (hardware.isOutputDefault())
+                return hardware;
+
+        return null;
+    }
+
+    public GirsHardware getDefaultInputHardware() {
+        for (GirsHardware hardware : irHardwareList)
+            if (hardware.isInputDefault())
+                return hardware;
+
+        return null;
     }
 
     public static class NoSuchRemoteTypeException extends Exception {

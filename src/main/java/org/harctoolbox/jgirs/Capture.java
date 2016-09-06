@@ -31,10 +31,11 @@ import org.harctoolbox.harchardware.ir.ICapture;
 public class Capture extends Module {
 
     private final ICapture hardware;
-    private final StartTimeoutParameter startTimeoutParameter;
-    private final MaxCaptureLengthParameter maxCaptureLengthParameter;
-    private final EndTimeoutParameter endTimeoutParameter;
-    private final UseCcfCaptureParameter useCcfCaptureParameter;
+    private StartTimeoutParameter startTimeoutParameter = null;
+    private MaxCaptureLengthParameter maxCaptureLengthParameter = null;
+    private EndTimeoutParameter endTimeoutParameter = null;
+    private UseCcfCaptureParameter useCcfCaptureParameter = null;
+    private Engine engine;
 
     public Capture(ICapture capture) {
         this.hardware = capture;
@@ -47,6 +48,20 @@ public class Capture extends Module {
         addParameter(endTimeoutParameter);
         useCcfCaptureParameter = new UseCcfCaptureParameter(false);
         addParameter(useCcfCaptureParameter);
+    }
+
+    public Capture(Engine engine) {
+        this.engine = engine;
+        this.hardware = null;//capture;
+//        addCommand(new AnalyzeCommand());
+//        startTimeoutParameter = new StartTimeoutParameter(2000);
+//        addParameter(startTimeoutParameter);
+//        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
+//        addParameter(maxCaptureLengthParameter);
+//        endTimeoutParameter = new EndTimeoutParameter(200);
+//        addParameter(endTimeoutParameter);
+//        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
+//        addParameter(useCcfCaptureParameter);
     }
 
     private static class StartTimeoutParameter extends IntegerParameter {

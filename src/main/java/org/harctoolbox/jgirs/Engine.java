@@ -42,9 +42,6 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.IrpUtils;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ICommandLineDevice;
-import org.harctoolbox.harchardware.ir.ICapture;
-import org.harctoolbox.harchardware.ir.IReceive;
-import org.harctoolbox.harchardware.ir.ITransmitter;
 import org.harctoolbox.readlinecommander.ReadlineCommander;
 import org.xml.sax.SAXException;
 
@@ -93,7 +90,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         ConfigFile config = null;
 
         try {
-            config = new ConfigFile(commandLineArgs.configFile); // ok if arg == null
+            config = new ConfigFile(commandLineArgs.configFile); // ok also if arg == null
         } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | ParseException | IrpMasterException | IOException ex) {
             Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(4);
@@ -101,7 +98,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
         if (!commandLineArgs.hardware.isEmpty()) {
             try {
-                GirsHardware irHardware = new GirsHardware(commandLineArgs.hardware, "default", true);
+                GirsHardware irHardware = new GirsHardware(commandLineArgs.hardware, "default", true, true);
                 config.addHardware(irHardware);
             } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | IOException ex) {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
@@ -130,13 +127,14 @@ public final class Engine implements ICommandLineDevice, Closeable {
 //        }
 
 //        NamedRemotes namedRemotes = null;
-        if (!commandLineArgs.girr.isEmpty()) {
+        //if (!commandLineArgs.girr.isEmpty()) {
             try {
                 config.addGirs(commandLineArgs.girr);
             } catch (ParseException | IOException | SAXException | IrpMasterException ex) {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+                System.exit(6);
             }
-        }
+        //}
 
 //                namedRemotes = new NamedRemotes(commandLineArgs.girr);
 //            } catch (ParserConfigurationException | SAXException | IOException | IrpMasterException | ParseException ex) {
@@ -186,7 +184,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
     private final Base base;
     private final Parameters parameters;
     private final CommandExecuter commandExecuter;
-    private final GirsHardware currentGirsHardware;
+    private final GirsHardware currentOutputGirsHardware;
+    private final GirsHardware currentInputGirsHardware;
     //private final Charset charSet;
     private boolean verbosity;
     private int debug;
@@ -207,20 +206,21 @@ public final class Engine implements ICommandLineDevice, Closeable {
 //        this.debug = debug;
 //        this.charSet = Charset.forName(charsetName);
 
-        this.currentGirsHardware = config.getDefaultHardware();
+        currentOutputGirsHardware = config.getDefaultOutputHardware();
+        currentInputGirsHardware = config.getDefaultInputHardware();
         //this.namedCommand = namedCommand;
         modules = new LinkedHashMap<>(16);
         commandExecuter = new CommandExecuter();
         parameters = new Parameters();
         registerModule(parameters);
-        base = new Base(modules, commandExecuter, currentGirsHardware.getHardware());
+        base = new Base(this, commandExecuter);
         registerModule(base);
-        config.getModuleList().stream().forEach((_item) -> {
-            registerModule(new DummyModule());
+        config.getModuleList().stream().forEach((module) -> {
+            registerModule(module);
         });
 
         if (config.getStringOption(IRPPROTOCOLSINI) != null) {
-            renderer = config.getStringOption(IRPPROTOCOLSINI) == null ? null : new Renderer(config.getStringOption(IRPPROTOCOLSINI));
+            renderer = new Renderer(config.getStringOption(IRPPROTOCOLSINI));
             registerModule(renderer);
         }
 
@@ -232,14 +232,13 @@ public final class Engine implements ICommandLineDevice, Closeable {
         irp = new Irp();
         registerModule(irp);
 
-
-        if (currentGirsHardware.getHardware() instanceof ITransmitter)
-            registerModule(new Transmitters((ITransmitter) currentGirsHardware.getHardware()));
-        if (currentGirsHardware.getHardware() instanceof ICapture)
-            registerModule(new Capture((ICapture) currentGirsHardware.getHardware()));
-        if (currentGirsHardware.getHardware() instanceof IReceive)
-            registerModule(new Receive((IReceive) currentGirsHardware.getHardware(), namedRemotes));
-        registerModule(Transmit.newTransmit(currentGirsHardware.getHardware(), renderer, irp, namedRemotes));
+        //if (currentGirsHardware.getHardware() instanceof ITransmitter)
+        registerModule(new Transmitters(this));
+        //if (currentGirsHardware.getHardware() instanceof ICapture)
+        registerModule(new Capture(this));
+        //if (currentGirsHardware.getHardware() instanceof IReceive)
+        registerModule(new Receive(this, namedRemotes));
+        //registerModule(Transmit.newTransmit(currentGirsHardware.getHardware(), renderer, irp, namedRemotes));
     }
 
 //    private Engine(ConfigFile config)
@@ -311,24 +310,24 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public String getVersion() throws IOException {
-        return currentGirsHardware.getHardware().getVersion(); // FIXME
+        return null;//currentGirsHardware.getHardware().getVersion(); // FIXME
     }
 
     @Override
     public void setVerbosity(boolean verbosity) {
         this.verbosity = verbosity;
-        currentGirsHardware.getHardware().setVerbosity(verbosity);
+//        currentGirsHardware.getHardware().setVerbosity(verbosity);
     }
 
     @Override
     public void setDebug(int debug) {
         this.debug = debug;
-        currentGirsHardware.getHardware().setDebug(debug);
+//        currentGirsHardware.getHardware().setDebug(debug);
     }
 
     @Override
     public void setTimeout(int timeout) throws IOException {
-        currentGirsHardware.getHardware().setTimeout(timeout);
+//        currentGirsHardware.getHardware().setTimeout(timeout);
     }
 
     @Override
@@ -338,14 +337,14 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public void open() throws HarcHardwareException, IOException {
-        if (currentGirsHardware.getHardware() != null)
-            currentGirsHardware.getHardware().open();// ???
+//        if (currentGirsHardware.getHardware() != null)
+//            currentGirsHardware.getHardware().open();// ???
     }
 
     @Override
     public void close() throws IOException {
-        if (currentGirsHardware != null)
-            currentGirsHardware.getHardware().close();
+//        if (currentGirsHardware != null)
+//            currentGirsHardware.getHardware().close();
     }
 
     /*class ReadlineCommander implements ICommander {
@@ -501,6 +500,14 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     public ArrayList<String> getCommandNames(boolean sort) {
         return commandExecuter.getCommandNames(sort);
+    }
+
+    public List<String> getCommandNames(String moduleName, boolean sort) throws NoSuchModuleException {
+        Module module = modules.get(moduleName);
+        if (module == null)
+            throw new NoSuchModuleException(moduleName);
+
+        return module.getCommandNames(sort);
     }
 
     public ArrayList<String> getSubCommandNames(String command, boolean sort) {

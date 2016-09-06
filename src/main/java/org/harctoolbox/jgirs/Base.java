@@ -19,9 +19,7 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import org.harctoolbox.harchardware.IHarcHardware;
 
 /**
  * The Girs Base module that must be implemented.
@@ -30,20 +28,23 @@ public class Base extends Module {
 
     public static final String goodbyeWord = "Bye!";
 
-    private final HashMap<String, Module> modules;
+//    private final HashMap<String, Module> modules;
     private final CommandExecuter commandExecuter;
-    private final IHarcHardware hardware;
+//    private final IHarcHardware hardware;
     //private boolean quitRequested = false;
 
-    public Base(HashMap<String, Module> modules, CommandExecuter commandExecuter, IHarcHardware hardware) {
+    private final Engine engine;
+
+    public Base(Engine engine, CommandExecuter commandExecuter) {
         super();
+        this.engine = engine;
         addCommand(new VersionCommand());
         addCommand(new ModulesCommand());
         addCommand(new LicenseCommand());
         addCommand(new GirsCommandsCommand());
         addCommand(new QuitCommand());
-        this.hardware = hardware;
-        this.modules = modules;
+//        this.hardware = hardware;
+//        this.modules = modules;
         this.commandExecuter = commandExecuter;
     }
 
@@ -93,7 +94,7 @@ public class Base extends Module {
         public List<String> exec(List<String> args) throws IOException {
             ArrayList<String> result = new ArrayList<>(1);
             result.add(Version.versionString);
-            result.add(hardware != null ? hardware.getVersion() : "Hardware not available");
+            //result.add(hardware != null ? hardware.getVersion() : "Hardware not available");
             return result;
         }
     }
@@ -107,7 +108,7 @@ public class Base extends Module {
 
         @Override
         public List<String> exec(List<String> args) {
-            return new ArrayList<>(modules.keySet());
+            return new ArrayList<>(engine.getModuleNames(true));
         }
     }
 
@@ -119,16 +120,8 @@ public class Base extends Module {
 
         @Override
         public List<String> exec(List<String> args) throws NoSuchModuleException {
-            ArrayList<String> cmds;
-            boolean sort = true;
-            if (args.size() > 1) {
-                Module module = modules.get(args.get(1));
-                if (module == null)
-                    throw new NoSuchModuleException(args.get(1));
-                cmds = module.getCommandNames(sort);
-            } else
-                cmds = commandExecuter.getCommandNames(sort);
-           return cmds;
+            List<String> cmds = args.size() > 1 ? engine.getCommandNames(args.get(1), true) : engine.getCommandNames(true);
+            return cmds;
         }
     }
 }
