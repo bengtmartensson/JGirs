@@ -28,14 +28,14 @@ public class DummyModule extends Module {
 
     private final String nonsense;
 
-    public DummyModule(String nonsense) {
-        super();
+    public DummyModule(CommandExecuter commandExecutor, Parameters parameters, String nonsense) {
+        super(commandExecutor, parameters);
         this.nonsense = nonsense;
         addCommand(new DateCommand());
     }
 
-    public DummyModule() {
-        this(null);
+    public DummyModule(CommandExecuter commandExecutor, Parameters parameters) {
+        this(commandExecutor, parameters, null);
     }
 
     private static class DateCommand implements ICommand {

@@ -29,5 +29,7 @@ public interface IParameter {
 
     public void set(String value);
 
+    public void set(Object value);
+
     public String get();
 }

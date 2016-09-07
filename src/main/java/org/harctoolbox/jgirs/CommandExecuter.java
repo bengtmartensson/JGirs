@@ -33,13 +33,14 @@ import org.harctoolbox.harchardware.HarcHardwareException;
  */
 public class CommandExecuter {
 
-    private final HashMap<String, ICommand> commands;
+    private final HashMap<String, ICommand> commandMap;
+
     public CommandExecuter() {
-        commands = new LinkedHashMap<>(8);
+        commandMap = new LinkedHashMap<>(8);
     }
 
     public ArrayList<String> getCommandNames(boolean sort) {
-        ArrayList<String> commandNames = new ArrayList<>(commands.keySet());
+        ArrayList<String> commandNames = new ArrayList<>(commandMap.keySet());
         if (sort)
             Collections.sort(commandNames);
 
@@ -47,26 +48,26 @@ public class CommandExecuter {
     }
 
     public ArrayList<String> getSubCommandNames(String command, boolean sort) {
-        if (!CommandWithSubcommands.class.isInstance(commands.get(command)))
+        if (!CommandWithSubcommands.class.isInstance(commandMap.get(command)))
             return null;
-        return ((CommandWithSubcommands) commands.get(command)).getSubCommandNames(sort);
+        return ((CommandWithSubcommands) commandMap.get(command)).getSubCommandNames(sort);
     }
 
     public Collection<ICommand> getCommands() {
-        return commands.values();
+        return commandMap.values();
     }
 
     public List<String> exec(List<String> args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         String commandName = args.get(0);
         ICommand cmd = null;
-        if (commands.containsKey(commandName))
-            cmd = commands.get(commandName);
+        if (commandMap.containsKey(commandName))
+            cmd = commandMap.get(commandName);
         else {
-            for (Map.Entry<String, ICommand> kvp : commands.entrySet()) {
+            for (Map.Entry<String, ICommand> kvp : commandMap.entrySet()) {
                 if (kvp.getKey().startsWith(commandName)) {
                     if (cmd == null) {
                         cmd = kvp.getValue();
-                        break;
+                        //break;
                     } else
                         throw new AmbigousCommandException("Command " + commandName + " is ambigous.");
                 }
@@ -77,10 +78,10 @@ public class CommandExecuter {
         return cmd.exec(args);
     }
 
-    public void addCommand(ICommand command) {
-        if (commands.containsKey(command.getName()))
+    public void add(ICommand command) {
+        if (commandMap.containsKey(command.getName()))
             throw new RuntimeException("Multiply defined command: " + command.getName());
 
-        commands.put(command.getName(), command);
+        commandMap.put(command.getName(), command);
     }
 }

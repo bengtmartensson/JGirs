@@ -34,7 +34,6 @@ import org.harctoolbox.harchardware.ir.IReceive;
 public class Receive extends Module {
     private final static String defaultReceiveFormat = "named-command";
 
-    private Engine engine;
     private final IReceive hardware;
     private final TimeoutParameter timeoutParameter = null;
     private final FallbackFrequencyParameter fallbackFrequencyParameter = null;
@@ -54,8 +53,8 @@ public class Receive extends Module {
 //
 //    }
 
-    Receive(Engine engine, NamedRemotes namedRemotes) {
-        this.engine = engine;
+    Receive(CommandExecuter commandExecuter, Parameters parameters, NamedRemotes namedRemotes) {
+        super(commandExecuter, parameters);
         this.namedRemotes = namedRemotes;
         hardware = null; // FIXME
     }

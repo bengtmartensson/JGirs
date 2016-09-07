@@ -29,23 +29,23 @@ public class Base extends Module {
     public static final String goodbyeWord = "Bye!";
 
 //    private final HashMap<String, Module> modules;
-    private final CommandExecuter commandExecuter;
+    //private final CommandExecuter commandExecuter;
 //    private final IHarcHardware hardware;
     //private boolean quitRequested = false;
 
     private final Engine engine;
 
-    public Base(Engine engine, CommandExecuter commandExecuter) {
-        super();
-        this.engine = engine;
+    public Base(CommandExecuter commandExecuter, Parameters parameters, Engine engine) {
+        super(commandExecuter, parameters);
         addCommand(new VersionCommand());
         addCommand(new ModulesCommand());
         addCommand(new LicenseCommand());
         addCommand(new GirsCommandsCommand());
         addCommand(new QuitCommand());
+        this.engine = engine;
 //        this.hardware = hardware;
 //        this.modules = modules;
-        this.commandExecuter = commandExecuter;
+        //this.commandExecuter = commandExecuter;
     }
 
 //    public boolean isQuitRequested() {
@@ -83,7 +83,7 @@ public class Base extends Module {
         }
     }
 
-    private class VersionCommand implements ICommand {
+    private static class VersionCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -119,9 +119,12 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws NoSuchModuleException {
-            List<String> cmds = args.size() > 1 ? engine.getCommandNames(args.get(1), true) : engine.getCommandNames(true);
-            return cmds;
+        public List<String> exec(List<String> args) throws CommandSyntaxException {
+            if (args.size() > 1)
+                throw new CommandSyntaxException(args.get(0), "This command takes no arguments");
+            return commandExecuter.getCommandNames(true);
+            //List<String> cmds = args.size() > 1 ? engine.getCommandNames(args.get(1), true) : engine.getCommandNames(true);
+            //return cmds;
         }
     }
 }

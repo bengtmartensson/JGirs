@@ -37,8 +37,8 @@ import org.harctoolbox.IrpMaster.UnknownProtocolException;
 public class Renderer extends Module {
     private IrpMaster irpMaster;
 
-    public Renderer(String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
-        super();
+    public Renderer(CommandExecuter commandExecuter, Parameters parameters, String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
+        super(commandExecuter, parameters);
         if (irpMasterIniName == null)
             throw new NullPointerException();
         irpMaster = new IrpMaster(irpMasterIniName);

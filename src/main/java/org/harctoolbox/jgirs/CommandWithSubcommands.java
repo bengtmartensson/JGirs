@@ -38,7 +38,7 @@ public abstract class CommandWithSubcommands {
     public abstract String getName();
 
     protected final void addCommand(ICommand command) {
-        commandExecuter.addCommand(command);
+        commandExecuter.add(command);
     }
 
     public Collection<ICommand> getSubCommands() {

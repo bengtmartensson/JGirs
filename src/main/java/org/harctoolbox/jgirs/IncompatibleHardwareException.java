@@ -17,44 +17,16 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.Locale;
-
 /**
- * Parameters that consist of a String.
+ * This is thrown when calling a command that the hardware does not support.
  */
-abstract class StringParameter implements IParameter {
-    private String value;
+public class IncompatibleHardwareException extends JGirsException {
 
-    private StringParameter() {}
-
-    StringParameter(String initValue) {
-        this.value = initValue;
+    IncompatibleHardwareException() {
+        super("Incompatible hardware error");
     }
 
-    @Override
-    public void set(String str) {
-        value = str.toLowerCase(Locale.US);
-    }
-
-    @Override
-    public void set(Object object) {
-        value = (String) object;
-    }
-
-    @Override
-    public String get() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return getName() + "=" + get();
-    }
-
-    /**
-     * @return the value
-     */
-    public String getValue() {
-        return value;
+    IncompatibleHardwareException(String name){
+        super("Current hardware does not support " + name);
     }
 }

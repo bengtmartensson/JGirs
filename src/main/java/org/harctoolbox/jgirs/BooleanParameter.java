@@ -35,6 +35,15 @@ abstract class BooleanParameter implements IParameter {
         value = Boolean.parseBoolean(str);
     }
 
+    public void set(boolean val) {
+        value = val;
+    }
+
+    @Override
+    public void set(Object val) {
+        value = (boolean) val;
+    }
+
     @Override
     public String get() {
         return Boolean.toString(value);

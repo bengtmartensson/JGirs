@@ -31,27 +31,28 @@ import org.harctoolbox.harchardware.ir.ICapture;
 public class Capture extends Module {
 
     private final ICapture hardware;
-    private StartTimeoutParameter startTimeoutParameter = null;
-    private MaxCaptureLengthParameter maxCaptureLengthParameter = null;
-    private EndTimeoutParameter endTimeoutParameter = null;
-    private UseCcfCaptureParameter useCcfCaptureParameter = null;
-    private Engine engine;
+    private final StartTimeoutParameter startTimeoutParameter = null;
+    private final MaxCaptureLengthParameter maxCaptureLengthParameter = null;
+    private final EndTimeoutParameter endTimeoutParameter = null;
+    private final UseCcfCaptureParameter useCcfCaptureParameter = null;
+    //private Engine engine;
 
-    public Capture(ICapture capture) {
-        this.hardware = capture;
-        addCommand(new AnalyzeCommand());
-        startTimeoutParameter = new StartTimeoutParameter(2000);
-        addParameter(startTimeoutParameter);
-        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
-        addParameter(maxCaptureLengthParameter);
-        endTimeoutParameter = new EndTimeoutParameter(200);
-        addParameter(endTimeoutParameter);
-        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
-        addParameter(useCcfCaptureParameter);
-    }
+//    public Capture(ICapture capture) {
+//        this.hardware = capture;
+//        addCommand(new AnalyzeCommand());
+//        startTimeoutParameter = new StartTimeoutParameter(2000);
+//        addParameter(startTimeoutParameter);
+//        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
+//        addParameter(maxCaptureLengthParameter);
+//        endTimeoutParameter = new EndTimeoutParameter(200);
+//        addParameter(endTimeoutParameter);
+//        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
+//        addParameter(useCcfCaptureParameter);
+//    }
 
-    public Capture(Engine engine) {
-        this.engine = engine;
+    public Capture(CommandExecuter commandExecuter, Parameters parameters) {
+        super(commandExecuter, parameters);
+        //this.engine = engine;
         this.hardware = null;//capture;
 //        addCommand(new AnalyzeCommand());
 //        startTimeoutParameter = new StartTimeoutParameter(2000);

@@ -40,6 +40,8 @@ import org.xml.sax.SAXException;
 
 public class ConfigFile {
 
+    private static final String LIRC_DEFAULT_ENCODING = "WINDOWS-1252";
+
     private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException {
         String type = element.getAttribute("type");
         if (type.equalsIgnoreCase("lircd"))
@@ -53,20 +55,20 @@ public class ConfigFile {
     private static RemoteSet parseLirc(Element element) throws MalformedURLException, IOException {
         URL url = new URL(element.getAttribute("url"));
         InputStream inputStream = url.openStream();
-        InputStreamReader reader = new InputStreamReader(inputStream);
+        InputStreamReader reader = new InputStreamReader(inputStream, LIRC_DEFAULT_ENCODING);
         return org.harctoolbox.jirc.ConfigFile.parseConfig(reader, url.toString(), true, null, false);
     }
 
     private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
         URL url = new URL(element.getAttribute("url"));
-        Document doc = XmlUtils.openXmlUrl(url, (Schema) null, true, true);
+        Document doc = XmlUtils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
         return remoteSet;
     }
 
     private final List<GirsHardware> irHardwareList;
     private RemoteCommandDataBase remoteCommandsDataBase;
-    private final List<Module> moduleList;
+    private final List<Module.ModulePars> moduleList;
     private final HashMap<String, Integer> integerOptions;
     private final HashMap<String, String> stringOptions;
     private final HashMap<String, Boolean> booleanOptions;
@@ -87,7 +89,9 @@ public class ConfigFile {
 
         NodeList nodeList = doc.getElementsByTagName("hardware-item");
         for (int i = 0; i < nodeList.getLength(); i++) {
-            GirsHardware hw = new GirsHardware((Element) nodeList.item(i));
+            Element el = (Element) nodeList.item(i);
+            loadJni(el);
+            GirsHardware hw = new GirsHardware(el);
             irHardwareList.add(hw);
         }
 
@@ -99,8 +103,10 @@ public class ConfigFile {
 
         nodeList = doc.getElementsByTagName("module");
         for (int i = 0; i < nodeList.getLength(); i++) {
-            Module module = Module.newModule((Element) nodeList.item(i));
-            moduleList.add(module);
+            Element el = (Element) nodeList.item(i);
+            loadJni(el);
+            Module.ModulePars modulePars = new Module.ModulePars(el);
+            moduleList.add(modulePars);
         }
 
         nodeList = doc.getElementsByTagName("option");
@@ -144,7 +150,7 @@ public class ConfigFile {
     /**
      * @return the moduleList
      */
-    public List<Module> getModuleList() {
+    public List<Module.ModulePars> getModuleList() {
         return Collections.unmodifiableList(moduleList);
     }
 
@@ -158,10 +164,28 @@ public class ConfigFile {
 
     /**
      * @param name
+     * @param dflt
+     * @return the booleanOptions
+     */
+    public boolean getBooleanOption(String name, boolean dflt) {
+        return booleanOptions.containsKey(name) ? booleanOptions.get(name) : dflt;
+    }
+
+    /**
+     * @param name
      * @return the booleanOptions
      */
     public boolean getBooleanOption(String name) {
-        return booleanOptions.get(name);
+        return getBooleanOption(name, false);
+    }
+
+    /**
+     * @param name
+     * @param dflt
+     * @return the booleanOptions
+     */
+    public int getIntegerOption(String name, int dflt) {
+        return integerOptions.containsKey(name) ? integerOptions.get(name) : dflt;
     }
 
     /**
@@ -169,7 +193,7 @@ public class ConfigFile {
      * @return the booleanOptions
      */
     public int getIntegerOption(String name) {
-        return integerOptions.get(name);
+        return getIntegerOption(name, -1);
     }
 
     void addHardware(GirsHardware irHardware) {
@@ -206,6 +230,18 @@ public class ConfigFile {
                 return hardware;
 
         return null;
+    }
+
+    private void loadJni(Element el) {
+        NodeList libList = el.getElementsByTagName("jni-lib");
+        for (int j = 0; j < libList.getLength(); j++) {
+            Element libElement = (Element) libList.item(j);
+            String path = libElement.getAttribute("libpath");
+            if (path.isEmpty())
+                System.loadLibrary(libElement.getAttribute("libname"));
+            else
+                System.load(path);
+        }
     }
 
     public static class NoSuchRemoteTypeException extends Exception {

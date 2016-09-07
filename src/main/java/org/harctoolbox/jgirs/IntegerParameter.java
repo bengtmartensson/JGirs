@@ -34,6 +34,15 @@ abstract class IntegerParameter implements IParameter {
         value = Integer.parseInt(str);
     }
 
+    public void set(int val) {
+        value = val;
+    }
+
+    @Override
+    public void set(Object object) {
+        value = (int) object;
+    }
+
     @Override
     public String get() {
         return Integer.toString(getValue());

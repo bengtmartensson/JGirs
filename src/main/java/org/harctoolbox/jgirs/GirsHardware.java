@@ -93,19 +93,24 @@ public final class GirsHardware {
         return newIrHardware(list.get(0), classArray, objectArray);
     }
 
-    private final IHarcHardware hardware;
-    private final String url;
-    private final String description;
-    private final String name;
-    private final boolean outputDefault;
-    private final boolean inputDefault;
+    private IHarcHardware hardware;
+    private String url;
+    private String description;
+    private String name;
+    private boolean outputDefault;
+    private boolean inputDefault;
 
-    public GirsHardware(IHarcHardware hardware) {
+    private GirsHardware() {
         this.outputDefault = false;
         this.inputDefault = false;
         this.description = null;
         this.url = null;
         this.name = null;
+        this.hardware = null;
+    }
+
+    public GirsHardware(IHarcHardware hardware) {
+        this();
         this.hardware = hardware;
     }
 
@@ -135,6 +140,20 @@ public final class GirsHardware {
         description = null;
         url = null;
         hardware = newIrHardware(params);
+    }
+
+    GirsHardware(GirsHardware orig) {
+        super();
+        copyFrom(orig);
+    }
+
+    void copyFrom(GirsHardware orig) {
+        this.outputDefault = orig.outputDefault;
+        this.inputDefault = orig.inputDefault;
+        this.description = orig.description;
+        this.url = orig.url;
+        this.name = orig.name;
+        this.hardware = orig.hardware;
     }
 
     /**

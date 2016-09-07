@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Djava.library.path=/usr/local/lib64 -classpath %classpath org.harctoolbox.jgirs.Engine girscommand</exec.args>
+                <exec.args>-Djava.library.path=/usr/local/lib64 -classpath %classpath org.harctoolbox.jgirs.Engine -c src/main/config/jgirs_config.xml send 1 38400 68 4 0 9024 4512 564 564 564 1692 564 564 564 1692 564 1692 564 1692 564 1692 564 564 564 1692 564 564 564 1692 564 564 564 564 564 564 564 564 564 1692 564 1692 564 564 564 1692 564 1692 564 1692 564 564 564 564 564 564 564 564 564 1692 564 564 564 564 564 564 564 1692 564 1692 564 1692 564 39756 9024 2256 564 96156</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -24,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -Djava.library.path=/usr/local/lib64 -classpath %classpath org.harctoolbox.jgirs.Engine girscommand</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -Djava.library.path=/usr/local/lib64 -classpath %classpath org.harctoolbox.jgirs.Engine -c src/main/config/jgirs_config.xml send 1 38400 68 4 0 9024 4512 564 564 564 1692 564 564 564 1692 564 1692 564 1692 564 1692 564 564 564 1692 564 564 564 1692 564 564 564 564 564 564 564 564 564 1692 564 1692 564 564 564 1692 564 1692 564 1692 564 564 564 564 564 564 564 564 564 1692 564 564 564 564 564 564 564 1692 564 1692 564 1692 564 39756 9024 2256 564 96156</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Djava.library.path=/usr/local/lib64 -classpath %classpath org.harctoolbox.jgirs.Engine girscommand</exec.args>
+                <exec.args>-Djava.library.path=/usr/local/lib64 -classpath %classpath org.harctoolbox.jgirs.Engine -c src/main/config/jgirs_config.xml send 1 38400 68 4 0 9024 4512 564 564 564 1692 564 564 564 1692 564 1692 564 1692 564 1692 564 564 564 1692 564 564 564 1692 564 564 564 564 564 564 564 564 564 1692 564 1692 564 564 564 1692 564 1692 564 1692 564 564 564 564 564 564 564 564 564 1692 564 564 564 564 564 564 564 1692 564 1692 564 1692 564 39756 9024 2256 564 96156</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>

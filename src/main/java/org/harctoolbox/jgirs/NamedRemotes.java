@@ -58,19 +58,19 @@ public class NamedRemotes extends Module {
     //private final RemoteSet remoteSet;
     private final RemoteCommandDataBase database;
 
-    public NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
-        super();
+    public NamedRemotes(CommandExecuter commandExecuter, Parameters parameters, Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+        super(commandExecuter, parameters);
         this.database = new RemoteCommandDataBase(remoteSets, caseInsensitive);
         addCommand(new RemotesCommand());
         addCommand(new CommandsCommand());
     }
 
-    public NamedRemotes(List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
-        this(readRemoteSet(files));
+    public NamedRemotes(CommandExecuter commandExecuter, Parameters parameters, List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+        this(commandExecuter, parameters, readRemoteSet(files));
     }
 
-    public NamedRemotes(RemoteCommandDataBase remoteCommandsDataBase) {
-        super();
+    public NamedRemotes(CommandExecuter commandExecuter, Parameters parameters, RemoteCommandDataBase remoteCommandsDataBase) {
+        super(commandExecuter, parameters);
         this.database = remoteCommandsDataBase;
     }
 

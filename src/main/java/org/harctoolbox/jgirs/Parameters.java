@@ -26,17 +26,26 @@ import java.util.List;
  * Models parameters in the Girs server.
  */
 public class Parameters extends Module {
-    private final HashMap<String, IParameter> allParameters;
+    private final HashMap<String, IParameter> parameterMap;
 
-    public Parameters() {
-        this.allParameters = new LinkedHashMap<>(8);
+    public Parameters(CommandExecuter commandExecutor) {
+        super(commandExecutor, null);
+        this.parameterMap = new LinkedHashMap<>(8);
         addCommand(new ParametersCommand());
         addCommand(new SetParameterCommand());
         addCommand(new GetParameterCommand());
     }
 
+    public void add(IParameter parameter) {
+        parameterMap.put(parameter.getName(), parameter);
+    }
+
     public void addAll(HashMap<String, IParameter> newParameters) {
-        allParameters.putAll(newParameters);
+        parameterMap.putAll(newParameters);
+    }
+
+    public IParameter get(String name) {
+        return parameterMap.get(name);
     }
 
     private static class GetParameterCommand implements ICommand {
@@ -72,7 +81,7 @@ public class Parameters extends Module {
         @Override
         public List<String> exec(List<String> args) {
             ArrayList<String> result = new ArrayList<>(8);
-            allParameters.values().stream().forEach((param) -> {
+            parameterMap.values().stream().forEach((param) -> {
                 result.add(param.toString());
             });
             return result;
@@ -90,9 +99,9 @@ public class Parameters extends Module {
         public List<String> exec(List<String> args) throws NoSuchParameterException {
             //int index = 1;
             String name = args.get(1);//[index++];
-            if (!allParameters.containsKey(name))
+            if (!parameterMap.containsKey(name))
                 throw new NoSuchParameterException(name);
-            IParameter parameter = allParameters.get(name);
+            IParameter parameter = parameterMap.get(name);
             parameter.set(args.get(2));
             return new ArrayList<>(0);
         }

@@ -31,8 +31,8 @@ import org.harctoolbox.IrpMaster.UnassignedException;
  */
 public class Irp extends Module {
 
-    public Irp() {
-        super();
+    public Irp(CommandExecuter commandExecuter, Parameters parameters) {
+        super(commandExecuter, parameters);
     }
 
     public IrSignal render(String protocolName, HashMap<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
