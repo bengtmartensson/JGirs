@@ -39,15 +39,15 @@ public class CommandExecuter {
         commandMap = new LinkedHashMap<>(8);
     }
 
-    public ArrayList<String> getCommandNames(boolean sort) {
-        ArrayList<String> commandNames = new ArrayList<>(commandMap.keySet());
+    public String[] getCommandNames(boolean sort) {
+        List<String> commandNames = new ArrayList<>(commandMap.keySet());
         if (sort)
             Collections.sort(commandNames);
 
-        return commandNames;
+        return commandNames.toArray(new String[commandNames.size()]);
     }
 
-    public ArrayList<String> getSubCommandNames(String command, boolean sort) {
+    public String[] getSubCommandNames(String command, boolean sort) {
         if (!CommandWithSubcommands.class.isInstance(commandMap.get(command)))
             return null;
         return ((CommandWithSubcommands) commandMap.get(command)).getSubCommandNames(sort);
@@ -57,8 +57,8 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public List<String> exec(List<String> args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
-        String commandName = args.get(0);
+    public String[] exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+        String commandName = args[0];
         ICommand cmd = null;
         if (commandMap.containsKey(commandName))
             cmd = commandMap.get(commandName);

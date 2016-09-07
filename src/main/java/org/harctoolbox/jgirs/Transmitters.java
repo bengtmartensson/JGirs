@@ -17,8 +17,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.Arrays;
-import java.util.List;
 import org.harctoolbox.harchardware.ir.ITransmitter;
 
 /**
@@ -46,8 +44,8 @@ public class Transmitters extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            return Arrays.asList(transmitter.getTransmitterNames());
+        public String[] exec(String[] args) {
+            return transmitter.getTransmitterNames();
         }
     }
 }

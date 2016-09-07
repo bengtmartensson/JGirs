@@ -101,12 +101,8 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            ArrayList<String> result = new ArrayList<>(database.getRemotes().size());
-            database.getRemotes().stream().forEach((remote) -> {
-                result.add(remote.getName());
-            });
-            return result;
+        public String[] exec(String[] args) {
+            return (String[]) database.getRemotes().toArray();
         }
     }
 
@@ -118,14 +114,14 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws CommandSyntaxException, NoSuchRemoteException {
-            if (args.size() <= 1)
+        public String[] exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException {
+            if (args.length <= 1)
                 throw new CommandSyntaxException("No remote given");
-            String remoteName = args.get(1);
+            String remoteName = args[1];
             Remote remote = database.getRemote(remoteName);
             if (remote == null)
                 throw new NoSuchRemoteException(remoteName);
-            return new ArrayList<>(remote.getCommands().keySet());
+            return (String[]) remote.getCommands().keySet().toArray();
         }
     }
 }

@@ -18,7 +18,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -42,5 +41,5 @@ public interface ICommand {
      * @throws org.harctoolbox.jgirs.JGirsException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public List<String> exec(List<String> args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
+    public String[] exec(String[] args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
 }

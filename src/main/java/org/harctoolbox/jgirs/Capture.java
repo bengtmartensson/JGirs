@@ -18,8 +18,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.ModulatedIrSequence;
 import org.harctoolbox.harchardware.HarcHardwareException;
@@ -138,10 +136,11 @@ public class Capture extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws HarcHardwareException, IOException, IrpMasterException {
+        public String[] exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             final ModulatedIrSequence irSequence = hardware.capture();
-            return irSequence == null ? new ArrayList<>(8) : new ArrayList<String>(8) {{ add(useCcfCaptureParameter.getValue() ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
+            return new String[] { irSequence.toPrintString(true, false) };
+            //return irSequence == null ? new ArrayList<>(8) : new ArrayList<String>(8) {{ add(useCcfCaptureParameter.getValue() ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
         }
     }
 }

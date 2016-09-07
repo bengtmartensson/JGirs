@@ -19,7 +19,6 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The Girs Base module that must be implemented.
@@ -60,10 +59,8 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            ArrayList<String> result = new ArrayList<>(1);
-            result.add(Version.licenseString);
-            return result;
+        public String[] exec(String[] args) {
+            return new String[] { Version.licenseString };
         }
     }
 
@@ -75,11 +72,8 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            //quitRequested = true;
-            ArrayList<String> result = new ArrayList<>(1);
-            result.add(goodbyeWord);
-            return result;
+        public String[] exec(String[] args) {
+            return new String[] { goodbyeWord };
         }
     }
 
@@ -91,11 +85,8 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws IOException {
-            ArrayList<String> result = new ArrayList<>(1);
-            result.add(Version.versionString);
-            //result.add(hardware != null ? hardware.getVersion() : "Hardware not available");
-            return result;
+        public String[] exec(String[] args) throws IOException {
+            return new String[] { Version.versionString };
         }
     }
 
@@ -107,8 +98,9 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            return new ArrayList<>(engine.getModuleNames(true));
+        public String[] exec(String[] args) {
+            ArrayList<String> list = engine.getModuleNames(true);
+            return list.toArray(new String[list.size()]);
         }
     }
 
@@ -119,12 +111,11 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws CommandSyntaxException {
-            if (args.size() > 1)
-                throw new CommandSyntaxException(args.get(0), "This command takes no arguments");
+        public String[] exec(String[] args) throws CommandSyntaxException {
+            if (args.length > 1)
+                throw new CommandSyntaxException(args[0], 0);
+
             return commandExecuter.getCommandNames(true);
-            //List<String> cmds = args.size() > 1 ? engine.getCommandNames(args.get(1), true) : engine.getCommandNames(true);
-            //return cmds;
         }
     }
 }

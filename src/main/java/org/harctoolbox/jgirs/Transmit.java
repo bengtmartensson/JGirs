@@ -18,9 +18,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.IrSignal;
 import org.harctoolbox.IrpMaster.IrpMasterException;
@@ -92,7 +89,7 @@ public class Transmit extends Module {
 //                addCommand(new TransmitNameCommand());
 //        }
 //
-//        private ArrayList<String> transmit(IrSignal irSignal, int count) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
+//        private ArrayString[] transmit(IrSignal irSignal, int count) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
 //            boolean result = ((IRawIrSender) hardware).sendIr(irSignal, count, transmitter);
 //            return result ? new ArrayList<>(0) : null;
 //        }
@@ -110,7 +107,7 @@ public class Transmit extends Module {
 //            }
 //
 //            @Override
-//            public List<String> exec(List<String> args) throws IrpMasterException, HarcHardwareException, IOException, JGirsException {
+//            public String[] exec(String[] args) throws IrpMasterException, HarcHardwareException, IOException, JGirsException {
 //                int count = intParse(args.get(0));
 //                String[] array = args.toArray(new String[args.size()]);
 //                IrSignal irSignal = new IrSignal(array, 1);
@@ -126,13 +123,13 @@ public class Transmit extends Module {
 //            }
 //
 //            @Override
-//            public List<String> exec(List<String> args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
+//            public String[] exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
 //                int index = 0;
-//                int count = intParse(args.get(index++)); // throw NumberFormatException
-//                int frequency = intParse(args.get(index++));
-//                int introLength= intParse(args.get(index++));
-//                int repeatLength= intParse(args.get(index++));
-//                int endingLength= intParse(args.get(index++));
+//                int count = intParse(args[index++]); // throw NumberFormatException
+//                int frequency = intParse(args[index++]);
+//                int introLength= intParse(args[index++]);
+//                int repeatLength= intParse(args[index++]);
+//                int endingLength= intParse(args[index++]);
 //                if (introLength % 2 != 0 || repeatLength % 2 != 0 || endingLength % 2 != 0)
 //                    throw new CommandSyntaxException("Lengths must be even");
 //                int[] data = parseRaw(args, 2*(introLength+repeatLength+endingLength), index);
@@ -140,7 +137,7 @@ public class Transmit extends Module {
 //                return transmit(irSignal, count);
 //            }
 //
-//            private int[] parseRaw(List<String> args, int length, int skip) throws CommandSyntaxException {
+//            private int[] parseRaw(String[] args, int length, int skip) throws CommandSyntaxException {
 //                int[] result = new int[length];
 //                for (int i = skip; i < length+skip; i++)
 //                    result[i] = intParse(args.get(i));
@@ -157,7 +154,7 @@ public class Transmit extends Module {
 //            }
 //
 //            @Override
-//            public List<String> exec(List<String> args) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, CommandSyntaxException {
+//            public String[] exec(String[] args) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, CommandSyntaxException {
 //                int count = intParse(args.get(0));
 //                String protocolName = args.get(1);
 //                HashMap<String, Long> parameters = new HashMap<>(args.size() - 2);
@@ -175,9 +172,9 @@ public class Transmit extends Module {
 //            }
 //
 //            @Override
-//            public List<String> exec(List<String> args) throws ExecutionException, CommandSyntaxException, UnassignedException, ParseException, UnknownProtocolException, DomainViolationException, IncompatibleArgumentException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
+//            public String[] exec(String[] args) throws ExecutionException, CommandSyntaxException, UnassignedException, ParseException, UnknownProtocolException, DomainViolationException, IncompatibleArgumentException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
 //                int index = 1;
-//                int count = intParse(args.get(index++));
+//                int count = intParse(args[index++]);
 //                IrSignal irSignal = renderer.render(args.toArray(new String[args.size()]), index);
 //                return transmit(irSignal, count);
 //            }
@@ -191,13 +188,13 @@ public class Transmit extends Module {
 //            }
 //
 //            @Override
-//            public List<String> exec(List<String> args) throws ExecutionException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException {
+//            public String[] exec(String[] args) throws ExecutionException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException {
 //                if (args.size() < 3)
 //                    throw new CommandSyntaxException("Too few arguments");
 //                int index = 1;
-//                int count = intParse(args.get(index++));
-//                String remote = args.get(index++);
-//                String command = args.get(index++);
+//                int count = intParse(args[index++]);
+//                String remote = args[index++];
+//                String command = args[index++];
 //                IrSignal irSignal = namedCommand.render(remote, command);
 //                return transmit(irSignal, count);
 //            }
@@ -212,13 +209,13 @@ public class Transmit extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException {
+        public String[] exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException {
             int index = 1;
-            int count = intParse(args.get(index++)); // throw NumberFormatException
-            int frequency = intParse(args.get(index++));
-            int introLength = intParse(args.get(index++));
-            int repeatLength = intParse(args.get(index++));
-            int endingLength = intParse(args.get(index++));
+            int count = intParse(args[index++]); // throw NumberFormatException
+            int frequency = intParse(args[index++]);
+            int introLength = intParse(args[index++]);
+            int repeatLength = intParse(args[index++]);
+            int endingLength = intParse(args[index++]);
             if (introLength % 2 != 0 || repeatLength % 2 != 0 || endingLength % 2 != 0)
                 throw new CommandSyntaxException("Lengths must be even");
             int[] data = parseRaw(args, introLength + repeatLength + endingLength, index);
@@ -226,15 +223,15 @@ public class Transmit extends Module {
             return transmit(irSignal, count);
         }
 
-        private int[] parseRaw(List<String> args, int length, int skip) throws CommandSyntaxException {
+        private int[] parseRaw(String[] args, int length, int skip) throws CommandSyntaxException {
                 int[] result = new int[length];
                 for (int i = 0; i < length; i++)
-                    result[i] = intParse(args.get(i+skip));
+                    result[i] = intParse(args[i+skip]);
 
                 return result;
             }
 
-        private List<String> transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
+        private String[] transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
             Transmitter transmitter = null; // FIXME
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof IRawIrSender))
@@ -244,7 +241,7 @@ public class Transmit extends Module {
                 hardware.open();
 
             boolean result = ((IRawIrSender) currentOutputHardware.getHardware()).sendIr(irSignal, count, transmitter);
-            return result ? new ArrayList<>(0) : null;
+            return result ? new String[0] : null;
         }
     }
 
@@ -256,13 +253,13 @@ public class Transmit extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws ExecutionException, NoSuchTransmitterException, IOException {
+        public String[] exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException {
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof ITransmitter))
                 throw new ExecutionException("Current hardware does not  support stopping.");
 
             Transmitter transmitter = null; // FIXME
-            return ((IIrSenderStop) hardware).stopIr(transmitter) ? new ArrayList<>(0) : null;
+            return ((IIrSenderStop) hardware).stopIr(transmitter) ? new String[0] : null;
         }
     }
 
@@ -274,14 +271,14 @@ public class Transmit extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
+        public String[] exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof ITransmitter))
                 throw new ExecutionException("Current hardware does not  support setting transmitters.");
-            if (args.size() > 1)
-                throw new CommandSyntaxException("Current command allows no arguments.");
+            if (args.length > 1)
+                throw new CommandSyntaxException("gettransmitters", 0);
 
-            return Arrays.asList(((ITransmitter) hardware).getTransmitterNames());
+            return ((ITransmitter) hardware).getTransmitterNames();
         }
     }
 }

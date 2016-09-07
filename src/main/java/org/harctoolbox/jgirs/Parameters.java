@@ -17,10 +17,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * Models parameters in the Girs server.
@@ -31,9 +29,9 @@ public class Parameters extends Module {
     public Parameters(CommandExecuter commandExecutor) {
         super(commandExecutor, null);
         this.parameterMap = new LinkedHashMap<>(8);
-        addCommand(new ParametersCommand());
-        addCommand(new SetParameterCommand());
-        addCommand(new GetParameterCommand());
+        addCommand(new ParameterCommand());
+        //addCommand(new SetParameterCommand());
+        //addCommand(new GetParameterCommand());
     }
 
     public void add(IParameter parameter) {
@@ -48,63 +46,64 @@ public class Parameters extends Module {
         return parameterMap.get(name);
     }
 
-    private static class GetParameterCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "getparameter";
-        }
-
-        @Override
-        public List<String> exec(List<String> args) throws NoSuchParameterException {
-//            int index = 1;
-//            String name = args[index];
-//            if (!allParameters.containsKey(name))
-//                throw new NoSuchParameterException(name);
-//            final IParameter parameter = allParameters.get(name);
-//            return new ArrayList<String>() {{ add(parameter.get()); }};
-            return new ArrayList<>(8);
-        }
-    }
-
-//    public void addParameters(Module module) {
-//        allParameters.putAll(module.getParameters());
+//    private static class GetParameterCommand implements ICommand {
+//
+//        @Override
+//        public String getName() {
+//            return "getparameter";
+//        }
+//
+//        @Override
+//        public String[] exec(String[] args) throws NoSuchParameterException {
+////            int index = 1;
+////            String name = args[index];
+////            if (!allParameters.containsKey(name))
+////                throw new NoSuchParameterException(name);
+////            final IParameter parameter = allParameters.get(name);
+////            return new ArrayString[]() {{ add(parameter.get()); }};
+//            return new ArrayList<>(8);
+//        }
 //    }
+//
+////    public void addParameters(Module module) {
+////        allParameters.putAll(module.getParameters());
+////    }
 
-    private class ParametersCommand implements ICommand {
+    private class ParameterCommand implements ICommand {
 
         @Override
         public String getName() {
-            return "parameters";
+            return "parameter";
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            ArrayList<String> result = new ArrayList<>(8);
-            parameterMap.values().stream().forEach((param) -> {
-                result.add(param.toString());
-            });
+        public String[] exec(String[] args) {
+            String[] result = new String[parameterMap.size()];
+            int i = 0;
+            for (IParameter param : parameterMap.values())
+                result[i++] = param.toString();
+
             return result;
         }
     }
 
-    private class SetParameterCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "setparameter";
-        }
-
-        @Override
-        public List<String> exec(List<String> args) throws NoSuchParameterException {
-            //int index = 1;
-            String name = args.get(1);//[index++];
-            if (!parameterMap.containsKey(name))
-                throw new NoSuchParameterException(name);
-            IParameter parameter = parameterMap.get(name);
-            parameter.set(args.get(2));
-            return new ArrayList<>(0);
-        }
-
-    }
+//    private class SetParameterCommand implements ICommand {
+//
+//        @Override
+//        public String getName() {
+//            return "setparameter";
+//        }
+//
+//        @Override
+//        public String[] exec(String[] args) throws NoSuchParameterException {
+//            //int index = 1;
+//            String name = args.get(1);//[index++];
+//            if (!parameterMap.containsKey(name))
+//                throw new NoSuchParameterException(name);
+//            IParameter parameter = parameterMap.get(name);
+//            parameter.set(args.get(2));
+//            return new ArrayList<>(0);
+//        }
+//
+//    }
 }

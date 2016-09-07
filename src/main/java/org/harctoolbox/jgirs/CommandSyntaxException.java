@@ -30,6 +30,10 @@ public class CommandSyntaxException extends JGirsException {
         super("Command syntax error: " + name);
     }
 
+    CommandSyntaxException(String name, int noArgs){
+        super("The command \" + name + \" takes " + noArgs + " argument(s).");
+    }
+
     CommandSyntaxException(String name, String reason){
         super("Command syntax error: " + name + " (" + reason + ")");
     }

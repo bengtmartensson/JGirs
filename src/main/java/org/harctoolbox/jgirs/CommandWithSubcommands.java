@@ -18,9 +18,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -45,16 +43,16 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommands();
     }
 
-    public ArrayList<String> getSubCommandNames(boolean sort) {
+    public String[] getSubCommandNames(boolean sort) {
         return commandExecuter.getCommandNames(sort);
     }
 
-    public List<String> exec(List<String> args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
-        if (args == null || args.isEmpty())
+    public String[] exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+        if (args == null || args.length == 0)
             throw new CommandSyntaxException(getName(), "subcommand missing");
-        //String[] rest = new String[args.length - 1];
-        //System.arraycopy(args, 1, rest, 0, args.length - 1);
-        args.remove(0);
+        String[] rest = new String[args.length - 1];
+        System.arraycopy(args, 1, rest, 0, args.length - 1);
+        //args.remove(0);
         return commandExecuter.exec(args);
     }
 }

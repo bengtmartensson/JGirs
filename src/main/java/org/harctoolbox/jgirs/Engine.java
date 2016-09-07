@@ -92,8 +92,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
         try {
             config = new ConfigFile(commandLineArgs.configFile); // ok also if arg == null
         } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | ParseException | IrpMasterException | IOException ex) {
-            Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            System.exit(4);
+            logger.log(Level.SEVERE, null, ex);
+            System.exit(IrpUtils.exitConfigReadError);
         }
 
         if (!commandLineArgs.hardware.isEmpty()) {
@@ -102,7 +102,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 config.addHardware(irHardware);
             } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | IOException ex) {
                 Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-                System.exit(5);
+                System.exit(IrpUtils.exitFatalProgramFailure);
             }
         }
 
@@ -132,7 +132,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
             config.addGirs(commandLineArgs.girr);
         } catch (ParseException | IOException | SAXException | IrpMasterException ex) {
             Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            System.exit(6);
+            System.exit(IrpUtils.exitFatalProgramFailure);
         }
         //}
 
@@ -169,8 +169,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 // shoot one command
                 try {
                     for (int i = 0; i < commandLineArgs.count; i++) {
-                        List<String> result = engine.eval(String.join(" ", commandLineArgs.parameters));
-                        System.out.println(result == null ? "FAIL" : result.isEmpty() ? "SUCCESS" : result);
+                        String[] result = engine.eval(String.join(" ", commandLineArgs.parameters));
+                        System.out.println(result == null ? "FAIL" : result.length == 0 ? "SUCCESS" : result);
                     }
                 } catch (IOException | HarcHardwareException | IrpMasterException | JGirsException ex) {
                     logger.log(Level.SEVERE, null, ex);
@@ -178,7 +178,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
             }
         } catch (IOException | IrpMasterException ex) {
             logger.log(Level.SEVERE, null, ex);
-            System.exit(3);
+            System.exit(IrpUtils.exitFatalProgramFailure);
         }
     }
 
@@ -296,9 +296,10 @@ public final class Engine implements ICommandLineDevice, Closeable {
     @Override
     public synchronized void sendString(String cmd) throws IOException {
         try {
-              outBuffer.addAll(eval(cmd));
-                    //for (String str : result)
-                    //    out.println(str);
+            String[] result = eval(cmd);
+            outBuffer.addAll(Arrays.asList(result)); //outBuffer.addAll(eval(cmd));
+            //for (String str : result)
+            //    out.println(str);
             } catch (JGirsException ex) {
                 outBuffer.add("ERROR: " + ex.getMessage());
                 //if (NoSuchCommandException.class.isInstance(ex)
@@ -524,7 +525,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return isQuitRequested();
     }*/
 
-    public ArrayList<String> getCommandNames(boolean sort) {
+    public String[] getCommandNames(boolean sort) {
         return commandExecuter.getCommandNames(sort);
     }
 
@@ -536,7 +537,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 //        return module.getCommandNames(sort);
 //    }
 
-    public ArrayList<String> getSubCommandNames(String command, boolean sort) {
+    public String[] getSubCommandNames(String command, boolean sort) {
         return commandExecuter.getSubCommandNames(command, sort);
     }
 
@@ -544,9 +545,9 @@ public final class Engine implements ICommandLineDevice, Closeable {
 //        return base.isQuitRequested();
 //    }
 
-    private List<String> eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+    private String[] eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         String[] tokens = command.split("\\s+");
-        return commandExecuter.exec(Arrays.asList(tokens));
+        return commandExecuter.exec(tokens);
     }
 
     private final static class CommandLineArgs {

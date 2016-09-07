@@ -17,9 +17,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * A pretty useless module, more as an example.
@@ -46,10 +44,8 @@ public class DummyModule extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            ArrayList<String> result = new ArrayList<>(1);
-            result.add((new Date()).toString());
-            return result;
+        public String[] exec(String[] args) {
+            return new String[] { (new Date()).toString() };
         }
     }
 
@@ -61,10 +57,8 @@ public class DummyModule extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            ArrayList<String> result = new ArrayList<>(1);
-            result.add(nonsense);
-            return result;
+        public String[] exec(String[] args) {
+            return new String[] { nonsense };
         }
     }
 }

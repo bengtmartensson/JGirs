@@ -18,9 +18,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 import org.harctoolbox.IrpMaster.DomainViolationException;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.InvalidRepeatException;
@@ -62,8 +61,9 @@ public class Renderer extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) {
-            return new ArrayList<>(irpMaster.getNames());
+        public String[] exec(String[] args) {
+            Set<String> result = irpMaster.getNames();
+            return result.toArray(new String[result.size()]);
         }
     }
 }

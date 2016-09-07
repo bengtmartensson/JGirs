@@ -18,8 +18,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.harctoolbox.IrpMaster.DecodeIR;
 import org.harctoolbox.IrpMaster.IrSequence;
 import org.harctoolbox.IrpMaster.IrSignal;
@@ -118,24 +116,23 @@ public class Receive extends Module {
         }
 
         @Override
-        public List<String> exec(List<String> args) throws HarcHardwareException, IOException, IrpMasterException {
+        public String[] exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
             hardware.setTimeout(timeoutParameter.getValue());
             final IrSequence irSequence = hardware.receive();
 
             final IrSignal irSignal = new IrSignal(fallbackFrequencyParameter.getValue(), IrpUtils.invalid, irSequence, null, null);
             switch (receiveFormatParameter.getValue()) {
                 case "ccf":
-                    return new ArrayList<String>() {{ add(irSignal.ccfString()); }};
+                    return new String[] { irSignal.ccfString() };
                 case "protocol-parameter":
                 {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
                     DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.getValue());
-                    ArrayList<String> result = new ArrayList<>(4);
-                    int i = 0;
-                    for (DecodeIR.DecodedSignal decode : decodes)
-                        result.add(decode.toString());
+                    String[] result = new String[decodes.length];
+                    for (int i = 0; i < decodes.length; i++)
+                        result[i] = decodes[i].toString();
 
                     return result;
                 }
@@ -148,10 +145,10 @@ public class Receive extends Module {
                     if (decodes.length == 0)
                         return null;
                     final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
-                    return cmd != null ? new ArrayList<String>() {{ add(cmd.toString()); }} : null;
+                    return cmd != null ? new String[] { cmd.toString() } : null;
                 }
                 default:
-                    return new ArrayList<String>() {{ add(irSequence.toPrintString(true, false)); }};
+                    return new String[] { irSequence.toPrintString(true, false) };
             }
         }
     }
