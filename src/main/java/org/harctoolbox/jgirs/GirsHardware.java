@@ -24,7 +24,6 @@ package org.harctoolbox.jgirs;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.IHarcHardware;
@@ -38,12 +37,12 @@ import org.w3c.dom.NodeList;
 
 public final class GirsHardware {
 
-    public static List<GirsHardware> singleHardware(List<String> params) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        List<GirsHardware> list = new ArrayList<>(1);
-        GirsHardware irHardware = new GirsHardware(params, "default", true, true);
-        list.add(irHardware);
-        return list;
-    }
+//    public static List<GirsHardware> singleHardware(List<String> params) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
+//        List<GirsHardware> list = new ArrayList<>(1);
+//        GirsHardware irHardware = new GirsHardware(params, "default", true, true);
+//        list.add(irHardware);
+//        return list;
+//    }
 
     private static IHarcHardware newIrHardware(String className, Class<?>[] classArray, Object[] objectArray)
             throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {

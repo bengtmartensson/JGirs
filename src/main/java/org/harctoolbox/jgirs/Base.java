@@ -18,19 +18,19 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * The Girs Base module that must be implemented.
  */
 public class Base extends Module {
 
-    public static final String goodbyeWord = "Bye!";
+    static final String goodbyeWord = "Bye!";
 
 //    private final HashMap<String, Module> modules;
     //private final CommandExecuter commandExecuter;
 //    private final IHarcHardware hardware;
-    //private boolean quitRequested = false;
+    private boolean quitRequested = false;
 
     private final Engine engine;
 
@@ -47,9 +47,9 @@ public class Base extends Module {
         //this.commandExecuter = commandExecuter;
     }
 
-//    public boolean isQuitRequested() {
-//        return quitRequested;
-//    }
+    public boolean isQuitRequested() {
+        return quitRequested;
+    }
 
     private static class LicenseCommand implements ICommand {
 
@@ -99,7 +99,7 @@ public class Base extends Module {
 
         @Override
         public String[] exec(String[] args) {
-            ArrayList<String> list = engine.getModuleNames(true);
+            Set<String> list = engine.getModuleNames();
             return list.toArray(new String[list.size()]);
         }
     }
@@ -115,7 +115,8 @@ public class Base extends Module {
             if (args.length > 1)
                 throw new CommandSyntaxException(args[0], 0);
 
-            return commandExecuter.getCommandNames(true);
+            Set<String> result = commandExecuter.getCommandNames();
+            return result.toArray(new String[result.size()]);
         }
     }
 }

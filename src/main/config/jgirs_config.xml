@@ -30,6 +30,7 @@
     <named-remotes>
         <named-remote type="girr" url="file:///home/bengt/harctoolbox/GirrLib/Girr/Yamaha/yamaha_rxv1400.girr"/>
         <named-remote             url="file:///home/bengt/harctoolbox/GirrLib/Girr/Coolstream/coolstream_neo.girr"/>
+        <named-remote type="lircd" url="file:///home/bengt/lirc/lirc-remotes/remotes/yamaha/RX-V995.lircd.conf"/>
         <!--named-remote type="lircd" url="http://lirc.sourceforge.net/remotes/yamaha/RX-V995"/-->
     </named-remotes>
 

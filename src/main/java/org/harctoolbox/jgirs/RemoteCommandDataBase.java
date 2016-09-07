@@ -33,7 +33,6 @@ import org.harctoolbox.IrpMaster.XmlUtils;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 /**
@@ -73,9 +72,11 @@ public class RemoteCommandDataBase {
             System.out.println(kvp.getKey() + "\t" + kvp.getValue());
         });
     }
-    private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
-        return parseGirr(new URL(element.getAttribute("url")));
-    }
+
+//    private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
+//        return parseGirr(new URL(element.getAttribute("url")));
+//    }
+
     private static RemoteSet parseGirr(URL url) throws java.text.ParseException, IOException, SAXException {
         Document doc = XmlUtils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
@@ -115,7 +116,7 @@ public class RemoteCommandDataBase {
             load(remoteSet);
         }
     }
-    
+
     public Remote getRemote(String remoteName) {
         return remotes.get(remoteName);
     }

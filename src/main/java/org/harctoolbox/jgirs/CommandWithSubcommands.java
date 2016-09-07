@@ -19,6 +19,7 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -43,8 +44,8 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommands();
     }
 
-    public String[] getSubCommandNames(boolean sort) {
-        return commandExecuter.getCommandNames(sort);
+    public Set<String> getSubCommandNames() {
+        return commandExecuter.getCommandNames();
     }
 
     public String[] exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {

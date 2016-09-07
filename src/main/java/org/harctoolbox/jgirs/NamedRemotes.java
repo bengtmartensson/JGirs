@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -102,7 +103,13 @@ public class NamedRemotes extends Module {
 
         @Override
         public String[] exec(String[] args) {
-            return (String[]) database.getRemotes().toArray();
+            Collection<Remote> collection = database.getRemotes();
+            String[] result = new String[collection.size()];
+            int i = 0;
+            for (Remote remote : collection)
+                result[i++] = remote.getName();
+
+            return result;
         }
     }
 
@@ -121,7 +128,7 @@ public class NamedRemotes extends Module {
             Remote remote = database.getRemote(remoteName);
             if (remote == null)
                 throw new NoSuchRemoteException(remoteName);
-            return (String[]) remote.getCommands().keySet().toArray();
+            return remote.getCommands().keySet().toArray(new String[remote.getCommands().size()]);
         }
     }
 }

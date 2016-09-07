@@ -18,13 +18,11 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -39,18 +37,15 @@ public class CommandExecuter {
         commandMap = new LinkedHashMap<>(8);
     }
 
-    public String[] getCommandNames(boolean sort) {
-        List<String> commandNames = new ArrayList<>(commandMap.keySet());
-        if (sort)
-            Collections.sort(commandNames);
-
-        return commandNames.toArray(new String[commandNames.size()]);
+    public Set<String> getCommandNames() {
+        return commandMap.keySet();
     }
 
-    public String[] getSubCommandNames(String command, boolean sort) {
-        if (!CommandWithSubcommands.class.isInstance(commandMap.get(command)))
+    public Set<String> getSubCommandNames(String command) {
+        ICommand cmd = commandMap.get(command);
+        if (!(cmd instanceof CommandWithSubcommands))
             return null;
-        return ((CommandWithSubcommands) commandMap.get(command)).getSubCommandNames(sort);
+        return ((CommandWithSubcommands) cmd).getSubCommandNames();
     }
 
     public Collection<ICommand> getCommands() {
@@ -69,12 +64,12 @@ public class CommandExecuter {
                         cmd = kvp.getValue();
                         //break;
                     } else
-                        throw new AmbigousCommandException("Command " + commandName + " is ambigous.");
+                        throw new AmbigousCommandException(commandName);
                 }
             }
         }
         if (cmd == null)
-            throw new NoSuchCommandException("Command " + commandName + " not found.");
+            throw new NoSuchCommandException(commandName);
         return cmd.exec(args);
     }
 

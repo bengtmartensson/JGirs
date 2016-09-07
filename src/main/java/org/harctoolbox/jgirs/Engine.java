@@ -31,10 +31,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
@@ -106,56 +106,23 @@ public final class Engine implements ICommandLineDevice, Closeable {
             }
         }
 
-//                //System.out.println("Hardware version: " + hwList.get(0).getVersion());
-//            }
-//        } catch (IOException | ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException ex) {
-//            logger.log(Level.SEVERE, null, ex);
-//            System.exit(1);
-//        }
-
-//        Renderer renderer = null;
         if (commandLineArgs.irpMasterIni != null) {
             config.setStringOption(IRPPROTOCOLSINI, commandLineArgs.irpMasterIni);
         }
-//            System.err.println("Warning: No IrpMaster.ini file, rendering will not be available.");
-//        } else {
-//            try {
-//                renderer = new Renderer(commandLineArgs.irpMasterIni);
-//            } catch (FileNotFoundException | IncompatibleArgumentException ex) {
-//                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
 
-//        NamedRemotes namedRemotes = null;
-        //if (!commandLineArgs.girr.isEmpty()) {
         try {
             config.addGirs(commandLineArgs.girr);
         } catch (ParseException | IOException | SAXException | IrpMasterException ex) {
             Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(IrpUtils.exitFatalProgramFailure);
         }
-        //}
 
         if (commandLineArgs.verbosity)
             config.setBooleanOption("verbosity", true);
 
-//                namedRemotes = new NamedRemotes(commandLineArgs.girr);
-//            } catch (ParserConfigurationException | SAXException | IOException | IrpMasterException | ParseException ex) {
-//                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
         int returnLines = -1; //commandLineArgs.oneLine ? 1 : commandLineArgs.twoLines ? 2 : 0;
         try (Engine engine = new Engine(config)) {
             if (commandLineArgs.parameters.isEmpty()) {
-                // read-eval-print
-                //FramedDevice.Framer framer = new FramedDevice.Framer();
-                /*        commandLineArgs.prefix + "{0}" + commandLineArgs.suffix
-                + (commandLineArgs.appendReturn ? "\r" : "")
-                + (commandLineArgs.appendNewline ? "\n" : ""),
-                commandLineArgs.toUpper);*/
-
-                //FramedDevice framedDevice = new FramedDevice((ICommandLineDevice) hardware, framer);
-                //FramedDevice framedDevice = new FramedDevice(engine, framer);
                 String historyFile = commandLineArgs.historyfile != null
                         ? commandLineArgs.historyfile
                         : ReadlineCommander.defaultHistoryFile(commandLineArgs.appName);
@@ -207,9 +174,6 @@ public final class Engine implements ICommandLineDevice, Closeable {
     private final List<String> outBuffer;
     private final List<GirsHardware> irHardwareList;
 
-    //private final ConfigFile config;
-    //private String irpMasterIni;
-
     public Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
         //this.config = config;
         this.outBuffer = new ArrayList<>(8);
@@ -255,19 +219,12 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
         config.getModuleList().stream().forEach((module) -> {
             try {
-                registerModule(module.instanciate(commandExecuter, parameters));
+                registerModule(module.instantiate(commandExecuter, parameters));
             } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
         });
     }
-
-//    private Engine(ConfigFile config)
-//            throws SAXException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException, IllegalArgumentException, ConfigFile.NoSuchRemoteTypeException, InvocationTargetException, ParseException, HarcHardwareException, IrpMasterException, IOException {
-//        this(config != null ? config.getIrHardwareList() : IrHardware.singleHardware(commandLineArgs.hardware),
-//                  remoteCommandDataBase = config != null ? config.getIrHardwareList() : new RemoteCommandDataBase(commandLineArgs.girr);
-//        irpMasterIni = config != null ? config.getStringOption(IRPPROTOCOLSINI) : commandLineArgs.irpMasterIni;
-//    }
 
     @Override
     public void flushInput() throws IOException {
@@ -285,12 +242,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
         //module.addParametersTo(parameters);
     }
 
-    public ArrayList<String> getModuleNames(boolean sort) {
-        ArrayList<String> moduleNames = new ArrayList<>(modules.keySet());
-        if (sort)
-            Collections.sort(moduleNames);
-
-        return moduleNames;
+    public Set<String> getModuleNames() {
+        return modules.keySet();
     }
 
     @Override
@@ -306,7 +259,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 //        || AmbigousCommandException.class.isInstance(ex))
                 //    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
             } catch (IOException | HarcHardwareException | IrpMasterException ex) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
     }
 
@@ -338,7 +291,6 @@ public final class Engine implements ICommandLineDevice, Closeable {
     @Override
     public void setVerbosity(boolean verbosity) {
         this.verbosity = verbosity;
-//        currentGirsHardware.getHardware().setVerbosity(verbosity);
     }
 
     @Override
@@ -365,180 +317,29 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public void close() {
-        for (GirsHardware hardware : irHardwareList) {
+        irHardwareList.stream().forEach((hardware) -> {
             try {
                 hardware.getHardware().close();
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
-        }
+        });
     }
 
-    /*class ReadlineCommander implements ICommander {
-        //private final String prompt;
-        private final String historyFile;
-
-        ReadlineCommander() {
-            this(null, null);
-        }
-
-        ReadlineCommander(String confFile, final String historyFile) {
-            //this.prompt = prompt;
-            this.historyFile = historyFile;
-
-            try {
-                Readline.load(ReadlineLibrary.GnuReadline);
-                Readline.initReadline(Version.appName);
-                if (confFile != null && new File(confFile).exists())
-                    try {
-                        Readline.readInitFile(confFile);
-                    } catch (IOException ex) {
-                        Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                if (historyFile != null && new File(historyFile).exists())
-                    try {
-                        Readline.readHistoryFile(historyFile);
-                    } catch (EOFException | UnsupportedEncodingException ex) {
-                        Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-            } catch (UnsatisfiedLinkError ignore_me) {
-                Logger.getLogger(Engine.class.getName()).log(Level.INFO, "couldn't load readline lib. Using simple stdin.");
-            }
-
-            /*Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Readline.writeHistoryFile(historyFile);
-                    } catch (EOFException | UnsupportedEncodingException ex) {
-                        Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    Logger.getLogger(Engine.class.getName()).log(Level.FINE, "Readline.cleanup called");
-                    Readline.cleanup();
-                }
-            });* /
-        }
-
-        @Override
-        public String readline() throws IOException {
-            String line;
-            try {
-                line = Readline.readline(prompt, false);
-                int size = Readline.getHistorySize();
-                if ((line != null && !line.isEmpty())
-                        && (size == 0 || !line.equals(Readline.getHistoryLine(size-1))))
-                    Readline.addToHistory(line);
-            } catch (EOFException ex) {
-                return null;
-            }
-            return line == null ? "" : line;
-        }
-
-        @Override
-        public void close() throws IOException {
-            if (historyFile != null)
-                Readline.writeHistoryFile(historyFile);
-            Readline.cleanup();
-        }
+    public Set<String> getCommandNames() {
+        return commandExecuter.getCommandNames();
     }
 
-    class ReaderCommander implements ICommander {
-        private final BufferedReader reader;
-        private final PrintStream out;
+    public List<String> getCommandNames(String moduleName) throws NoSuchModuleException {
+        Module module = modules.get(moduleName);
+        if (module == null)
+            throw new NoSuchModuleException(moduleName);
 
-        ReaderCommander() {
-            this(System.in, charSet, System.out, prompt);
-        }
-
-        ReaderCommander(InputStream inputStream, Charset charset, PrintStream out, String prompt) {
-            this(new InputStreamReader(inputStream, charSet), out, prompt);
-        }
-
-        ReaderCommander(Reader reader, PrintStream out, String prompt) {
-            this.reader = new BufferedReader(reader);
-            this.out = out;
-        }
-
-        @Override
-        public String readline() throws IOException {
-            out.print(prompt);
-            return reader.readLine();
-        }
-
-        @Override
-        public void close() throws IOException {
-            reader.close();
-        }
+        return module.getCommandNames();
     }
 
-    public boolean readEvalPrint(boolean joinLines) {
-        return readEvalPrint(System.in, System.out, System.err, joinLines);
-    }
-
-    public boolean readEvalPrint(String initFile, String historyFile, boolean joinLines) {
-        return readEvalPrint(new ReadlineCommander(initFile, historyFile), System.out, System.err, joinLines);
-    }
-
-    public boolean readEvalPrint(Reader in, PrintStream out, PrintStream err, boolean joinLines) {
-        return readEvalPrint(new ReaderCommander(in, out, prompt), out, err, joinLines);
-    }
-
-    public boolean readEvalPrint(InputStream in, PrintStream out, PrintStream err, boolean joinLines) {
-        return readEvalPrint(new InputStreamReader(in, charSet), out, err, joinLines);
-    }
-
-    private boolean readEvalPrint(ICommander commander, PrintStream out, PrintStream err, boolean joinLines) {
-        while (!isQuitRequested()) {
-            String line = null;
-            try {
-                line = commander.readline();
-            } catch (IOException ex) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            if (line == null) { // EOF
-                out.println();
-                break;
-            }
-
-            if (line.isEmpty())
-                continue;
-
-            try {
-                List<String> result = eval(line);
-                if (joinLines)
-                    out.println(Module.join(result));
-                else
-                    for (String str : result)
-                        out.println(str);
-            } catch (JGirsException ex) {
-                err.println("ERROR: " + ex.getMessage());
-                if (NoSuchCommandException.class.isInstance(ex)
-                        || AmbigousCommandException.class.isInstance(ex))
-                    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
-            } catch (IOException | HarcHardwareException | IrpMasterException ex) {
-                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                // Something really unexpected happened
-                ex.printStackTrace();
-            }
-        }
-        return isQuitRequested();
-    }*/
-
-    public String[] getCommandNames(boolean sort) {
-        return commandExecuter.getCommandNames(sort);
-    }
-
-//    public List<String> getCommandNames(String moduleName, boolean sort) throws NoSuchModuleException {
-//        Module module = modules.get(moduleName);
-//        if (module == null)
-//            throw new NoSuchModuleException(moduleName);
-//
-//        return module.getCommandNames(sort);
-//    }
-
-    public String[] getSubCommandNames(String command, boolean sort) {
-        return commandExecuter.getSubCommandNames(command, sort);
+    public Set<String> getSubCommandNames(String command) {
+        return commandExecuter.getSubCommandNames(command);
     }
 
 //    private boolean isQuitRequested() {
@@ -554,9 +355,6 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
 //        @Parameter(names = {"-1"}, description = "Expect one line of response")
 //        private boolean oneLine;
-//
-//        @Parameter(names = {"-2"}, description = "Expect two line of response")
-//        private boolean twoLines;
 
         @Parameter(names = {"--appname"}, description = "Appname for finding resourses")
         private String appName = "JGirs";
@@ -588,8 +386,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
         @Parameter(names = {      "--prompt"}, description = "Interactive prompt for readline")
         private String prompt = "JGirs> ";
 
-        //@Parameter(names = {"-r", "--readline"}, description = "Use the readline library, if available")
-        //private boolean readLine; // TODO: must not be combined with --command
+        @Parameter(names = {"-r", "--readline"}, description = "Use the readline library, if available")
+        private boolean readLine;
 
         @Parameter(names = {"-V", "--version"}, description = "Display version information")
         private boolean versionRequested;
@@ -602,60 +400,6 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
         @Parameter(names = {"-#", "--count"}, description = "Number of times to send sequence")
         private int count = 1;
-
-//        @Parameter(names = {"-b", "--baud"}, description = "Baud rate for the serial port")
-//        private int baud = 115200; //9600;
-
-//        @Parameter(names = {"--delay"}, description = "Delay between commands in milliseconds")
-//        private int delay = 0;
-
-//        @Parameter(names = {"-d", "--device"}, description = "Device name for serial device")
-//        private String device = null;
-
-        //@Parameter(names = {"-g", "--globalcache"}, description = "Use GlobalCache")
-        //private boolean globalcache = false;
-
-        //@Parameter(names = {"--http", "--url"}, description = "Use URLs (http)")
-        //private boolean url = false;
-
-//        @Parameter(names = {      "--ip"}, description = "IP address or name")
-//        private String ip = null;
-//
-//        @Parameter(names = {      "--opendelay"}, description = "Delay after opening, in milliseconds")
-//        private int openDelay = 0;
-
-        //@Parameter(names = {"-m", "--myip"}, description = "For UPD only: IP number to listen to")
-        //private String myIp = null;
-
-//        @Parameter(names = {"-p", "--port"}, description = "Port number, either TCP port number, or serial port number (counting the first as 1).")
-//        private int portNumber = (int) IrpUtils.invalid;
-//
-//        @Parameter(names = {"--prefix"}, description = "Prefix to be prepended to all sent commands.")
-//        private String prefix = "";
-//
-//        @Parameter(names = {"-n", "--newline"}, description = "Append a newline at the end of the command.")
-//        private boolean appendNewline;
-//
-//        @Parameter(names = {"-r", "--return"}, description = "Append a carrage return at the end of the command.")
-//        private boolean appendReturn;
-//
-//        @Parameter(names = {"-s", "--serial"}, description = "Use local serial port.")
-//        private boolean serial;
-//
-//        @Parameter(names = {"--suffix"}, description = "Sufffix to be appended to all sent commands.")
-//        private String suffix = "";
-//
-//        @Parameter(names = {"-t", "--tcp"}, description = "Use tcp sockets")
-//        private boolean tcp;
-//
-//        @Parameter(names = {"-T", "--timeout"}, description = "Timeout in milliseconds")
-//        private int timeout = 15000;
-//
-//        @Parameter(names = {"-u", "--upper"}, description = "Translate commands to upper case.")
-//        private boolean toUpper;
-
-        //@Parameter(names = {"--udp"}, description = "Use Udp sockets.")
-        //private boolean udp;
 
         @Parameter(description = "[parameters]")
         private ArrayList<String> parameters = new ArrayList<>(8);

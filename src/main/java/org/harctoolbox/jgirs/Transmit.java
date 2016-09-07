@@ -232,7 +232,6 @@ public class Transmit extends Module {
             }
 
         private String[] transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
-            Transmitter transmitter = null; // FIXME
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof IRawIrSender))
                 throw new IncompatibleArgumentException("transmit");
@@ -240,7 +239,9 @@ public class Transmit extends Module {
             if (!hardware.isValid())
                 hardware.open();
 
-            boolean result = ((IRawIrSender) currentOutputHardware.getHardware()).sendIr(irSignal, count, transmitter);
+            Transmitter transmitter = ((IRawIrSender) hardware).getTransmitter();
+
+            boolean result = ((IRawIrSender) hardware).sendIr(irSignal, count, transmitter);
             return result ? new String[0] : null;
         }
     }
@@ -255,10 +256,10 @@ public class Transmit extends Module {
         @Override
         public String[] exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException {
             IHarcHardware hardware = currentOutputHardware.getHardware();
-            if (!(hardware instanceof ITransmitter))
+            if (!(hardware instanceof IIrSenderStop))
                 throw new ExecutionException("Current hardware does not  support stopping.");
 
-            Transmitter transmitter = null; // FIXME
+            Transmitter transmitter = ((ITransmitter) hardware).getTransmitter();
             return ((IIrSenderStop) hardware).stopIr(transmitter) ? new String[0] : null;
         }
     }

@@ -24,7 +24,6 @@ import org.harctoolbox.harchardware.ir.ITransmitter;
  */
 public class Transmitters extends Module {
     private final ITransmitter transmitter;
-    private Engine engine;
 
     public Transmitters(CommandExecuter commandExecuter, Parameters parameters, ITransmitter transmitter) {
         super(commandExecuter, parameters);

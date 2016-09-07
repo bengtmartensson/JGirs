@@ -19,6 +19,7 @@ package org.harctoolbox.jgirs;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -87,6 +88,10 @@ public abstract class Module {
         parametersModule.add(parameter);
     }
 
+    List<String> getCommandNames() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 //    void addParametersTo(Parameters parameters) {
 //        parameters.addAll(this.parameters);
 //    }
@@ -118,7 +123,7 @@ public abstract class Module {
 //            this.objectArray = objectArray;
 //        }
 
-        public Module instanciate(CommandExecuter commandExecutor, Parameters parameters) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        public Module instantiate(CommandExecuter commandExecutor, Parameters parameters) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             objectArray[0] = commandExecutor;
             objectArray[1] = parameters;
             String fullHardwareClassName = (className.contains(".") ? "" : "org.harctoolbox.jgirs.") + className;
