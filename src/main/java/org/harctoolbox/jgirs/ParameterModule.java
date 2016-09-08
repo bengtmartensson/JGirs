@@ -20,6 +20,7 @@ package org.harctoolbox.jgirs;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -27,22 +28,50 @@ import java.util.Map;
  */
 public class ParameterModule extends Module {
 
+    public static final String IRPPROTOCOLSINI = "irpProtocolsIni";
+    public static final String VERBOSITY = "verbosity"; // Do not change to the more grammatically correct "verbose"
+    public static final String LISTSEPARATOR = "listseparator";
+
+    private static volatile ParameterModule instance = null;
+
+    public static ParameterModule getInstance() {
+        return instance;
+    }
+
+    public static ParameterModule newParameterModule() {
+        if (instance != null)
+            throw new InvalidMultipleInstantiation();
+
+        instance = new ParameterModule();
+        return instance;
+    }
+
     private final HashMap<String, Parameter> parameterMap;
 
-    public ParameterModule(CommandExecuter commandExecutor) {
-        super(commandExecutor, null);
+    private ParameterModule() {
+        super();
         this.parameterMap = new HashMap<>(8);
         addCommand(new ParameterCommand());
+
+        // In this constructor, use add instead of addParameter.
+        add(new StringParameter(LISTSEPARATOR, " ", "String to be used between entries in list"));
+        add(new BooleanParameter(VERBOSITY, false, "Execute commands verbosely"));
         //addCommand(new SetParameterCommand());
         //addCommand(new GetParameterCommand());
     }
 
-    public void add(Parameter parameter) {
+    public final void add(Parameter parameter) {
         parameterMap.put(parameter.getName(), parameter);
     }
 
     public void addAll(HashMap<String, Parameter> newParameters) {
         parameterMap.putAll(newParameters);
+    }
+
+    public void addAll(List<Parameter> list) {
+        list.stream().forEach((parameter) -> {
+            add(parameter);
+        });
     }
 
     public Parameter get(String name) {
@@ -55,7 +84,7 @@ public class ParameterModule extends Module {
 
         Parameter candidate = null;
         for (Map.Entry<String, Parameter> kvp : parameterMap.entrySet()) {
-            if (kvp.getKey().startsWith(str)) {
+            if (kvp.getKey().toLowerCase(Locale.US).startsWith(str.toLowerCase(Locale.US))) {
                 if (candidate != null)
                     throw new AmbigousParameterException(str);
                 candidate = kvp.getValue();
@@ -69,7 +98,7 @@ public class ParameterModule extends Module {
         return ((IntegerParameter) param).getValue();
     }
 
-    public boolean getBooleanr(String name) {
+    public boolean getBoolean(String name) {
         Parameter param = parameterMap.get(name);
         return ((BooleanParameter) param).getValue();
     }
@@ -77,6 +106,27 @@ public class ParameterModule extends Module {
     public String getString(String name) {
         Parameter param = parameterMap.get(name);
         return ((StringParameter) param).getValue();
+    }
+
+    public void setInteger(String name, int value) throws Parameter.IncorrectParameterType {
+        Parameter param = parameterMap.get(name);
+        if (!(param instanceof IntegerParameter))
+            throw new Parameter.IncorrectParameterType("int");
+        ((IntegerParameter) param).set(value);
+    }
+
+    public void setBoolean(String name, boolean value) throws Parameter.IncorrectParameterType {
+        Parameter param = parameterMap.get(name);
+        if (!(param instanceof BooleanParameter))
+            throw new Parameter.IncorrectParameterType("boolean");
+        ((BooleanParameter) param).set(value);
+    }
+
+    public void setString(String name, String value) throws Parameter.IncorrectParameterType {
+        Parameter param = parameterMap.get(name);
+        if (!(param instanceof StringParameter))
+            throw new Parameter.IncorrectParameterType("String");
+        ((StringParameter) param).set(value);
     }
 
 //    private class SetParameterCommand implements ICommand {
@@ -99,7 +149,7 @@ public class ParameterModule extends Module {
 //
 //    }
 
-    public static class AmbigousParameterException extends Exception {
+    public static class AmbigousParameterException extends CommandException {
         public AmbigousParameterException(String name) {
             super("Ambigous parameter name: " + name);
         }
@@ -136,12 +186,34 @@ public class ParameterModule extends Module {
         }
 
         @Override
-        public String exec(String[] args) {
+        public String exec(String[] args) throws CommandException {
             List<String> result = new ArrayList<>(parameterMap.size());
-            int i = 0;
-            parameterMap.values().stream().forEach((param) -> {
-                result.add(param.toString());
-            });
+            switch (args.length) {
+                case 1:
+                    parameterMap.values().stream().forEach((param) -> {
+                        result.add(param.toString());
+                    });
+                    break;
+                case 2: {
+                    String fragment = args[1];
+                    parameterMap.values().stream().forEach((param) -> {
+                        if (param.getName().toLowerCase(Locale.US).startsWith(fragment.toLowerCase(Locale.US)))
+                            result.add(param.toString());
+                    });
+                }
+                break;
+                case 3: {
+                    String fragment = args[1];
+                    String newValue = args[2];
+
+                    Parameter parameter = find(fragment);
+                    parameter.set(newValue);
+                    result.add(parameter.toString());
+                }
+                break;
+                default:
+                    throw new CommandSyntaxException("parameter", 0, 2);
+            }
 
             return Utils.sortedString(result);
         }

@@ -232,9 +232,17 @@ public class ConfigFile {
         return null;
     }
 
-    public GirsHardware getDefaultInputHardware() {
+    public GirsHardware getDefaultCapturingHardware() {
         for (GirsHardware hardware : irHardwareList)
-            if (hardware.isInputDefault())
+            if (hardware.isCapturingDefault())
+                return hardware;
+
+        return null;
+    }
+
+    public GirsHardware getDefaultReceivingHardware() {
+        for (GirsHardware hardware : irHardwareList)
+            if (hardware.isReceivingDefault())
                 return hardware;
 
         return null;

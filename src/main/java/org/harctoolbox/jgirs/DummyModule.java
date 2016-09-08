@@ -20,21 +20,26 @@ package org.harctoolbox.jgirs;
 import java.util.Date;
 
 /**
- * A pretty useless module, more as an example.
+ * A pretty useless module, to serve as an example.
  */
 public class DummyModule extends Module {
 
+//    public static DummyModule newDummyModule(String nonsense) {
+//        instance = new DummyModule(nonsense);
+//        return (DummyModule) instance;
+//    }
+
     private final String nonsense;
 
-    public DummyModule(CommandExecuter commandExecutor, ParameterModule parameters, String nonsense) {
-        super(commandExecutor, parameters);
+    public DummyModule(String nonsense) {
+        super();
         this.nonsense = nonsense;
         addCommand(new DateCommand());
         addCommand(new NonsenseCommand());
     }
 
-    public DummyModule(CommandExecuter commandExecutor, ParameterModule parameters) {
-        this(commandExecutor, parameters, null);
+    public DummyModule() {
+        this(null);
     }
 
     private static class DateCommand implements ICommand {

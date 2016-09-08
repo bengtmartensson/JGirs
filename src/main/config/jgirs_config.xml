@@ -54,7 +54,7 @@
                 <argument description="device name">/dev/lirc0</argument>
             </arguments>
         </hardware-item>
-        <hardware-item outputdefault="true" inputdefault="true" name="nano" displayname="Arduino Nano" class="org.harctoolbox.harchardware.ir.SerialGirsClient">
+        <hardware-item outputdefault="true" capturingdefault="true" receivingdefault="true" name="nano" displayname="Arduino Nano" class="org.harctoolbox.harchardware.ir.SerialGirsClient">
             <arguments>
                 <argument description="device name">/dev/arduino_nano_qinheng</argument>
                 <argument type="int" description="baud rate">115200</argument>

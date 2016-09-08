@@ -17,25 +17,28 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import org.harctoolbox.harchardware.ir.ITransmitter;
-
 /**
  * This class models transmitters as in HarcHardware.
  */
-public class Transmitters extends Module {
-    private final ITransmitter transmitter;
+public class TransmittersModule extends Module {
 
-    public Transmitters(CommandExecuter commandExecuter, ParameterModule parameters, ITransmitter transmitter) {
-        super(commandExecuter, parameters);
-        this.transmitter = transmitter;
+    private static volatile TransmittersModule instance = null;
+
+    public static TransmittersModule newTransmittersModule() {
+        if (instance != null)
+            throw new InvalidMultipleInstantiation();
+
+        instance = new TransmittersModule();
+        return instance;
+    }
+    //private final ITransmitter transmitter;
+
+    private TransmittersModule() {
+        super();
         addCommand(new TransmittersCommand());
     }
 
-    public Transmitters(CommandExecuter commandExecuter, ParameterModule parameters) {
-        this(commandExecuter, parameters, null);
-    }
-
-    private class TransmittersCommand implements ICommand {
+    private static class TransmittersCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -44,7 +47,7 @@ public class Transmitters extends Module {
 
         @Override
         public String exec(String[] args) {
-            return String.join(" ", transmitter.getTransmitterNames());
+            return null; // TODO Utils.sortedString(transmitter.getTransmitterNames());
         }
     }
 }

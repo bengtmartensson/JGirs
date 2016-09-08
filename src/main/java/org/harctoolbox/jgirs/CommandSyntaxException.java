@@ -20,7 +20,7 @@ package org.harctoolbox.jgirs;
 /**
  * This is thrown when calling a command with erroneous syntax.
  */
-public class CommandSyntaxException extends JGirsException {
+public class CommandSyntaxException extends CommandException {
 
     CommandSyntaxException() {
         super("Command syntax error");
@@ -31,7 +31,11 @@ public class CommandSyntaxException extends JGirsException {
     }
 
     CommandSyntaxException(String name, int noArgs){
-        super("The command \" + name + \" takes " + noArgs + " argument(s).");
+        super("The command \"" + name + "\" takes " + noArgs + " argument(s).");
+    }
+
+    CommandSyntaxException(String name, int minNoArgs, int maxNoArgs){
+        super("The command \"" + name + "\" takes min " + minNoArgs + ", max " + maxNoArgs + " arguments.");
     }
 
     CommandSyntaxException(String name, String reason){

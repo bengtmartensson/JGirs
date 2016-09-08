@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.ModulatedIrSequence;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.harchardware.IHarcHardware;
 import org.harctoolbox.harchardware.ir.ICapture;
 
 /**
@@ -28,7 +29,17 @@ import org.harctoolbox.harchardware.ir.ICapture;
  */
 public class Capture extends Module {
 
-    private final ICapture hardware;
+    private static volatile Capture instance = null;
+
+    public static Capture newCapture() {
+        if (instance !=  null)
+            throw new InvalidMultipleInstantiation();
+
+        instance = new Capture();
+        return instance;
+    }
+
+    //private final ICapture hardware;
 //    private final StartTimeoutParameter startTimeoutParameter = null;
 //    private final MaxCaptureLengthParameter maxCaptureLengthParameter = null;
 //    private final EndTimeoutParameter endTimeoutParameter = null;
@@ -48,10 +59,10 @@ public class Capture extends Module {
 //        addParameter(useCcfCaptureParameter);
 //    }
 
-    public Capture(CommandExecuter commandExecuter, ParameterModule parameters) {
-        super(commandExecuter, parameters);
+    private Capture() {
+        super();
         //this.engine = engine;
-        this.hardware = null;//capture;
+        //this.hardware = null;//capture;
 //        addCommand(new AnalyzeCommand());
 //        startTimeoutParameter = new StartTimeoutParameter(2000);
 //        addParameter(startTimeoutParameter);
@@ -128,7 +139,7 @@ public class Capture extends Module {
 //        }
 //    }
 
-    private class AnalyzeCommand implements ICommand {
+    private static class AnalyzeCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -136,9 +147,12 @@ public class Capture extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
+        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
-            final ModulatedIrSequence irSequence = hardware.capture();
+            IHarcHardware hardware = GirsHardware.getDefaultCapturingHardware().getHardware();
+            if (!(hardware instanceof ICapture))
+                throw new IncompatibleHardwareException("ICapture");
+            final ModulatedIrSequence irSequence = ((ICapture) hardware).capture();
             return irSequence.toPrintString(true, false);
             //return irSequence == null ? new ArrayList<>(8) : new ArrayList<String>(8) {{ add(useCcfCaptureParameter.getValue() ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
         }

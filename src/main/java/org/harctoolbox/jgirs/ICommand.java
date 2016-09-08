@@ -38,8 +38,8 @@ public interface ICommand {
      * @return String to be returned to the client
      * @throws java.io.IOException
      * @throws org.harctoolbox.harchardware.HarcHardwareException
-     * @throws org.harctoolbox.jgirs.JGirsException
+     * @throws org.harctoolbox.jgirs.CommandException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public String exec(String[] args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
+    public String exec(String[] args) throws IOException, HarcHardwareException, CommandException, IrpMasterException;
 }

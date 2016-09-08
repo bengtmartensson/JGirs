@@ -33,24 +33,29 @@ import org.harctoolbox.harchardware.ir.Transmitter;
  * Transmitting commands.
  */
 public class Transmit extends Module {
-    public static Transmit newTransmit(CommandExecuter commandExecuter, ParameterModule parameters, GirsHardware currentOutputHardware, Renderer renderer, Irp irp, NamedRemotes namedCommand) {
-//        if (!(IRawIrSender.class.isInstance(hardware) || IRemoteCommandIrSender.class.isInstance(hardware)))
-//            return null;
-        return new Transmit(commandExecuter, parameters, currentOutputHardware, renderer, irp, namedCommand);
+
+    private static volatile Transmit instance = null;
+
+    static Module newTransmit(Renderer renderer, Irp irp, NamedRemotes namedRemotes) {
+        if (instance != null)
+            throw new InvalidMultipleInstantiation();
+
+        instance = new Transmit(renderer, irp, namedRemotes);
+        return instance;
     }
 
     private final Renderer renderer;
     private final Irp irp;
-    private final GirsHardware currentOutputHardware; // NOTE: its field hardware may change outside of this class
-    //private Transmitter transmitter;
-    private final NamedRemotes namedCommand;
+//    private final GirsHardware currentOutputHardware; // NOTE: its field hardware may change outside of this class
+//    //private Transmitter transmitter;
+    private final NamedRemotes namedRemotes;
 
-    protected Transmit(CommandExecuter commandExecuter, ParameterModule parameters, GirsHardware currentOutputHardware, Renderer renderer, Irp irp, NamedRemotes namedCommand) {
-        super(commandExecuter, parameters);
+    private Transmit(Renderer renderer, Irp irp, NamedRemotes namedRemotes) {
+        super();
         this.renderer = renderer;
         this.irp = irp;
-        this.currentOutputHardware = currentOutputHardware;
-        this.namedCommand = namedCommand;
+//        this.currentOutputHardware = currentOutputHardware;
+        this.namedRemotes = namedRemotes;
 //        if (currentOutputHardware.getHardware() iIRawIrSender.class.isInstance(hardware))
 //            transmitter = ((IRawIrSender) hardware).getTransmitter();
 //        else if (IRemoteCommandIrSender.class.isInstance(hardware))
@@ -74,7 +79,44 @@ public class Transmit extends Module {
         }
     }
 
-//    private class TransmitCommand extends CommandWithSubcommands implements ICommand {
+
+    private static class StopCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "stop";
+        }
+
+        @Override
+        public String exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException {
+            IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
+            if (!(hardware instanceof IIrSenderStop))
+                throw new ExecutionException("Current hardware does not  support stopping.");
+
+            Transmitter transmitter = ((ITransmitter) hardware).getTransmitter();
+            return ((IIrSenderStop) hardware).stopIr(transmitter) ? "" : null;
+        }
+    }
+
+    private static class GetTransmittersCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "gettransmitters";
+        }
+
+        @Override
+        public String exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
+            IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
+            if (!(hardware instanceof ITransmitter))
+                throw new ExecutionException("Current hardware does not  support setting transmitters.");
+            if (args.length > 1)
+                throw new CommandSyntaxException("gettransmitters", 0);
+
+            return Utils.sortedString(((ITransmitter) hardware).getTransmitterNames());
+        }
+    }
+    //    private class TransmitCommand extends CommandWithSubcommands implements ICommand {
 //
 //        TransmitCommand() {
 //            if (IRawIrSender.class.isInstance(hardware)) {
@@ -224,15 +266,15 @@ public class Transmit extends Module {
         }
 
         private int[] parseRaw(String[] args, int length, int skip) throws CommandSyntaxException {
-                int[] result = new int[length];
-                for (int i = 0; i < length; i++)
-                    result[i] = intParse(args[i+skip]);
+            int[] result = new int[length];
+            for (int i = 0; i < length; i++)
+                result[i] = intParse(args[i+skip]);
 
-                return result;
-            }
+            return result;
+        }
 
         private String transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
-            IHarcHardware hardware = currentOutputHardware.getHardware();
+            IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
             if (!(hardware instanceof IRawIrSender))
                 throw new IncompatibleArgumentException("transmit");
 
@@ -243,43 +285,6 @@ public class Transmit extends Module {
 
             boolean result = ((IRawIrSender) hardware).sendIr(irSignal, count, transmitter);
             return result ? "" : null;
-        }
-    }
-
-    private class StopCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "stop";
-        }
-
-        @Override
-        public String exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException {
-            IHarcHardware hardware = currentOutputHardware.getHardware();
-            if (!(hardware instanceof IIrSenderStop))
-                throw new ExecutionException("Current hardware does not  support stopping.");
-
-            Transmitter transmitter = ((ITransmitter) hardware).getTransmitter();
-            return ((IIrSenderStop) hardware).stopIr(transmitter) ? "" : null;
-        }
-    }
-
-    private class GetTransmittersCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "gettransmitters";
-        }
-
-        @Override
-        public String exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
-            IHarcHardware hardware = currentOutputHardware.getHardware();
-            if (!(hardware instanceof ITransmitter))
-                throw new ExecutionException("Current hardware does not  support setting transmitters.");
-            if (args.length > 1)
-                throw new CommandSyntaxException("gettransmitters", 0);
-
-            return String.join(" ", ((ITransmitter) hardware).getTransmitterNames());
         }
     }
 }

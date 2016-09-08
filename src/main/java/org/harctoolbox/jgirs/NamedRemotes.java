@@ -38,7 +38,8 @@ import org.xml.sax.SAXException;
  * Implementation of named remotes.
  */
 public class NamedRemotes extends Module {
-    private final static boolean caseInsensitive = true;
+
+    private static boolean caseInsensitive = true;
 
     private static RemoteSet readRemoteSet(String file) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -59,20 +60,20 @@ public class NamedRemotes extends Module {
     //private final RemoteSet remoteSet;
     private final RemoteCommandDataBase database;
 
-    public NamedRemotes(CommandExecuter commandExecuter, ParameterModule parameters, Iterable<RemoteSet> remoteSets) throws IrpMasterException {
-        super(commandExecuter, parameters);
-        this.database = new RemoteCommandDataBase(remoteSets, caseInsensitive);
+    private NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+        this(new RemoteCommandDataBase(remoteSets, caseInsensitive));
+
+    }
+
+    private NamedRemotes(List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+        this(readRemoteSet(files));
+    }
+
+    public NamedRemotes(RemoteCommandDataBase remoteCommandsDataBase) {
+        super();
+        this.database = remoteCommandsDataBase;
         addCommand(new RemotesCommand());
         addCommand(new CommandsCommand());
-    }
-
-    public NamedRemotes(CommandExecuter commandExecuter, ParameterModule parameters, List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
-        this(commandExecuter, parameters, readRemoteSet(files));
-    }
-
-    public NamedRemotes(CommandExecuter commandExecuter, ParameterModule parameters, RemoteCommandDataBase remoteCommandsDataBase) {
-        super(commandExecuter, parameters);
-        this.database = remoteCommandsDataBase;
     }
 
     public RemoteCommandDataBase.RemoteCommand getRemoteCommand(String protocol, Map<String, Long> parameters) {
@@ -105,12 +106,11 @@ public class NamedRemotes extends Module {
         public String exec(String[] args) {
             Collection<Remote> collection = database.getRemotes();
             List<String> result = new ArrayList<>(collection.size());
-            int i = 0;
             collection.stream().forEach((remote) -> {
                 result.add(remote.getName());
             });
 
-            return String.join(" ", result);
+            return Utils.sortedString(result);
         }
     }
 
@@ -122,14 +122,14 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException {
+        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException, RemoteCommandDataBase.AmbigousRemoteException {
             if (args.length <= 1)
                 throw new CommandSyntaxException("No remote given");
-            String remoteName = args[1];
-            Remote remote = database.getRemote(remoteName);
+            String remoteNameFragment = args[1];
+            Remote remote = database.findRemote(remoteNameFragment);
             if (remote == null)
-                throw new NoSuchRemoteException(remoteName);
-            return String.join(" ", remote.getCommands().keySet());
+                throw new NoSuchRemoteException(remoteNameFragment);
+            return Utils.sortedString(remote.getCommands().keySet());
         }
     }
 }

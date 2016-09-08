@@ -20,7 +20,7 @@ package org.harctoolbox.jgirs;
 /**
  * This exception is thrown if an IR command is not found.
  */
-public class NoSuchCommandException extends JGirsException {
+public class NoSuchCommandException extends CommandException {
 
     NoSuchCommandException() {
         super("Command not existing or abbreviation ambigous");

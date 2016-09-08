@@ -20,7 +20,7 @@ package org.harctoolbox.jgirs;
 /**
  * Thrown if a non-existing parameter is requested.
  */
-public class NoSuchParameterException extends JGirsException {
+public class NoSuchParameterException extends CommandException {
 
     public NoSuchParameterException(String name) {
         super("No such parameter: " + name);

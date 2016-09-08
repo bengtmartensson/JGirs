@@ -42,6 +42,15 @@ public class Receive extends Module {
     public static final String RECEIVELENGTH = "receivelength";
     public static final String FALLBACKFREQUENCY = "fallbackfrequency";
     public static final String RECEIVEFORMAT = "receiveformat";
+    private static volatile Receive instance;
+
+    static Module newReceive(NamedRemotes namedRemotes) {
+        if (instance != null)
+            throw new InvalidMultipleInstantiation();
+
+        instance = new Receive(namedRemotes);
+        return instance;
+    }
 
     //private IReceive hardware;
 //    private IntegerParameter beginTimeout;
@@ -52,7 +61,7 @@ public class Receive extends Module {
 
     private final NamedRemotes namedRemotes;
     //private ReceiveFormat receiveFormat;
-    private final GirsHardware girsHardware;
+    //private final GirsHardware girsHardware;
 
 //    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
 //        this.namedRemotes = namedRemotes;
@@ -67,10 +76,18 @@ public class Receive extends Module {
 //
 //    }
 
-    Receive(CommandExecuter commandExecuter, ParameterModule parameters, GirsHardware girsHardware, NamedRemotes namedRemotes) {
-        super(commandExecuter, parameters);
+//    public static Receive newReceive() {
+//        if (instance != null)
+//            throw new InvalidMultipleInstantiation();
+//
+//        instance = new Receive();
+//        return instance;
+//    }
+
+    public Receive(NamedRemotes namedRemotes) {
+        super();
         this.namedRemotes = namedRemotes;
-        this.girsHardware = girsHardware;
+        //this.girsHardware = girsHardware;
         addCommand(new ReceiveCommand());
 
         addParameter(new IntegerParameter(RECEIVEBEGINTIMEOUT, defaultReceiveBeginTimeout, "begin timeout for receive"));
@@ -164,18 +181,18 @@ public class Receive extends Module {
 
         @Override
         public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException {
-            if (!(girsHardware.getHardware() instanceof IReceive))
+            if (!(GirsHardware.getDefaultReceivingHardware().getHardware() instanceof IReceive))
                 throw new IncompatibleHardwareException("IReceive");
-            IReceive hardware = (IReceive) girsHardware.getHardware();
-            hardware.setVerbosity(commandExecuter.isVerbosity());
+            IReceive hardware = (IReceive) GirsHardware.getDefaultReceivingHardware().getHardware();
+            hardware.setVerbosity(ParameterModule.getInstance().getBoolean("verbosity"));
             if (!hardware.isValid())
                 hardware.open();
 
-            hardware.setBeginTimeout(parameters.getInteger(RECEIVEBEGINTIMEOUT));
+            hardware.setBeginTimeout(ParameterModule.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
             final IrSequence irSequence = hardware.receive();
 
-            final IrSignal irSignal = new IrSignal(parameters.getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
-            ReceiveFormat receiveFormat = ((ReceiveFormatParameter) parameters.get(RECEIVEFORMAT)).value;
+            final IrSignal irSignal = new IrSignal(ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
+            ReceiveFormat receiveFormat = ((ReceiveFormatParameter) ParameterModule.getInstance().get(RECEIVEFORMAT)).value;
             switch (receiveFormat) {
                 case ccf:
                     return irSignal.ccfString();
@@ -184,7 +201,7 @@ public class Receive extends Module {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, parameters.getInteger(FALLBACKFREQUENCY));
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY));
                     List<String> result = new ArrayList<>(decodes.length);
                     for (DecodeIR.DecodedSignal decode : decodes)
                         result.add(decode.toString());
@@ -196,7 +213,7 @@ public class Receive extends Module {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, parameters.getInteger(FALLBACKFREQUENCY));
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY));
                     if (decodes.length == 0)
                         return null;
                     final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());

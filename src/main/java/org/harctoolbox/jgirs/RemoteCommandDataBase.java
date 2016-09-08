@@ -121,6 +121,21 @@ public class RemoteCommandDataBase {
         return remotes.get(remoteName);
     }
 
+    public Remote findRemote(String remoteNameFragment) throws AmbigousRemoteException {
+        if (remotes.containsKey(remoteNameFragment))
+            return remotes.get(remoteNameFragment);
+
+        Remote candidate = null;
+        for (Remote remote : remotes.values())
+            if (remote.getName().toLowerCase(Locale.US).startsWith(remoteNameFragment.toLowerCase(Locale.US))) {
+                if (candidate != null)
+                    throw new AmbigousRemoteException(remoteNameFragment);
+                candidate = remote;
+            }
+
+        return candidate;
+    }
+
     public Collection<Remote> getRemotes() {
         return remotes.values();
     }
@@ -291,6 +306,13 @@ public class RemoteCommandDataBase {
             super.clone();
             ParameterSet dolly = new ParameterSet(protocol, parameters);
             return dolly;
+        }
+    }
+
+    public static class AmbigousRemoteException extends CommandException {
+
+        public AmbigousRemoteException(String fragment) {
+            super("Name " + fragment + " matches more than one remote");
         }
     }
 }

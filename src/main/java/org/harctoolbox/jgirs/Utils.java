@@ -18,6 +18,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,12 +41,25 @@ public class Utils {
 
     public static String sortedString(Iterable<String> things) {
         List<String> list = new ArrayList<>(8);
-        for (String string : things)
-            list.add(string);
+        for (String string : things) {
+            String s = string.matches(".*\\s+.*") ? ("\"" + string + "\"") : string;
+            list.add(s);
+        }
 
         Collections.sort(list);
 
-        return String.join(" ", list);
+        return String.join(ParameterModule.getInstance().getString(ParameterModule.LISTSEPARATOR), list);
+    }
+
+    public static String sortedString(String[] things) {
+        return sortedString(Arrays.asList(things));
+    }
+
+    public static String[] tokenizer(String s) {
+        String[] toks = s.split("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+        for (int i = 0; i < toks.length; i++)
+            toks[i] = toks[i].replaceFirst("^\"", "").replaceFirst("\"$", "");
+        return toks;
     }
 
     private Utils() {

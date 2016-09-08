@@ -20,7 +20,7 @@ package org.harctoolbox.jgirs;
 /**
  * This is thrown when calling a command that the hardware does not support.
  */
-public class IncompatibleHardwareException extends JGirsException {
+public class IncompatibleHardwareException extends CommandException {
 
     IncompatibleHardwareException() {
         super("Incompatible hardware error");

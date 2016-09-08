@@ -17,16 +17,10 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-/**
- * This is thrown when a command fails.
- */
-public class ExecutionException extends CommandException {
 
-    ExecutionException() {
-        super("Execution error.");
+public class InvalidMultipleInstantiation extends RuntimeException {
+
+    public InvalidMultipleInstantiation() {
     }
 
-    ExecutionException(String str){
-        super(str);
-    }
 }

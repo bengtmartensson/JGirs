@@ -50,13 +50,15 @@ public abstract class Module {
 //    }
 
     //private final HashMap<String, ICommand> commands;
-    protected final CommandExecuter commandExecuter;
-    protected final ParameterModule parameters;
+    //protected final CommandExecuter commandExecuter;
+    //protected final ParameterModule parameters;
     //private final HashMap<String, IParameter> parameterMap;
 
-    protected Module(CommandExecuter commandExecuter, ParameterModule parameters) {
-        this.commandExecuter = commandExecuter;
-        this.parameters = parameters;
+    protected Module() {
+//        if (instance != null)
+//            throw new InvalidMultipleInstantiation();
+        //this.commandExecuter = commandExecuter;
+        //this.parameters = parameters;
         //parameters = new LinkedHashMap<>(4);
     }
 
@@ -77,7 +79,7 @@ public abstract class Module {
 
     protected final void addCommand(ICommand command) {
         //commands.put(command.getName(), command);
-        commandExecuter.add(command);
+        CommandExecuter.getMainExecutor().add(command);
     }
 
 //    public HashMap<String, IParameter> getParameters() {
@@ -85,7 +87,7 @@ public abstract class Module {
 //    }
 
     protected final void addParameter(Parameter parameter) {
-        parameters.add(parameter);
+        ParameterModule.getInstance().add(parameter);
     }
 
     List<String> getCommandNames() {
@@ -105,15 +107,13 @@ public abstract class Module {
         public ModulePars(Element element) throws ClassNotFoundException {
             className = element.getAttribute("class");
             NodeList nodeList = element.getElementsByTagName("argument");
-            classArray = new Class<?>[nodeList.getLength() + 2];
-            classArray[0] = CommandExecuter.class;
-            classArray[1] = ParameterModule.class;
-            objectArray = new Object[nodeList.getLength() + 2];
+            classArray = new Class<?>[nodeList.getLength()];
+            objectArray = new Object[nodeList.getLength()];
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Element e = (Element) nodeList.item(i);
                 String type = e.getAttribute("type");
-                classArray[i + 2] = Utils.name2class(type);
-                objectArray[i + 2] = Utils.parseObject(type, e.getTextContent());
+                classArray[i] = Utils.name2class(type);
+                objectArray[i] = Utils.parseObject(type, e.getTextContent());
             }
         }
 
@@ -123,9 +123,7 @@ public abstract class Module {
 //            this.objectArray = objectArray;
 //        }
 
-        public Module instantiate(CommandExecuter commandExecutor, ParameterModule parameters) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            objectArray[0] = commandExecutor;
-            objectArray[1] = parameters;
+        public Module instantiate() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
             String fullHardwareClassName = (className.contains(".") ? "" : "org.harctoolbox.jgirs.") + className;
             Class<?> clazz = Class.forName(fullHardwareClassName);
             Constructor<?> constructor = clazz.getConstructor(classArray);

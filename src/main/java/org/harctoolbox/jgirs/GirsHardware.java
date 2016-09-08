@@ -37,6 +37,10 @@ import org.w3c.dom.NodeList;
 
 public final class GirsHardware {
 
+    private static GirsHardware defaultTransmittingHardware = null;
+    private static GirsHardware defaultReceivingHardware = null;
+    private static GirsHardware defaultCapturingHardware = null;
+
 //    public static List<GirsHardware> singleHardware(List<String> params) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
 //        List<GirsHardware> list = new ArrayList<>(1);
 //        GirsHardware irHardware = new GirsHardware(params, "default", true, true);
@@ -92,16 +96,60 @@ public final class GirsHardware {
         return newIrHardware(list.get(0), classArray, objectArray);
     }
 
+    /**
+     * @return the defaultSendingHardware
+     */
+    public static GirsHardware getDefaultTransmittingHardware() {
+        return defaultTransmittingHardware;
+    }
+
+    /**
+     * @param aDefaultSendingHardware the defaultSendingHardware to set
+     */
+    public static void setDefaultTransmittingHardware(GirsHardware aDefaultSendingHardware) {
+        defaultTransmittingHardware = aDefaultSendingHardware;
+    }
+
+    /**
+     * @return the defaultReceivingHardware
+     */
+    public static GirsHardware getDefaultReceivingHardware() {
+        return defaultReceivingHardware;
+    }
+
+    /**
+     * @param aDefaultReceivingHardware the defaultReceivingHardware to set
+     */
+    public static void setDefaultReceivingHardware(GirsHardware aDefaultReceivingHardware) {
+        defaultReceivingHardware = aDefaultReceivingHardware;
+    }
+
+    /**
+     * @return the defaultCapturingHardware
+     */
+    public static GirsHardware getDefaultCapturingHardware() {
+        return defaultCapturingHardware;
+    }
+
+    /**
+     * @param aDefaultCapturingHardware the defaultCapturingHardware to set
+     */
+    public static void setDefaultCapturingHardware(GirsHardware aDefaultCapturingHardware) {
+        defaultCapturingHardware = aDefaultCapturingHardware;
+    }
+
     private IHarcHardware hardware;
     private String url;
     private String description;
     private String name;
     private boolean outputDefault;
-    private boolean inputDefault;
+    private boolean capturingDefault;
+    private boolean receivingDefault;
 
     private GirsHardware() {
         this.outputDefault = false;
-        this.inputDefault = false;
+        this.capturingDefault = false;
+        this.receivingDefault = false;
         this.description = null;
         this.url = null;
         this.name = null;
@@ -114,7 +162,8 @@ public final class GirsHardware {
     }
 
     public GirsHardware(Element element) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        inputDefault = Boolean.parseBoolean(element.getAttribute("inputdefault"));
+        capturingDefault = Boolean.parseBoolean(element.getAttribute("capturingdefault"));
+        receivingDefault = Boolean.parseBoolean(element.getAttribute("receivingdefault"));
         outputDefault = Boolean.parseBoolean(element.getAttribute("outputdefault"));
         name = element.getAttribute("name");
         description = getChildContent(element, "description");
@@ -132,8 +181,9 @@ public final class GirsHardware {
         hardware = newIrHardware(element.getAttribute("class"), classArray, objectArray);
     }
 
-    GirsHardware(List<String> params, String name, boolean inputDefault, boolean outputDefault) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        this.inputDefault = inputDefault;
+    GirsHardware(List<String> params, String name, boolean capturingDefault, boolean receivingDefault, boolean outputDefault) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
+        this.capturingDefault = capturingDefault;
+        this.receivingDefault = receivingDefault;
         this.outputDefault = outputDefault;
         this.name = name;
         description = null;
@@ -142,13 +192,13 @@ public final class GirsHardware {
     }
 
     GirsHardware(GirsHardware orig) {
-        super();
         copyFrom(orig);
     }
 
     void copyFrom(GirsHardware orig) {
         this.outputDefault = orig.outputDefault;
-        this.inputDefault = orig.inputDefault;
+        this.capturingDefault = orig.capturingDefault;
+        this.receivingDefault = orig.receivingDefault;
         this.description = orig.description;
         this.url = orig.url;
         this.name = orig.name;
@@ -187,8 +237,12 @@ public final class GirsHardware {
         return outputDefault;
     }
 
-    boolean isInputDefault() {
-        return inputDefault;
+    boolean isCapturingDefault() {
+        return capturingDefault;
+    }
+
+    boolean isReceivingDefault() {
+        return receivingDefault;
     }
 
 //    private Object[] toObjects(List<String> parameters) {

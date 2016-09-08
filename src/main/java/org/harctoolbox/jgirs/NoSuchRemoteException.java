@@ -20,7 +20,7 @@ package org.harctoolbox.jgirs;
 /**
  * Thrown if a non-existing remote is requested.
  */
-public class NoSuchRemoteException extends JGirsException {
+public class NoSuchRemoteException extends CommandException {
 
     public NoSuchRemoteException(String remoteName) {
         super("No such remote " + remoteName);

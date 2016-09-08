@@ -33,10 +33,15 @@ import org.harctoolbox.IrpMaster.UnknownProtocolException;
  * Implements rendering commands.
  */
 public class Renderer extends Module {
+
+//    static Renderer newRenderer(String path) throws FileNotFoundException, IncompatibleArgumentException {
+//        instance = new Renderer(path);
+//        return (Renderer) instance;
+//    }
     private IrpMaster irpMaster;
 
-    public Renderer(CommandExecuter commandExecuter, ParameterModule parameters, String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
-        super(commandExecuter, parameters);
+    public Renderer(String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
+        super();
         if (irpMasterIniName == null)
             throw new NullPointerException();
         irpMaster = new IrpMaster(irpMasterIniName);
@@ -61,7 +66,7 @@ public class Renderer extends Module {
 
         @Override
         public String exec(String[] args) {
-            return String.join(" ", irpMaster.getNames());
+            return Utils.sortedString(irpMaster.getNames());
         }
     }
 }

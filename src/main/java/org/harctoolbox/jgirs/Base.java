@@ -24,24 +24,30 @@ import java.io.IOException;
  */
 public class Base extends Module {
 
-    static final String goodbyeWord = "Bye!";
+    public static final String goodbyeWord = "Bye!";
+    private static volatile Base instance = null;
+
+    static Base newBase() {
+        if (instance != null)
+            throw new InvalidMultipleInstantiation();
+
+        instance = new Base();
+        return instance;
+    }
 
 //    private final HashMap<String, Module> modules;
     //private final CommandExecuter commandExecuter;
 //    private final IHarcHardware hardware;
     private boolean quitRequested = false;
 
-    private final Engine engine;
-
-    public Base(CommandExecuter commandExecuter, ParameterModule parameters, Engine engine) {
-        super(commandExecuter, parameters);
+    private Base() {
+        super();
         addCommand(new VersionCommand());
         addCommand(new ModulesCommand());
         addCommand(new LicenseCommand());
         addCommand(new GirsCommandsCommand());
         addCommand(new QuitCommand());
-        addParameter(new StringParameter("listseparator", ";", "String to be used between entries in list"));
-        this.engine = engine;
+//        this.engine = engine;
 //        this.hardware = hardware;
 //        this.modules = modules;
         //this.commandExecuter = commandExecuter;
@@ -76,6 +82,33 @@ public class Base extends Module {
             return Version.versionString;
         }
     }
+
+    private static class ModulesCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "modules";
+        }
+
+        @Override
+        public String exec(String[] args) {
+            return Utils.sortedString(Engine.getInstance().getModuleNames());
+        }
+    }
+
+    private static class GirsCommandsCommand implements ICommand {
+        @Override
+        public String getName() {
+            return "girscommands";
+        }
+
+        @Override
+        public String exec(String[] args) throws CommandSyntaxException {
+            if (args.length > 1)
+                throw new CommandSyntaxException(args[0], 0);
+            return Utils.sortedString(CommandExecuter.getMainExecutor().getCommandNames());
+        }
+    }
     private class QuitCommand implements ICommand {
 
         @Override
@@ -87,33 +120,6 @@ public class Base extends Module {
         public String exec(String[] args) {
             quitRequested = true;
             return goodbyeWord;
-        }
-    }
-
-    private class ModulesCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "modules";
-        }
-
-        @Override
-        public String exec(String[] args) {
-            return Utils.sortedString(engine.getModuleNames());
-        }
-    }
-
-    private class GirsCommandsCommand implements ICommand {
-        @Override
-        public String getName() {
-            return "commands";
-        }
-
-        @Override
-        public String exec(String[] args) throws CommandSyntaxException {
-            if (args.length > 1)
-                throw new CommandSyntaxException(args[0], 0);
-            return Utils.sortedString(commandExecuter.getCommandNames());
         }
     }
 }

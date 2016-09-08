@@ -30,24 +30,16 @@ import org.harctoolbox.harchardware.HarcHardwareException;
  */
 public class CommandExecuter {
 
-    private final HashMap<String, ICommand> commandMap;
-    private final Engine engine;
+    private static final CommandExecuter mainExecuter = new CommandExecuter();
 
-    public CommandExecuter(Engine engine) {
-        this.engine = engine;
-        commandMap = new HashMap<>(8);
+    public static CommandExecuter getMainExecutor() {
+        return mainExecuter;
     }
+
+    private final HashMap<String, ICommand> commandMap;
 
     public CommandExecuter() {
-        this(null);
-    }
-
-    public Engine getEngine() {
-        return engine;
-    }
-
-    public boolean isVerbosity() {
-        return engine.isVerbosity();
+        commandMap = new HashMap<>(8);
     }
 
     public Set<String> getCommandNames() {
