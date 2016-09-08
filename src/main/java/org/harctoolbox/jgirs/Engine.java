@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,6 +51,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
     private static final CommandLineArgs commandLineArgs = new CommandLineArgs();
 
     private static final String IRPPROTOCOLSINI = "irpProtocolsIni";
+
+    public  static final String OKSTRING = "OK";
 
     private static void usage(int exitcode) {
         StringBuilder str = new StringBuilder(128);
@@ -136,8 +137,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 // shoot one command
                 try {
                     for (int i = 0; i < commandLineArgs.count; i++) {
-                        String[] result = engine.eval(String.join(" ", commandLineArgs.parameters));
-                        System.out.println(result == null ? "FAIL" : result.length == 0 ? "SUCCESS" : result);
+                        String result = engine.eval(String.join(" ", commandLineArgs.parameters));
+                        System.out.println(result == null ? "FAIL" : result.isEmpty() ? "SUCCESS" : result);
                     }
                 } catch (IOException | HarcHardwareException | IrpMasterException | JGirsException ex) {
                     logger.log(Level.SEVERE, null, ex);
@@ -154,7 +155,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     // Speical modules
     private final Base base;
-    private final Parameters parameters;
+    private final ParameterModule parameters;
     private NamedRemotes namedRemotes;
     private Renderer renderer;
     private final Irp irp;
@@ -186,10 +187,10 @@ public final class Engine implements ICommandLineDevice, Closeable {
         currentInputGirsHardware = new GirsHardware(config.getDefaultInputHardware());
         //this.namedCommand = namedCommand;
         modules = new LinkedHashMap<>(16);
-        commandExecuter = new CommandExecuter();
+        commandExecuter = new CommandExecuter(this);
 
         // Set up the special modules
-        parameters = new Parameters(commandExecuter);
+        parameters = new ParameterModule(commandExecuter);
         registerModule(parameters);
         base = new Base(commandExecuter, parameters, this);
         registerModule(base);
@@ -214,7 +215,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         //if (currentGirsHardware.getHardware() instanceof ICapture)
         registerModule(new Capture(commandExecuter, parameters));
         //if (currentGirsHardware.getHardware() instanceof IReceive)
-        registerModule(new Receive(commandExecuter, parameters, namedRemotes));
+        registerModule(new Receive(commandExecuter, parameters, currentInputGirsHardware, namedRemotes));
         //registerModule(Transmit.newTransmit(currentGirsHardware.getHardware(), renderer, irp, namedRemotes));
 
         config.getModuleList().stream().forEach((module) -> {
@@ -224,6 +225,12 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 logger.log(Level.SEVERE, null, ex);
             }
         });
+
+        // May override values in the code
+        for (org.harctoolbox.jgirs.Parameter parameter : config.getOptions())
+            parameters.add(parameter);
+
+        outBuffer.add(Version.versionString);
     }
 
     @Override
@@ -249,18 +256,18 @@ public final class Engine implements ICommandLineDevice, Closeable {
     @Override
     public synchronized void sendString(String cmd) throws IOException {
         try {
-            String[] result = eval(cmd);
-            outBuffer.addAll(Arrays.asList(result)); //outBuffer.addAll(eval(cmd));
+            String result = eval(cmd);
+            outBuffer.add(result);//All(Arrays.asList(result)); //outBuffer.addAll(eval(cmd));
             //for (String str : result)
             //    out.println(str);
-            } catch (JGirsException ex) {
-                outBuffer.add("ERROR: " + ex.getMessage());
-                //if (NoSuchCommandException.class.isInstance(ex)
-                //        || AmbigousCommandException.class.isInstance(ex))
-                //    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
-            } catch (IOException | HarcHardwareException | IrpMasterException ex) {
-                logger.log(Level.SEVERE, null, ex);
-            }
+        } catch (JGirsException ex) {
+            outBuffer.add("ERROR: " + ex.getMessage());
+            //if (NoSuchCommandException.class.isInstance(ex)
+            //        || AmbigousCommandException.class.isInstance(ex))
+            //    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
+        } catch (IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -346,9 +353,16 @@ public final class Engine implements ICommandLineDevice, Closeable {
 //        return base.isQuitRequested();
 //    }
 
-    private String[] eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+    private String eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+        if (command.trim().isEmpty())
+            return OKSTRING;
+
         String[] tokens = command.split("\\s+");
         return commandExecuter.exec(tokens);
+    }
+
+    public boolean isVerbosity() {
+        return verbosity;
     }
 
     private final static class CommandLineArgs {

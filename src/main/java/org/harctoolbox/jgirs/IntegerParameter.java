@@ -20,19 +20,16 @@ package org.harctoolbox.jgirs;
 /**
  *
  */
-abstract class IntegerParameter implements IParameter {
+final class IntegerParameter extends Parameter {
+
     private int value;
+    //private IntegerParameter() {}
 
-    private IntegerParameter() {}
-
-    IntegerParameter(int initValue) {
+    IntegerParameter(String name, int initValue, String documentation) {
+        super(name, documentation);
         this.value = initValue;
     }
 
-    @Override
-    public void set(String str) {
-        value = Integer.parseInt(str);
-    }
 
     public void set(int val) {
         value = val;
@@ -45,12 +42,7 @@ abstract class IntegerParameter implements IParameter {
 
     @Override
     public String get() {
-        return Integer.toString(getValue());
-    }
-
-    @Override
-    public String toString() {
-        return getName() + "=" + get();
+        return Integer.toString(value);
     }
 
     /**
@@ -59,4 +51,10 @@ abstract class IntegerParameter implements IParameter {
     public int getValue() {
         return value;
     }
+
+    @Override
+    public void set(String str) {
+        value = Integer.parseInt(str);
+    }
+
 }

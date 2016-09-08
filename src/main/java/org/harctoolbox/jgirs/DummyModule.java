@@ -26,13 +26,14 @@ public class DummyModule extends Module {
 
     private final String nonsense;
 
-    public DummyModule(CommandExecuter commandExecutor, Parameters parameters, String nonsense) {
+    public DummyModule(CommandExecuter commandExecutor, ParameterModule parameters, String nonsense) {
         super(commandExecutor, parameters);
         this.nonsense = nonsense;
         addCommand(new DateCommand());
+        addCommand(new NonsenseCommand());
     }
 
-    public DummyModule(CommandExecuter commandExecutor, Parameters parameters) {
+    public DummyModule(CommandExecuter commandExecutor, ParameterModule parameters) {
         this(commandExecutor, parameters, null);
     }
 
@@ -44,8 +45,8 @@ public class DummyModule extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
-            return new String[] { (new Date()).toString() };
+        public String exec(String[] args) {
+            return (new Date()).toString();
         }
     }
 
@@ -57,8 +58,8 @@ public class DummyModule extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
-            return new String[] { nonsense };
+        public String exec(String[] args) {
+            return nonsense;
         }
     }
 }

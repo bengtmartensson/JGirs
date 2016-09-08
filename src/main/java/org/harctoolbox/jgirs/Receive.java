@@ -18,6 +18,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.harctoolbox.IrpMaster.DecodeIR;
 import org.harctoolbox.IrpMaster.IrSequence;
 import org.harctoolbox.IrpMaster.IrSignal;
@@ -30,13 +32,27 @@ import org.harctoolbox.harchardware.ir.IReceive;
  * This class implements the receiving commands.
  */
 public class Receive extends Module {
-    private final static String defaultReceiveFormat = "named-command";
+    private static final int defaultReceiveBeginTimeout = 2000;
+    private static final int defaultReceiveEndingTimeout = 30;
+    private static final int defaultReceiveLength = 400;
+    private static final ReceiveFormat defaultReceiveFormat = ReceiveFormat.raw;
 
-    private final IReceive hardware;
-    private final TimeoutParameter timeoutParameter = null;
-    private final FallbackFrequencyParameter fallbackFrequencyParameter = null;
-    private final ReceiveFormatParameter receiveFormatParameter = null;
+    public static final String RECEIVEBEGINTIMEOUT = "receivebegintimeout";
+    public static final String RECEIVEENDTIMEOUT = "receiveendtimeout";
+    public static final String RECEIVELENGTH = "receivelength";
+    public static final String FALLBACKFREQUENCY = "fallbackfrequency";
+    public static final String RECEIVEFORMAT = "receiveformat";
+
+    //private IReceive hardware;
+//    private IntegerParameter beginTimeout;
+//    private IntegerParameter receiveLength;
+//    private IntegerParameter endingTimeout;
+//    private IntegerParameter fallbackFrequency;
+//    private ReceiveFormatParameter receiveFormat;
+
     private final NamedRemotes namedRemotes;
+    //private ReceiveFormat receiveFormat;
+    private final GirsHardware girsHardware;
 
 //    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
 //        this.namedRemotes = namedRemotes;
@@ -51,60 +67,91 @@ public class Receive extends Module {
 //
 //    }
 
-    Receive(CommandExecuter commandExecuter, Parameters parameters, NamedRemotes namedRemotes) {
+    Receive(CommandExecuter commandExecuter, ParameterModule parameters, GirsHardware girsHardware, NamedRemotes namedRemotes) {
         super(commandExecuter, parameters);
         this.namedRemotes = namedRemotes;
-        hardware = null; // FIXME
+        this.girsHardware = girsHardware;
+        addCommand(new ReceiveCommand());
+
+        addParameter(new IntegerParameter(RECEIVEBEGINTIMEOUT, defaultReceiveBeginTimeout, "begin timeout for receive"));
+        addParameter(new IntegerParameter(RECEIVELENGTH, defaultReceiveLength, "max number of durations in receive"));
+        addParameter(new IntegerParameter(RECEIVEENDTIMEOUT, defaultReceiveEndingTimeout, "ending timeout for receive"));
+        addParameter(new IntegerParameter(FALLBACKFREQUENCY, (int) IrpUtils.defaultFrequency,
+                "Fallback frequency (in Hz) to be used in absence of a measurement."));
+        addParameter(new ReceiveFormatParameter("receiveformat", defaultReceiveFormat,
+                "Format of received codes (to the extent possible). Possible values are: raw, ccf, protocolparameter, namedcommand"));
     }
 
-    private static class TimeoutParameter extends IntegerParameter {
+    public static enum ReceiveFormat {
+        raw,
+        ccf,
+        protocolparameter,
+        namedcommand;
+    };
 
-        TimeoutParameter(int initValue) {
-            super(initValue);
+//    private static class TimeoutParameter extends IntegerParameter {
+//
+//        TimeoutParameter(int initValue) {
+//            super(initValue);
+//        }
+//        @Override
+//        public String getName() {
+//            return "receivetimeout";
+//        }
+//
+//        @Override
+//        public String getDocumentation() {
+//            return "Timeout in milliseconds";
+//        }
+//    }
+
+//    private static class FallbackFrequencyParameter extends IntegerParameter {
+//
+//        FallbackFrequencyParameter(int initValue) {
+//            super(initValue);
+//        }
+//
+//        @Override
+//        public String getName() {
+//            return "defaultfrequency";
+//        }
+//
+//        @Override
+//        public String getDocumentation() {
+//            return "Fallback frequency to be used in absence of a measurement.";
+//        }
+//    }
+
+    private static class ReceiveFormatParameter extends Parameter {
+
+        ReceiveFormat value;
+
+        ReceiveFormatParameter(String name, ReceiveFormat initValue, String documentation) {
+            super(name, documentation);
+            value = initValue;
         }
+
         @Override
-        public String getName() {
-            return "receivetimeout";
+        public void set(String str) {
+            set(ReceiveFormat.valueOf(str));
+        }
+
+        public void set(ReceiveFormat receiveFormat) {
+            value = receiveFormat;
         }
 
         @Override
-        public String getDocumentation() {
-            return "Timeout in milliseconds";
-        }
-    }
-
-    private static class FallbackFrequencyParameter extends IntegerParameter {
-
-        FallbackFrequencyParameter(int initValue) {
-            super(initValue);
+        public void set(Object value) {
+            this.value = (ReceiveFormat) value;
         }
 
         @Override
-        public String getName() {
-            return "defaultfrequency";
+        public String get() {
+            return value.toString();
         }
 
-        @Override
-        public String getDocumentation() {
-            return "Fallback frequency to be used in absence of a measurement.";
-        }
-    }
-
-    private static class ReceiveFormatParameter extends StringParameter {
-
-        ReceiveFormatParameter(String initValue) {
-            super(initValue);
-        }
-
-        @Override
-        public String getName() {
-            return "receiveformat";
-        }
-
-        @Override
-        public String getDocumentation() {
-            return "Format of received codes (as long as possible). Possible values are: "
-                    + "raw, ccf, protocol-parameter, named-command";
+        public ReceiveFormat getValue() {
+            return value;
         }
     }
 
@@ -116,39 +163,49 @@ public class Receive extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
-            hardware.setTimeout(timeoutParameter.getValue());
+        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException {
+            if (!(girsHardware.getHardware() instanceof IReceive))
+                throw new IncompatibleHardwareException("IReceive");
+            IReceive hardware = (IReceive) girsHardware.getHardware();
+            hardware.setVerbosity(commandExecuter.isVerbosity());
+            if (!hardware.isValid())
+                hardware.open();
+
+            hardware.setBeginTimeout(parameters.getInteger(RECEIVEBEGINTIMEOUT));
             final IrSequence irSequence = hardware.receive();
 
-            final IrSignal irSignal = new IrSignal(fallbackFrequencyParameter.getValue(), IrpUtils.invalid, irSequence, null, null);
-            switch (receiveFormatParameter.getValue()) {
-                case "ccf":
-                    return new String[] { irSignal.ccfString() };
-                case "protocol-parameter":
+            final IrSignal irSignal = new IrSignal(parameters.getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
+            ReceiveFormat receiveFormat = ((ReceiveFormatParameter) parameters.get(RECEIVEFORMAT)).value;
+            switch (receiveFormat) {
+                case ccf:
+                    return irSignal.ccfString();
+                case protocolparameter:
                 {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.getValue());
-                    String[] result = new String[decodes.length];
-                    for (int i = 0; i < decodes.length; i++)
-                        result[i] = decodes[i].toString();
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, parameters.getInteger(FALLBACKFREQUENCY));
+                    List<String> result = new ArrayList<>(decodes.length);
+                    for (DecodeIR.DecodedSignal decode : decodes)
+                        result.add(decode.toString());
 
-                    return result;
+                    return String.join(";", result);
                 }
-                case "named-command":
+                case namedcommand:
                 {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, fallbackFrequencyParameter.getValue());
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, parameters.getInteger(FALLBACKFREQUENCY));
                     if (decodes.length == 0)
                         return null;
                     final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
-                    return cmd != null ? new String[] { cmd.toString() } : null;
+                    return cmd != null ? cmd.toString() : null;
                 }
+                case raw:
+                    return irSequence.toPrintString(true, false);
                 default:
-                    return new String[] { irSequence.toPrintString(true, false) };
+                    throw new RuntimeException("Programming error");
             }
         }
     }

@@ -31,7 +31,7 @@ import org.harctoolbox.IrpMaster.UnassignedException;
  */
 public class Irp extends Module {
 
-    public Irp(CommandExecuter commandExecuter, Parameters parameters) {
+    public Irp(CommandExecuter commandExecuter, ParameterModule parameters) {
         super(commandExecuter, parameters);
     }
 

@@ -51,12 +51,12 @@ public abstract class Module {
 
     //private final HashMap<String, ICommand> commands;
     protected final CommandExecuter commandExecuter;
-    protected final Parameters parametersModule;
+    protected final ParameterModule parameters;
     //private final HashMap<String, IParameter> parameterMap;
 
-    protected Module(CommandExecuter commandExecuter, Parameters parametersModule) {
+    protected Module(CommandExecuter commandExecuter, ParameterModule parameters) {
         this.commandExecuter = commandExecuter;
-        this.parametersModule = parametersModule;
+        this.parameters = parameters;
         //parameters = new LinkedHashMap<>(4);
     }
 
@@ -84,8 +84,8 @@ public abstract class Module {
 //        return parameters;
 //    }
 
-    protected final void addParameter(IParameter parameter) {
-        parametersModule.add(parameter);
+    protected final void addParameter(Parameter parameter) {
+        parameters.add(parameter);
     }
 
     List<String> getCommandNames() {
@@ -107,7 +107,7 @@ public abstract class Module {
             NodeList nodeList = element.getElementsByTagName("argument");
             classArray = new Class<?>[nodeList.getLength() + 2];
             classArray[0] = CommandExecuter.class;
-            classArray[1] = Parameters.class;
+            classArray[1] = ParameterModule.class;
             objectArray = new Object[nodeList.getLength() + 2];
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Element e = (Element) nodeList.item(i);
@@ -123,7 +123,7 @@ public abstract class Module {
 //            this.objectArray = objectArray;
 //        }
 
-        public Module instantiate(CommandExecuter commandExecutor, Parameters parameters) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        public Module instantiate(CommandExecuter commandExecutor, ParameterModule parameters) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             objectArray[0] = commandExecutor;
             objectArray[1] = parameters;
             String fullHardwareClassName = (className.contains(".") ? "" : "org.harctoolbox.jgirs.") + className;

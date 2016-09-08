@@ -59,18 +59,18 @@ public class NamedRemotes extends Module {
     //private final RemoteSet remoteSet;
     private final RemoteCommandDataBase database;
 
-    public NamedRemotes(CommandExecuter commandExecuter, Parameters parameters, Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+    public NamedRemotes(CommandExecuter commandExecuter, ParameterModule parameters, Iterable<RemoteSet> remoteSets) throws IrpMasterException {
         super(commandExecuter, parameters);
         this.database = new RemoteCommandDataBase(remoteSets, caseInsensitive);
         addCommand(new RemotesCommand());
         addCommand(new CommandsCommand());
     }
 
-    public NamedRemotes(CommandExecuter commandExecuter, Parameters parameters, List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+    public NamedRemotes(CommandExecuter commandExecuter, ParameterModule parameters, List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
         this(commandExecuter, parameters, readRemoteSet(files));
     }
 
-    public NamedRemotes(CommandExecuter commandExecuter, Parameters parameters, RemoteCommandDataBase remoteCommandsDataBase) {
+    public NamedRemotes(CommandExecuter commandExecuter, ParameterModule parameters, RemoteCommandDataBase remoteCommandsDataBase) {
         super(commandExecuter, parameters);
         this.database = remoteCommandsDataBase;
     }
@@ -102,14 +102,15 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
+        public String exec(String[] args) {
             Collection<Remote> collection = database.getRemotes();
-            String[] result = new String[collection.size()];
+            List<String> result = new ArrayList<>(collection.size());
             int i = 0;
-            for (Remote remote : collection)
-                result[i++] = remote.getName();
+            collection.stream().forEach((remote) -> {
+                result.add(remote.getName());
+            });
 
-            return result;
+            return String.join(" ", result);
         }
     }
 
@@ -121,14 +122,14 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException {
+        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException {
             if (args.length <= 1)
                 throw new CommandSyntaxException("No remote given");
             String remoteName = args[1];
             Remote remote = database.getRemote(remoteName);
             if (remote == null)
                 throw new NoSuchRemoteException(remoteName);
-            return remote.getCommands().keySet().toArray(new String[remote.getCommands().size()]);
+            return String.join(" ", remote.getCommands().keySet());
         }
     }
 }

@@ -20,13 +20,14 @@ package org.harctoolbox.jgirs;
 /**
  * Class for boolean parameters.
  */
-abstract class BooleanParameter implements IParameter {
+final class BooleanParameter extends Parameter {
 
     private boolean value;
 
-    private BooleanParameter() {}
+    //private BooleanParameter() {}
 
-    BooleanParameter(boolean initValue) {
+    BooleanParameter(String name, boolean initValue, String documentation) {
+        super(name, documentation);
         this.value = initValue;
     }
 
@@ -47,11 +48,6 @@ abstract class BooleanParameter implements IParameter {
     @Override
     public String get() {
         return Boolean.toString(value);
-    }
-
-    @Override
-    public String toString() {
-        return getName() + "=" + get();
     }
 
     /**

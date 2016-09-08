@@ -72,6 +72,7 @@ public class ConfigFile {
     private final HashMap<String, Integer> integerOptions;
     private final HashMap<String, String> stringOptions;
     private final HashMap<String, Boolean> booleanOptions;
+    private final List<Parameter> optionsList;
 
     public ConfigFile() {
         remoteCommandsDataBase = new RemoteCommandDataBase(true);
@@ -80,6 +81,7 @@ public class ConfigFile {
         integerOptions = new HashMap<>(4);
         booleanOptions = new HashMap<>(4);
         stringOptions = new HashMap<>(16);
+        optionsList = new ArrayList<>(16);
     }
 
     public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, IrpMasterException {
@@ -115,18 +117,24 @@ public class ConfigFile {
             String name = e.getAttribute("name");
             String type = e.getAttribute("type");
             String value = e.getTextContent();
+            Parameter parameter;
             switch (type) {
                 case "int":
                     integerOptions.put(name, Integer.parseInt(value));
+                    parameter = new IntegerParameter(name, Integer.parseInt(value), null);
                     break;
                 case "boolean":
                     booleanOptions.put(name, Boolean.parseBoolean(value));
+                    parameter = new BooleanParameter(name, Boolean.parseBoolean(value), null);
                     break;
                 default: // String
                     stringOptions.put(name, value);
+                    parameter = new StringParameter(name, value, null);
                     break;
             }
+            optionsList.add(parameter);
         }
+        Collections.sort(optionsList, new Parameter.ParameterNameComparator());
     }
 
     public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException {
@@ -242,6 +250,10 @@ public class ConfigFile {
             else
                 System.load(path);
         }
+    }
+
+    List<Parameter> getOptions() {
+        return Collections.unmodifiableList(optionsList);
     }
 
     public static class NoSuchRemoteTypeException extends Exception {

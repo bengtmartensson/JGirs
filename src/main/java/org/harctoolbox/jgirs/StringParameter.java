@@ -22,12 +22,12 @@ import java.util.Locale;
 /**
  * Parameters that consist of a String.
  */
-abstract class StringParameter implements IParameter {
+final class StringParameter extends Parameter {
+
     private String value;
 
-    private StringParameter() {}
-
-    StringParameter(String initValue) {
+    StringParameter(String name, String initValue, String documentation) {
+        super(name, documentation);
         this.value = initValue;
     }
 
@@ -44,11 +44,6 @@ abstract class StringParameter implements IParameter {
     @Override
     public String get() {
         return value;
-    }
-
-    @Override
-    public String toString() {
-        return getName() + "=" + get();
     }
 
     /**

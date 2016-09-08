@@ -17,6 +17,10 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 public class Utils {
 
@@ -32,6 +36,16 @@ public class Utils {
                 : type.equals("boolean") ? boolean.class
                 : type.equalsIgnoreCase("string") || type.isEmpty() ? String.class
                 : Class.forName(type);
+    }
+
+    public static String sortedString(Iterable<String> things) {
+        List<String> list = new ArrayList<>(8);
+        for (String string : things)
+            list.add(string);
+
+        Collections.sort(list);
+
+        return String.join(" ", list);
     }
 
     private Utils() {

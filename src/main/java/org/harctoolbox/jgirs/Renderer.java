@@ -19,7 +19,6 @@ package org.harctoolbox.jgirs;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.Set;
 import org.harctoolbox.IrpMaster.DomainViolationException;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.InvalidRepeatException;
@@ -36,7 +35,7 @@ import org.harctoolbox.IrpMaster.UnknownProtocolException;
 public class Renderer extends Module {
     private IrpMaster irpMaster;
 
-    public Renderer(CommandExecuter commandExecuter, Parameters parameters, String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
+    public Renderer(CommandExecuter commandExecuter, ParameterModule parameters, String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
         super(commandExecuter, parameters);
         if (irpMasterIniName == null)
             throw new NullPointerException();
@@ -61,9 +60,8 @@ public class Renderer extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
-            Set<String> result = irpMaster.getNames();
-            return result.toArray(new String[result.size()]);
+        public String exec(String[] args) {
+            return String.join(" ", irpMaster.getNames());
         }
     }
 }

@@ -29,10 +29,10 @@ import org.harctoolbox.harchardware.ir.ICapture;
 public class Capture extends Module {
 
     private final ICapture hardware;
-    private final StartTimeoutParameter startTimeoutParameter = null;
-    private final MaxCaptureLengthParameter maxCaptureLengthParameter = null;
-    private final EndTimeoutParameter endTimeoutParameter = null;
-    private final UseCcfCaptureParameter useCcfCaptureParameter = null;
+//    private final StartTimeoutParameter startTimeoutParameter = null;
+//    private final MaxCaptureLengthParameter maxCaptureLengthParameter = null;
+//    private final EndTimeoutParameter endTimeoutParameter = null;
+//    private final UseCcfCaptureParameter useCcfCaptureParameter = null;
     //private Engine engine;
 
 //    public Capture(ICapture capture) {
@@ -48,7 +48,7 @@ public class Capture extends Module {
 //        addParameter(useCcfCaptureParameter);
 //    }
 
-    public Capture(CommandExecuter commandExecuter, Parameters parameters) {
+    public Capture(CommandExecuter commandExecuter, ParameterModule parameters) {
         super(commandExecuter, parameters);
         //this.engine = engine;
         this.hardware = null;//capture;
@@ -63,70 +63,70 @@ public class Capture extends Module {
 //        addParameter(useCcfCaptureParameter);
     }
 
-    private static class StartTimeoutParameter extends IntegerParameter {
-
-        StartTimeoutParameter(int initValue) {
-            super(initValue);
-        }
-        @Override
-        public String getName() {
-            return "starttimeout";
-        }
-
-        @Override
-        public String getDocumentation() {
-            return "Timeout in milliseconds while waiting for first pulse";
-        }
-    }
-
-    private static class MaxCaptureLengthParameter extends IntegerParameter {
-
-        MaxCaptureLengthParameter(int initValue) {
-            super(initValue);
-        }
-        @Override
-        public String getName() {
-            return "maxcapturelength";
-        }
-
-        @Override
-        public String getDocumentation() {
-            return "Maximal capture length in milliseconds";
-        }
-    }
-
-    private static class EndTimeoutParameter extends IntegerParameter {
-
-        EndTimeoutParameter(int initValue) {
-            super(initValue);
-        }
-        @Override
-        public String getName() {
-            return "endtimeout";
-        }
-
-        @Override
-        public String getDocumentation() {
-            return "Requred silece at end of capture";
-        }
-    }
-
-    private static class UseCcfCaptureParameter extends BooleanParameter {
-
-        UseCcfCaptureParameter(boolean initValue) {
-            super(initValue);
-        }
-
-        @Override
-        public String getName() {
-            return "useccfcapture";
-        }
-
-        @Override
-        public String getDocumentation() {
-            return "If true, present captures in CCF form.";
-        }
-    }
+//    private static class StartTimeoutParameter extends IntegerParameter {
+//
+//        StartTimeoutParameter(int initValue) {
+//            super(initValue);
+//        }
+//        @Override
+//        public String getName() {
+//            return "starttimeout";
+//        }
+//
+//        @Override
+//        public String getDocumentation() {
+//            return "Timeout in milliseconds while waiting for first pulse";
+//        }
+//    }
+//
+//    private static class MaxCaptureLengthParameter extends IntegerParameter {
+//
+//        MaxCaptureLengthParameter(int initValue) {
+//            super(initValue);
+//        }
+//        @Override
+//        public String getName() {
+//            return "maxcapturelength";
+//        }
+//
+//        @Override
+//        public String getDocumentation() {
+//            return "Maximal capture length in milliseconds";
+//        }
+//    }
+//
+//    private static class EndTimeoutParameter extends IntegerParameter {
+//
+//        EndTimeoutParameter(int initValue) {
+//            super(initValue);
+//        }
+//        @Override
+//        public String getName() {
+//            return "endtimeout";
+//        }
+//
+//        @Override
+//        public String getDocumentation() {
+//            return "Requred silece at end of capture";
+//        }
+//    }
+//
+//    private static class UseCcfCaptureParameter extends BooleanParameter {
+//
+//        UseCcfCaptureParameter(boolean initValue) {
+//            super(initValue);
+//        }
+//
+//        @Override
+//        public String getName() {
+//            return "useccfcapture";
+//        }
+//
+//        @Override
+//        public String getDocumentation() {
+//            return "If true, present captures in CCF form.";
+//        }
+//    }
 
     private class AnalyzeCommand implements ICommand {
 
@@ -136,10 +136,10 @@ public class Capture extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
+        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             final ModulatedIrSequence irSequence = hardware.capture();
-            return new String[] { irSequence.toPrintString(true, false) };
+            return irSequence.toPrintString(true, false);
             //return irSequence == null ? new ArrayList<>(8) : new ArrayList<String>(8) {{ add(useCcfCaptureParameter.getValue() ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
         }
     }

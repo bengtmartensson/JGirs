@@ -25,13 +25,13 @@ import org.harctoolbox.harchardware.ir.ITransmitter;
 public class Transmitters extends Module {
     private final ITransmitter transmitter;
 
-    public Transmitters(CommandExecuter commandExecuter, Parameters parameters, ITransmitter transmitter) {
+    public Transmitters(CommandExecuter commandExecuter, ParameterModule parameters, ITransmitter transmitter) {
         super(commandExecuter, parameters);
         this.transmitter = transmitter;
         addCommand(new TransmittersCommand());
     }
 
-    public Transmitters(CommandExecuter commandExecuter, Parameters parameters) {
+    public Transmitters(CommandExecuter commandExecuter, ParameterModule parameters) {
         this(commandExecuter, parameters, null);
     }
 
@@ -43,8 +43,8 @@ public class Transmitters extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
-            return transmitter.getTransmitterNames();
+        public String exec(String[] args) {
+            return String.join(" ", transmitter.getTransmitterNames());
         }
     }
 }

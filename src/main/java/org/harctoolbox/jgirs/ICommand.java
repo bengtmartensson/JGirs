@@ -41,5 +41,5 @@ public interface ICommand {
      * @throws org.harctoolbox.jgirs.JGirsException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public String[] exec(String[] args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
+    public String exec(String[] args) throws IOException, HarcHardwareException, JGirsException, IrpMasterException;
 }

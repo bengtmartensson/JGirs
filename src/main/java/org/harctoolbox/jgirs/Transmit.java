@@ -33,7 +33,7 @@ import org.harctoolbox.harchardware.ir.Transmitter;
  * Transmitting commands.
  */
 public class Transmit extends Module {
-    public static Transmit newTransmit(CommandExecuter commandExecuter, Parameters parameters, GirsHardware currentOutputHardware, Renderer renderer, Irp irp, NamedRemotes namedCommand) {
+    public static Transmit newTransmit(CommandExecuter commandExecuter, ParameterModule parameters, GirsHardware currentOutputHardware, Renderer renderer, Irp irp, NamedRemotes namedCommand) {
 //        if (!(IRawIrSender.class.isInstance(hardware) || IRemoteCommandIrSender.class.isInstance(hardware)))
 //            return null;
         return new Transmit(commandExecuter, parameters, currentOutputHardware, renderer, irp, namedCommand);
@@ -45,7 +45,7 @@ public class Transmit extends Module {
     //private Transmitter transmitter;
     private final NamedRemotes namedCommand;
 
-    protected Transmit(CommandExecuter commandExecuter, Parameters parameters, GirsHardware currentOutputHardware, Renderer renderer, Irp irp, NamedRemotes namedCommand) {
+    protected Transmit(CommandExecuter commandExecuter, ParameterModule parameters, GirsHardware currentOutputHardware, Renderer renderer, Irp irp, NamedRemotes namedCommand) {
         super(commandExecuter, parameters);
         this.renderer = renderer;
         this.irp = irp;
@@ -209,7 +209,7 @@ public class Transmit extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException {
+        public String exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException {
             int index = 1;
             int count = intParse(args[index++]); // throw NumberFormatException
             int frequency = intParse(args[index++]);
@@ -231,7 +231,7 @@ public class Transmit extends Module {
                 return result;
             }
 
-        private String[] transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
+        private String transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof IRawIrSender))
                 throw new IncompatibleArgumentException("transmit");
@@ -242,7 +242,7 @@ public class Transmit extends Module {
             Transmitter transmitter = ((IRawIrSender) hardware).getTransmitter();
 
             boolean result = ((IRawIrSender) hardware).sendIr(irSignal, count, transmitter);
-            return result ? new String[0] : null;
+            return result ? "" : null;
         }
     }
 
@@ -254,13 +254,13 @@ public class Transmit extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException {
+        public String exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException {
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof IIrSenderStop))
                 throw new ExecutionException("Current hardware does not  support stopping.");
 
             Transmitter transmitter = ((ITransmitter) hardware).getTransmitter();
-            return ((IIrSenderStop) hardware).stopIr(transmitter) ? new String[0] : null;
+            return ((IIrSenderStop) hardware).stopIr(transmitter) ? "" : null;
         }
     }
 
@@ -272,14 +272,14 @@ public class Transmit extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
+        public String exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
             IHarcHardware hardware = currentOutputHardware.getHardware();
             if (!(hardware instanceof ITransmitter))
                 throw new ExecutionException("Current hardware does not  support setting transmitters.");
             if (args.length > 1)
                 throw new CommandSyntaxException("gettransmitters", 0);
 
-            return ((ITransmitter) hardware).getTransmitterNames();
+            return String.join(" ", ((ITransmitter) hardware).getTransmitterNames());
         }
     }
 }

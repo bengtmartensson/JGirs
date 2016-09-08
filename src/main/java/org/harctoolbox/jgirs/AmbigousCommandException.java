@@ -23,6 +23,6 @@ package org.harctoolbox.jgirs;
 public class AmbigousCommandException extends JGirsException {
 
     AmbigousCommandException(String name){
-        super("Ambigous command or abbreviation: " + name);
+        super("Ambigous command abbreviation: " + name);
     }
 }

@@ -20,7 +20,6 @@ package org.harctoolbox.jgirs;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.harctoolbox.IrpMaster.IrpMasterException;
@@ -32,9 +31,23 @@ import org.harctoolbox.harchardware.HarcHardwareException;
 public class CommandExecuter {
 
     private final HashMap<String, ICommand> commandMap;
+    private final Engine engine;
+
+    public CommandExecuter(Engine engine) {
+        this.engine = engine;
+        commandMap = new HashMap<>(8);
+    }
 
     public CommandExecuter() {
-        commandMap = new LinkedHashMap<>(8);
+        this(null);
+    }
+
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public boolean isVerbosity() {
+        return engine.isVerbosity();
     }
 
     public Set<String> getCommandNames() {
@@ -52,7 +65,7 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public String[] exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+    public String exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
         String commandName = args[0];
         ICommand cmd = null;
         if (commandMap.containsKey(commandName))

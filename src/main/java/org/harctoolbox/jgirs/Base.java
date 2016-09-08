@@ -18,7 +18,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * The Girs Base module that must be implemented.
@@ -34,13 +33,14 @@ public class Base extends Module {
 
     private final Engine engine;
 
-    public Base(CommandExecuter commandExecuter, Parameters parameters, Engine engine) {
+    public Base(CommandExecuter commandExecuter, ParameterModule parameters, Engine engine) {
         super(commandExecuter, parameters);
         addCommand(new VersionCommand());
         addCommand(new ModulesCommand());
         addCommand(new LicenseCommand());
         addCommand(new GirsCommandsCommand());
         addCommand(new QuitCommand());
+        addParameter(new StringParameter("listseparator", ";", "String to be used between entries in list"));
         this.engine = engine;
 //        this.hardware = hardware;
 //        this.modules = modules;
@@ -59,21 +59,8 @@ public class Base extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
-            return new String[] { Version.licenseString };
-        }
-    }
-
-    private static class QuitCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "quit";
-        }
-
-        @Override
-        public String[] exec(String[] args) {
-            return new String[] { goodbyeWord };
+        public String exec(String[] args) {
+            return Version.licenseString;
         }
     }
 
@@ -85,8 +72,21 @@ public class Base extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) throws IOException {
-            return new String[] { Version.versionString };
+        public String exec(String[] args) throws IOException {
+            return Version.versionString;
+        }
+    }
+    private class QuitCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "quit";
+        }
+
+        @Override
+        public String exec(String[] args) {
+            quitRequested = true;
+            return goodbyeWord;
         }
     }
 
@@ -98,25 +98,22 @@ public class Base extends Module {
         }
 
         @Override
-        public String[] exec(String[] args) {
-            Set<String> list = engine.getModuleNames();
-            return list.toArray(new String[list.size()]);
+        public String exec(String[] args) {
+            return Utils.sortedString(engine.getModuleNames());
         }
     }
 
     private class GirsCommandsCommand implements ICommand {
         @Override
         public String getName() {
-            return "girscommands";
+            return "commands";
         }
 
         @Override
-        public String[] exec(String[] args) throws CommandSyntaxException {
+        public String exec(String[] args) throws CommandSyntaxException {
             if (args.length > 1)
                 throw new CommandSyntaxException(args[0], 0);
-
-            Set<String> result = commandExecuter.getCommandNames();
-            return result.toArray(new String[result.size()]);
+            return Utils.sortedString(commandExecuter.getCommandNames());
         }
     }
 }

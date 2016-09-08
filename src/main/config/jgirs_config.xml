@@ -35,7 +35,7 @@
     </named-remotes>
 
     <hardware>
-        <hardware-item inputdefault="true" name="myirtoy" displayname="IrToy" class="org.harctoolbox.harchardware.ir.IrToy">
+        <hardware-item name="myirtoy" displayname="IrToy" class="org.harctoolbox.harchardware.ir.IrToy">
             <jni-lib libpath="/usr/lib64/rxtx/librxtxSerial.so"/>
             <arguments>
                 <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>
@@ -54,7 +54,7 @@
                 <argument description="device name">/dev/lirc0</argument>
             </arguments>
         </hardware-item>
-        <hardware-item outputdefault="true" name="nano" displayname="Arduino Nano" class="org.harctoolbox.harchardware.ir.SerialGirsClient">
+        <hardware-item outputdefault="true" inputdefault="true" name="nano" displayname="Arduino Nano" class="org.harctoolbox.harchardware.ir.SerialGirsClient">
             <arguments>
                 <argument description="device name">/dev/arduino_nano_qinheng</argument>
                 <argument type="int" description="baud rate">115200</argument>
