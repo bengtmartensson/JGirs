@@ -48,12 +48,11 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommandNames();
     }
 
-    public String exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
-        if (args == null || args.length == 0)
+    public String exec(String[] args) throws IOException, HarcHardwareException, IrpMasterException, CommandException, AmbigousCommandException {
+        if (args == null || args.length < 2)
             throw new CommandSyntaxException(getName(), "subcommand missing");
         String[] rest = new String[args.length - 1];
         System.arraycopy(args, 1, rest, 0, args.length - 1);
-        //args.remove(0);
-        return commandExecuter.exec(args);
+        return commandExecuter.exec(rest);
     }
 }

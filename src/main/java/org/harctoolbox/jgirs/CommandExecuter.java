@@ -57,7 +57,7 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public String exec(String[] args) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+    public String exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException {
         String commandName = args[0];
         ICommand cmd = null;
         if (commandMap.containsKey(commandName))
