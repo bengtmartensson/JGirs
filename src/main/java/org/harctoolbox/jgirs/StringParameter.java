@@ -17,8 +17,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.Locale;
-
 /**
  * Parameters that consist of a String.
  */
@@ -33,7 +31,7 @@ final class StringParameter extends Parameter {
 
     @Override
     public void set(String str) {
-        value = str.toLowerCase(Locale.US);
+        value = str;
     }
 
     @Override

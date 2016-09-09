@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,9 +67,9 @@ public class ConfigFileNGTest {
      * Test of getIrHardwareList method, of class ConfigFile.
      */
     @Test
-    public void testGetIrHardwareList() {
-        System.out.println("getIrHardwareList");
-        List<GirsHardware> result = instance.getIrHardwareList();
+    public void testGetIrHardware() {
+        System.out.println("getIrHardware");
+        HashMap<String, GirsHardware> result = instance.getIrHardware();
         assertEquals(result.size(), 4);
     }
 
@@ -79,7 +80,7 @@ public class ConfigFileNGTest {
     public void testGetRemoteCommandsDataBase() {
         System.out.println("getRemoteCommandsDataBase");
         RemoteCommandDataBase result = instance.getRemoteCommandsDataBase();
-        assertEquals(result.getRemotes().size(), 3);
+        assertEquals(result.getRemotes().size(), 4);
     }
 
     /**
@@ -92,29 +93,29 @@ public class ConfigFileNGTest {
         assertEquals(result.size(), 1);
     }
 
-    /**
-     * Test of getStringOption method, of class ConfigFile.
-     */
-    @Test
-    public void testGetStringOption() {
-        System.out.println("getStringOption");
-        String name = "clientPassword";
-        String expResult = "LetsReplaceLirc";
-        String result = instance.getStringOption(name);
-        assertEquals(result, expResult);
-    }
-
-    /**
-     * Test of getBooleanOption method, of class ConfigFile.
-     */
-    @Test
-    public void testGetBooleanOption() {
-        System.out.println("getBooleanOption");
-        String name = "logappend";
-        boolean expResult = false;
-        boolean result = instance.getBooleanOption(name);
-        assertEquals(result, true);
-    }
+//    /**
+//     * Test of getStringOption method, of class ConfigFile.
+//     */
+//    @Test
+//    public void testGetStringOption() {
+//        System.out.println("getStringOption");
+//        String name = "clientPassword";
+//        String expResult = "LetsReplaceLirc";
+//        String result = instance.getStringOption(name);
+//        assertEquals(result, expResult);
+//    }
+//
+//    /**
+//     * Test of getBooleanOption method, of class ConfigFile.
+//     */
+//    @Test
+//    public void testGetBooleanOption() {
+//        System.out.println("getBooleanOption");
+//        String name = "logappend";
+//        boolean expResult = false;
+//        boolean result = instance.getBooleanOption(name);
+//        assertEquals(result, true);
+//    }
 
     /**
      * Test of getIntegerOption method, of class ConfigFile.

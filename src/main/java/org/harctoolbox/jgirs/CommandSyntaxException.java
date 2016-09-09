@@ -26,19 +26,22 @@ public class CommandSyntaxException extends CommandException {
         super("Command syntax error");
     }
 
-    CommandSyntaxException(String name){
+    CommandSyntaxException(String name) {
         super("Command syntax error: " + name);
     }
 
-    CommandSyntaxException(String name, int noArgs){
+    CommandSyntaxException(String name, int noArgs) {
         super("The command \"" + name + "\" takes " + noArgs + " argument(s).");
     }
 
-    CommandSyntaxException(String name, int minNoArgs, int maxNoArgs){
-        super("The command \"" + name + "\" takes min " + minNoArgs + ", max " + maxNoArgs + " arguments.");
+    CommandSyntaxException(String name, int minNoArgs, int maxNoArgs) {
+        super(minNoArgs == maxNoArgs
+                ? ("The command \"" + name + "\" takes " + minNoArgs + " argument(s).")
+                : ("The command \"" + name + "\" takes between " + minNoArgs + " and " + maxNoArgs + " arguments.")
+        );
     }
 
-    CommandSyntaxException(String name, String reason){
+    CommandSyntaxException(String name, String reason) {
         super("Command syntax error: " + name + " (" + reason + ")");
     }
 }

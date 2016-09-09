@@ -39,6 +39,7 @@ public interface ICommand {
      * @throws java.io.IOException
      * @throws org.harctoolbox.harchardware.HarcHardwareException
      * @throws org.harctoolbox.jgirs.CommandException
+     * @throws org.harctoolbox.jgirs.AmbigousCommandException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
     public String exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousCommandException, IrpMasterException;

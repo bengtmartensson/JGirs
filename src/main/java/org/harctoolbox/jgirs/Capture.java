@@ -25,9 +25,20 @@ import org.harctoolbox.harchardware.IHarcHardware;
 import org.harctoolbox.harchardware.ir.ICapture;
 
 /**
- * Class for capturing raw signals.
+ * Module for capturing raw signals.
  */
 public class Capture extends Module {
+
+    private static final int defaultCaptureBeginTimeout = 2000;
+    private static final int defaultCaptureEndingTimeout = 30;
+    private static final int defaultCaptureLength = 400;
+    //private static final CaptureFormat defaultCaptureFormat = CaptureFormat.raw;
+
+    public static final String RECEIVEBEGINTIMEOUT = "captureBeginTimeout";
+    public static final String RECEIVEENDINGTIMEOUT = "captureEndingTimeout";
+    public static final String RECEIVELENGTH = "captureLength";
+    public static final String FALLBACKFREQUENCY = "fallbackFrequency";
+    public static final String RECEIVEFORMAT = "captureFormat";
 
     private static volatile Capture instance = null;
 
@@ -147,9 +158,9 @@ public class Capture extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException {
+        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
-            IHarcHardware hardware = GirsHardware.getDefaultCapturingHardware().getHardware();
+            IHarcHardware hardware = Engine.getInstance().getCaptureHardware().getHardware();
             if (!(hardware instanceof ICapture))
                 throw new IncompatibleHardwareException("ICapture");
             final ModulatedIrSequence irSequence = ((ICapture) hardware).capture();

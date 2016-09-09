@@ -18,12 +18,12 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 /**
- * This is thrown if a non-existing module is requested,
+ * Thrown if a non-existing remote is requested.
  */
-public class NoSuchModuleException extends JGirsException {
+public class NoSuchHardwareException extends CommandException {
 
-    NoSuchModuleException(String name){
-        super("No such module: \"" + name + "\"");
+    public NoSuchHardwareException(String hardwareName) {
+        super("No such hardware: \"" + hardwareName + "\"");
     }
 
 }

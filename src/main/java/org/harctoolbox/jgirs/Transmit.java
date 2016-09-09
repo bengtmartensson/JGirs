@@ -30,7 +30,6 @@ import org.harctoolbox.IrpMaster.Protocol;
 import org.harctoolbox.IrpMaster.UnassignedException;
 import org.harctoolbox.IrpMaster.UnknownProtocolException;
 import org.harctoolbox.harchardware.HarcHardwareException;
-import org.harctoolbox.harchardware.IHarcHardware;
 import org.harctoolbox.harchardware.ir.IIrSenderStop;
 import org.harctoolbox.harchardware.ir.IRawIrSender;
 import org.harctoolbox.harchardware.ir.ITransmitter;
@@ -70,21 +69,7 @@ public class Transmit extends Module {
 
     private static String transmit(IrSignal irSignal, int count, IRawIrSender hardware, Transmitter transmitter) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException {
         boolean result = hardware.sendIr(irSignal, count, transmitter);
-        return result ? "" : null;
-    }
-
-    private static String transmit(IrSignal irSignal, int count) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException {
-        IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
-        if (!(hardware instanceof IRawIrSender))
-            throw new IncompatibleHardwareException("IRawIrSender");
-
-        if (!hardware.isValid())
-            hardware.open();
-
-        IRawIrSender irsender = (IRawIrSender) hardware;
-        Transmitter transmitter = irsender.getTransmitter();
-
-        return transmit(irSignal, count, irsender, transmitter);
+        return result ? OK: ERROR;
     }
 
     private final Renderer renderer;
@@ -104,7 +89,7 @@ public class Transmit extends Module {
 //        else
 //            throw new RuntimeException();
 
-addCommand(new TransmitCommand());
+        addCommand(new TransmitCommand());
         addCommand(new SendCommand());
 //if (IIrSenderStop.class.isInstance(hardware))
         addCommand(new StopCommand());
@@ -112,7 +97,21 @@ addCommand(new TransmitCommand());
         addCommand(new GetTransmittersCommand());
     }
 
-    private static class StopCommand implements ICommand {
+    private String transmit(IrSignal irSignal, int count) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+        GirsHardware hardware = Engine.getInstance().getOutputHardware();
+        initializeHardware(hardware, IRawIrSender.class);
+        IRawIrSender irsender = (IRawIrSender) hardware.getHardware();
+        Transmitter transmitter = irsender.getTransmitter();
+        return transmit(irSignal, count, irsender, transmitter);
+    }
+
+    private String transmitCcf(String[] args) throws CommandSyntaxException, IrpMasterException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+        int count = intParse(args[0]);
+        IrSignal irSignal = Pronto.ccfSignal(args, 1);
+        return transmit(irSignal, count);
+    }
+
+    private class StopCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -120,18 +119,16 @@ addCommand(new TransmitCommand());
         }
 
         @Override
-        public String exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException {
-            IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
-            if (!(hardware instanceof IIrSenderStop))
-                throw new IncompatibleHardwareException("IIrSenderStop");
-                        //ExecutionException("Current hardware does not  support stopping.");
+        public String exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException {
+            GirsHardware hardware = Engine.getInstance().getOutputHardware();
+            initializeHardware(hardware, IIrSenderStop.class);
 
-            Transmitter transmitter = ((ITransmitter) hardware).getTransmitter();
-            return ((IIrSenderStop) hardware).stopIr(transmitter) ? "" : null;
+            Transmitter transmitter = ((ITransmitter) hardware.getHardware()).getTransmitter();
+            return ((IIrSenderStop) hardware.getHardware()).stopIr(transmitter) ? "" : null;
         }
     }
 
-    private static class GetTransmittersCommand implements ICommand {
+    private class GetTransmittersCommand implements ICommand {
 
         @Override
         public String getName() {
@@ -139,14 +136,16 @@ addCommand(new TransmitCommand());
         }
 
         @Override
-        public String exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException {
-            IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
-            if (!(hardware instanceof ITransmitter))
-                throw new ExecutionException("Current hardware does not  support setting transmitters.");
-            if (args.length > 1)
-                throw new CommandSyntaxException("gettransmitters", 0);
+        public String exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchHardwareException, NoSuchParameterException {
+            GirsHardware hardware = Engine.getInstance().getOutputHardware();
+            initializeHardware(hardware, ITransmitter.class);
 
-            return Utils.sortedString(((ITransmitter) hardware).getTransmitterNames());
+//        IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
+//            if (!(hardware instanceof ITransmitter))
+//                throw new ExecutionException("Current hardware does not  support setting transmitters.");
+//            if (args.length > 1)
+//                throw new CommandSyntaxException("gettransmitters", 0);
+            return Utils.sortedString(((ITransmitter) hardware.getHardware()).getTransmitterNames());
         }
     }
 
@@ -154,6 +153,7 @@ addCommand(new TransmitCommand());
 
         TransmitCommand() {
             addCommand(new TransmitHexCommand());
+            addCommand(new TransmitCcfCommand()); // synonym
             addCommand(new TransmitRawCommand());
             if (irp != null)
                 addCommand(new TransmitIrpCommand());
@@ -176,10 +176,21 @@ addCommand(new TransmitCommand());
             }
 
             @Override
-            public String exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException {
-                int count = intParse(args[1]);
-                IrSignal irSignal = Pronto.ccfSignal(args, 2);
-                return transmit(irSignal, count);
+            public String exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+                return transmitCcf(args);
+            }
+        }
+
+        private class TransmitCcfCommand implements ICommand {
+
+            @Override
+            public String getName() {
+                return "ccf";
+            }
+
+            @Override
+            public String exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+                return transmitCcf(args);
             }
         }
 
@@ -191,8 +202,8 @@ addCommand(new TransmitCommand());
             }
 
             @Override
-            public String exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException {
-                int index = 1;
+            public String exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+                int index = 0;
                 int count = intParse(args[index++]); // throw NumberFormatException
                 int frequency = intParse(args[index++]);
                 int introLength= intParse(args[index++]);
@@ -214,7 +225,7 @@ addCommand(new TransmitCommand());
             }
 
             @Override
-            public String exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException {
+            public String exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
                 int count = intParse(args[1]);
                 String irpCode = args[2];
                 HashMap<String, Long> parameters = Protocol.parseParams(args, 3);
@@ -231,7 +242,7 @@ addCommand(new TransmitCommand());
             }
 
             @Override
-            public String exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException {
+            public String exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
                 int index = 1;
                 int count = intParse(args[index++]);
                 IrSignal irSignal = renderer.render(args, index);
@@ -247,10 +258,9 @@ addCommand(new TransmitCommand());
             }
 
             @Override
-            public String exec(String[] args) throws ExecutionException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException, IncompatibleHardwareException {
-                if (args.length != 3)
-                    throw new CommandSyntaxException("name", 3);
-                int index = 1;
+            public String exec(String[] args) throws ExecutionException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+                checkNoArgs("name", args.length, 3, 3);
+                int index = 0;
                 int count = intParse(args[index++]);
                 String remote = args[index++];
                 String command = args[index++];
@@ -268,7 +278,7 @@ addCommand(new TransmitCommand());
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException, IncompatibleHardwareException {
+        public String exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
             int index = 1;
             int count = intParse(args[index++]); // throw NumberFormatException
             int frequency = intParse(args[index++]);
@@ -281,19 +291,5 @@ addCommand(new TransmitCommand());
             IrSignal irSignal = new IrSignal(data, introLength / 2, repeatLength / 2, frequency);
             return transmit(irSignal, count);
         }
-
-//        private String transmit(IrSignal irSignal, int count) throws IncompatibleArgumentException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException  {
-//            IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
-//            if (!(hardware instanceof IRawIrSender))
-//                throw new IncompatibleArgumentException("transmit");
-//
-//            if (!hardware.isValid())
-//                hardware.open();
-//
-//            Transmitter transmitter = ((IRawIrSender) hardware).getTransmitter();
-//
-//            boolean result = ((IRawIrSender) hardware).sendIr(irSignal, count, transmitter);
-//            return result ? "" : null;
-//        }
     }
 }

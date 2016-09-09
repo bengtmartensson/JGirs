@@ -30,9 +30,17 @@ public class ParameterModule extends Module {
 
     public static final String IRPPROTOCOLSINI = "irpProtocolsIni";
     public static final String VERBOSITY = "verbosity"; // Do not change to the more grammatically correct "verbose"
-    public static final String LISTSEPARATOR = "listseparator";
+    public static final String LISTSEPARATOR = "listSeparator";
+    public static final String OUTPUTDEVICE = "outputDevice";
+    public static final String CAPTUREDEVICE = "captureDevice";
+    public static final String RECEIVEDEVICE = "receiveDevice";
+
+    public static final String INT = "int";
+    public static final String BOOLEAN = "boolean";
+    public static final String STRING = "String";
 
     private static volatile ParameterModule instance = null;
+
 
     public static ParameterModule getInstance() {
         return instance;
@@ -93,39 +101,46 @@ public class ParameterModule extends Module {
         return candidate; // possibly null
     }
 
-    public int getInteger(String name) {
+    private Parameter getParameter(String name) throws NoSuchParameterException {
         Parameter param = parameterMap.get(name);
+        if (param == null)
+            throw new NoSuchParameterException(name);
+        return param;
+    }
+
+    public int getInteger(String name) throws NoSuchParameterException {
+        Parameter param = getParameter(name);
         return ((IntegerParameter) param).getValue();
     }
 
-    public boolean getBoolean(String name) {
-        Parameter param = parameterMap.get(name);
+    public boolean getBoolean(String name) throws NoSuchParameterException {
+        Parameter param = getParameter(name);
         return ((BooleanParameter) param).getValue();
     }
 
-    public String getString(String name) {
-        Parameter param = parameterMap.get(name);
+    public String getString(String name) throws NoSuchParameterException {
+        Parameter param = getParameter(name);
         return ((StringParameter) param).getValue();
     }
 
     public void setInteger(String name, int value) throws Parameter.IncorrectParameterType {
         Parameter param = parameterMap.get(name);
         if (!(param instanceof IntegerParameter))
-            throw new Parameter.IncorrectParameterType("int");
+            throw new Parameter.IncorrectParameterType(INT);
         ((IntegerParameter) param).set(value);
     }
 
     public void setBoolean(String name, boolean value) throws Parameter.IncorrectParameterType {
         Parameter param = parameterMap.get(name);
         if (!(param instanceof BooleanParameter))
-            throw new Parameter.IncorrectParameterType("boolean");
+            throw new Parameter.IncorrectParameterType(BOOLEAN);
         ((BooleanParameter) param).set(value);
     }
 
     public void setString(String name, String value) throws Parameter.IncorrectParameterType {
         Parameter param = parameterMap.get(name);
         if (!(param instanceof StringParameter))
-            throw new Parameter.IncorrectParameterType("String");
+            throw new Parameter.IncorrectParameterType(STRING);
         ((StringParameter) param).set(value);
     }
 
@@ -180,39 +195,45 @@ public class ParameterModule extends Module {
 
     private class ParameterCommand implements ICommand {
 
+        static final String PARAMETER = "parameter";
+
         @Override
         public String getName() {
-            return "parameter";
+            return PARAMETER;
         }
 
         @Override
         public String exec(String[] args) throws CommandException {
-            List<String> result = new ArrayList<>(parameterMap.size());
+            checkNoArgs(PARAMETER, args.length, 0, 2);
+            List<String> result;
             switch (args.length) {
-                case 1:
+                case 0:
+                    result = new ArrayList<>(parameterMap.size());
                     parameterMap.values().stream().forEach((param) -> {
                         result.add(param.toString());
                     });
                     break;
-                case 2: {
-                    String fragment = args[1];
+                case 1: {
+                    result = new ArrayList<>(4);
+                    String fragment = args[0];
                     parameterMap.values().stream().forEach((param) -> {
                         if (param.getName().toLowerCase(Locale.US).startsWith(fragment.toLowerCase(Locale.US)))
                             result.add(param.toString());
                     });
                 }
                 break;
-                case 3: {
-                    String fragment = args[1];
-                    String newValue = args[2];
+                case 2: {
+                    String fragment = args[0];
+                    String newValue = args[1];
 
                     Parameter parameter = find(fragment);
                     parameter.set(newValue);
+                    result = new ArrayList<>(1);
                     result.add(parameter.toString());
                 }
                 break;
                 default:
-                    throw new CommandSyntaxException("parameter", 0, 2);
+                    throw new RuntimeException();
             }
 
             return Utils.sortedString(result);

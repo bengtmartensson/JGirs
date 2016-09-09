@@ -65,7 +65,7 @@ public class Renderer extends Module {
         }
 
         @Override
-        public String exec(String[] args) {
+        public String exec(String[] args) throws NoSuchParameterException {
             return Utils.sortedString(irpMaster.getNames());
         }
     }

@@ -17,9 +17,12 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.harchardware.IHarcHardware;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -27,6 +30,14 @@ import org.w3c.dom.NodeList;
  * Abstract base class for the Girs modules.
  */
 public abstract class Module {
+
+    public static final String OK = Engine.OK;
+    public static final String ERROR = Engine.ERROR;
+
+    protected static void checkNoArgs(String name, int length, int min, int max) throws CommandSyntaxException {
+        if (length < min  || length > max)
+            throw new CommandSyntaxException(name, min, max);
+    }
 
 //    public static Module newModule(String className, Class<?>[] classArray, Object[] objectArray)
 //            throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -92,6 +103,15 @@ public abstract class Module {
 
     List<String> getCommandNames() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    protected void initializeHardware(GirsHardware girsHardware, Class<?> requiredClass) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
+        IHarcHardware hardware = girsHardware.getHardware();
+        if (!(requiredClass.isInstance(hardware)))
+            throw new IncompatibleHardwareException(requiredClass.getSimpleName());
+        hardware.setVerbosity(Engine.getInstance().isVerbosity());
+        if (!hardware.isValid())
+            hardware.open();
     }
 
 //    void addParametersTo(Parameters parameters) {

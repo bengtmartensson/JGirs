@@ -23,7 +23,7 @@ package org.harctoolbox.jgirs;
 public class NoSuchRemoteException extends CommandException {
 
     public NoSuchRemoteException(String remoteName) {
-        super("No such remote " + remoteName);
+        super("No such remote \"" + remoteName + "\"");
     }
 
 }

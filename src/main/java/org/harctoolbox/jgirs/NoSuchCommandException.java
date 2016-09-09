@@ -22,11 +22,7 @@ package org.harctoolbox.jgirs;
  */
 public class NoSuchCommandException extends CommandException {
 
-    NoSuchCommandException() {
-        super("Command not existing or abbreviation ambigous");
-    }
-
     NoSuchCommandException(String name){
-        super("No such command or abbreviation ambigous: " + name);
+        super("No such command or abbreviation ambigous: \"" + name + "\"");
     }
 }

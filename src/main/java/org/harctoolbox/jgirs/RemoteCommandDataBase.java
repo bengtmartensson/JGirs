@@ -94,7 +94,7 @@ public class RemoteCommandDataBase {
     public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets, boolean caseInsensitive) throws IrpMasterException {
         this(caseInsensitive);
         for (RemoteSet remoteSet : remoteSets)
-            load (remoteSet);
+            load(remoteSet);
     }
 
     private void load(RemoteSet remoteSet) throws IrpMasterException {
@@ -228,7 +228,7 @@ public class RemoteCommandDataBase {
                 return false;
             if (this.parameters.size() != other.parameters.size())
                 return false;
-            for (Map.Entry<String, Long> kvp : this.parameters.entrySet()) {
+            for (Map.Entry<String, Long> kvp : parameters.entrySet()) {
                 String name = kvp.getKey();
                 if (!Objects.equals(kvp.getValue(), other.parameters.get(name)))
                     return false;

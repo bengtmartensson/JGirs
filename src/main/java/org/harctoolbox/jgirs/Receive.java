@@ -37,11 +37,11 @@ public class Receive extends Module {
     private static final int defaultReceiveLength = 400;
     private static final ReceiveFormat defaultReceiveFormat = ReceiveFormat.raw;
 
-    public static final String RECEIVEBEGINTIMEOUT = "receivebegintimeout";
-    public static final String RECEIVEENDTIMEOUT = "receiveendtimeout";
-    public static final String RECEIVELENGTH = "receivelength";
-    public static final String FALLBACKFREQUENCY = "fallbackfrequency";
-    public static final String RECEIVEFORMAT = "receiveformat";
+    public static final String RECEIVEBEGINTIMEOUT = "receiveBeginTimeout";
+    public static final String RECEIVEENDINGTIMEOUT = "receiveEndingTimeout";
+    public static final String RECEIVELENGTH = "receiveLength";
+    public static final String FALLBACKFREQUENCY = "fallbackFrequency";
+    public static final String RECEIVEFORMAT = "receiveFormat";
     private static volatile Receive instance;
 
     static Module newReceive(NamedRemotes namedRemotes) {
@@ -92,7 +92,7 @@ public class Receive extends Module {
 
         addParameter(new IntegerParameter(RECEIVEBEGINTIMEOUT, defaultReceiveBeginTimeout, "begin timeout for receive"));
         addParameter(new IntegerParameter(RECEIVELENGTH, defaultReceiveLength, "max number of durations in receive"));
-        addParameter(new IntegerParameter(RECEIVEENDTIMEOUT, defaultReceiveEndingTimeout, "ending timeout for receive"));
+        addParameter(new IntegerParameter(RECEIVEENDINGTIMEOUT, defaultReceiveEndingTimeout, "ending timeout for receive"));
         addParameter(new IntegerParameter(FALLBACKFREQUENCY, (int) IrpUtils.defaultFrequency,
                 "Fallback frequency (in Hz) to be used in absence of a measurement."));
         addParameter(new ReceiveFormatParameter("receiveformat", defaultReceiveFormat,
@@ -173,23 +173,21 @@ public class Receive extends Module {
     }
 
     private class ReceiveCommand implements ICommand {
+        private static final String RECEIVE = "receive";
 
         @Override
         public String getName() {
-            return "receive";
+            return RECEIVE;
         }
 
         @Override
-        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException {
-            if (!(GirsHardware.getDefaultReceivingHardware().getHardware() instanceof IReceive))
-                throw new IncompatibleHardwareException("IReceive");
-            IReceive hardware = (IReceive) GirsHardware.getDefaultReceivingHardware().getHardware();
-            hardware.setVerbosity(ParameterModule.getInstance().getBoolean("verbosity"));
-            if (!hardware.isValid())
-                hardware.open();
+        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+            GirsHardware hardware = Engine.getInstance().getReceiveHardware();
+            initializeHardware(hardware, IReceive.class);
+            IReceive receiver = (IReceive) hardware.getHardware();
 
-            hardware.setBeginTimeout(ParameterModule.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
-            final IrSequence irSequence = hardware.receive();
+            receiver.setBeginTimeout(ParameterModule.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
+            final IrSequence irSequence = receiver.receive();
 
             final IrSignal irSignal = new IrSignal(ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
             ReceiveFormat receiveFormat = ((ReceiveFormatParameter) ParameterModule.getInstance().get(RECEIVEFORMAT)).value;

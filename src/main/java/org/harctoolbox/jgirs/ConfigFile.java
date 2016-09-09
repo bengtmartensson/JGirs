@@ -31,8 +31,12 @@ import java.util.List;
 import javax.xml.validation.Schema;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.XmlUtils;
+import org.harctoolbox.girr.Command;
+import org.harctoolbox.girr.CsvImporter;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import static org.harctoolbox.jgirs.ParameterModule.BOOLEAN;
+import static org.harctoolbox.jgirs.ParameterModule.INT;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -40,33 +44,56 @@ import org.xml.sax.SAXException;
 
 public class ConfigFile {
 
-    private static final String LIRC_DEFAULT_ENCODING = "WINDOWS-1252";
+    private static final String LIRC_ENCODING = "WINDOWS-1252";
+    private static final String DEFAULT_ENCODING = "WINDOWS-1252";
+    private static final String URL = "url";
+    private static final String GIRR = "girr";
+    private static final String LIRCD = "lircd";
+    private static final String CSV = "csv";
+    private static final String TYPE = "type";
 
-    private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException {
-        String type = element.getAttribute("type");
-        if (type.equalsIgnoreCase("lircd"))
+    private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException, IrpMasterException {
+        String type = element.getAttribute(TYPE);
+        if (type.equalsIgnoreCase(LIRCD))
             return parseLirc(element);
-        else if (type.equalsIgnoreCase("girr") || type.isEmpty())
+        else if (type.equalsIgnoreCase(GIRR) || type.isEmpty())
             return parseGirr(element);
+        else if (type.equalsIgnoreCase(CSV) || type.isEmpty())
+            return parseCsv(element);
         else
             throw new NoSuchRemoteTypeException(type);
     }
 
     private static RemoteSet parseLirc(Element element) throws MalformedURLException, IOException {
-        URL url = new URL(element.getAttribute("url"));
+        URL url = new URL(element.getAttribute(URL));
         InputStream inputStream = url.openStream();
-        InputStreamReader reader = new InputStreamReader(inputStream, LIRC_DEFAULT_ENCODING);
+        InputStreamReader reader = new InputStreamReader(inputStream, LIRC_ENCODING);
         return org.harctoolbox.jirc.ConfigFile.parseConfig(reader, url.toString(), true, null, false);
     }
 
     private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
-        URL url = new URL(element.getAttribute("url"));
+        URL url = new URL(element.getAttribute(URL));
         Document doc = XmlUtils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
         return remoteSet;
     }
 
-    private final List<GirsHardware> irHardwareList;
+    private static RemoteSet parseCsv(Element element) throws IOException, SAXException, ParseException, IrpMasterException {
+        URL url = new URL(element.getAttribute(URL));
+        int commandNameColumn = Integer.parseInt(element.getAttribute("commandName"));
+        int protocolColumn = Integer.parseInt(element.getAttribute("protocol"));
+        int DColumn = Integer.parseInt(element.getAttribute("D"));
+        int SColumn = Integer.parseInt(element.getAttribute("S"));
+        int FColumn = Integer.parseInt(element.getAttribute("F"));
+        String separator = element.getAttribute("separator");
+        CsvImporter csvImporter = new CsvImporter(commandNameColumn, protocolColumn, DColumn, SColumn, FColumn, separator);
+        InputStream inputStream = url.openStream();
+        InputStreamReader reader = new InputStreamReader(inputStream, DEFAULT_ENCODING);
+        String name = element.getAttribute("name");
+        return csvImporter.parseRemoteSet(name, url.toString(), reader);
+    }
+
+    private final HashMap<String, GirsHardware> irHardware;
     private RemoteCommandDataBase remoteCommandsDataBase;
     private final List<Module.ModulePars> moduleList;
     private final HashMap<String, Integer> integerOptions;
@@ -76,7 +103,7 @@ public class ConfigFile {
 
     public ConfigFile() {
         remoteCommandsDataBase = new RemoteCommandDataBase(true);
-        irHardwareList = new ArrayList<>(8);
+        irHardware = new HashMap<>(8);
         moduleList = new ArrayList<>(4);
         integerOptions = new HashMap<>(4);
         booleanOptions = new HashMap<>(4);
@@ -89,14 +116,40 @@ public class ConfigFile {
         if (doc == null)
             return;
 
-        NodeList nodeList = doc.getElementsByTagName("hardware-item");
+        NodeList nodeList = doc.getElementsByTagName("option");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element e = (Element) nodeList.item(i);
+            String name = e.getAttribute("name");
+            String type = e.getAttribute(TYPE);
+            String value = e.getTextContent();
+            Parameter parameter;
+            switch (type) {
+                case INT:
+                    integerOptions.put(name, Integer.parseInt(value));
+                    parameter = new IntegerParameter(name, Integer.parseInt(value), null);
+                    break;
+                case BOOLEAN:
+                    booleanOptions.put(name, Boolean.parseBoolean(value));
+                    parameter = new BooleanParameter(name, Boolean.parseBoolean(value), null);
+                    break;
+                default: // String
+                    stringOptions.put(name, value);
+                    parameter = new StringParameter(name, value, null);
+                    break;
+            }
+            optionsList.add(parameter);
+        }
+        Collections.sort(optionsList, new Parameter.ParameterNameComparator());
+
+        nodeList = doc.getElementsByTagName("hardware-item");
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element el = (Element) nodeList.item(i);
             loadJni(el);
             GirsHardware hw = new GirsHardware(el);
-            irHardwareList.add(hw);
+            irHardware.put(hw.getName(), hw);
         }
 
+        Command.setIrpMaster(getStringOption(ParameterModule.IRPPROTOCOLSINI)); // needed for CSV import
         nodeList = doc.getElementsByTagName("named-remote");
         ArrayList<RemoteSet> remoteSetList = new ArrayList<>(nodeList.getLength());
         for (int i = 0; i < nodeList.getLength(); i++)
@@ -110,31 +163,6 @@ public class ConfigFile {
             Module.ModulePars modulePars = new Module.ModulePars(el);
             moduleList.add(modulePars);
         }
-
-        nodeList = doc.getElementsByTagName("option");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element e = (Element) nodeList.item(i);
-            String name = e.getAttribute("name");
-            String type = e.getAttribute("type");
-            String value = e.getTextContent();
-            Parameter parameter;
-            switch (type) {
-                case "int":
-                    integerOptions.put(name, Integer.parseInt(value));
-                    parameter = new IntegerParameter(name, Integer.parseInt(value), null);
-                    break;
-                case "boolean":
-                    booleanOptions.put(name, Boolean.parseBoolean(value));
-                    parameter = new BooleanParameter(name, Boolean.parseBoolean(value), null);
-                    break;
-                default: // String
-                    stringOptions.put(name, value);
-                    parameter = new StringParameter(name, value, null);
-                    break;
-            }
-            optionsList.add(parameter);
-        }
-        Collections.sort(optionsList, new Parameter.ParameterNameComparator());
     }
 
     public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException {
@@ -144,8 +172,8 @@ public class ConfigFile {
     /**
      * @return the irHardwareList
      */
-    public List<GirsHardware> getIrHardwareList() {
-        return Collections.unmodifiableList(irHardwareList);
+    HashMap<String, GirsHardware> getIrHardware() {
+        return irHardware;
     }
 
     /**
@@ -166,7 +194,7 @@ public class ConfigFile {
      * @param name
      * @return the stringOptions
      */
-    public String getStringOption(String name) {
+    private String getStringOption(String name) {
         return stringOptions.get(name);
     }
 
@@ -175,7 +203,7 @@ public class ConfigFile {
      * @param dflt
      * @return the booleanOptions
      */
-    public boolean getBooleanOption(String name, boolean dflt) {
+    private boolean getBooleanOption(String name, boolean dflt) {
         return booleanOptions.containsKey(name) ? booleanOptions.get(name) : dflt;
     }
 
@@ -183,7 +211,7 @@ public class ConfigFile {
      * @param name
      * @return the booleanOptions
      */
-    public boolean getBooleanOption(String name) {
+    private boolean getBooleanOption(String name) {
         return getBooleanOption(name, false);
     }
 
@@ -204,8 +232,8 @@ public class ConfigFile {
         return getIntegerOption(name, -1);
     }
 
-    void addHardware(GirsHardware irHardware) {
-        irHardwareList.add(irHardware);
+    void addHardware(GirsHardware hardware) {
+        irHardware.put(hardware.getName(), hardware);
     }
 
     void setStringOption(String name, String value) {
@@ -222,30 +250,6 @@ public class ConfigFile {
 
     void addGirs(List<String> girr) throws ParseException, IOException, SAXException, IrpMasterException {
         remoteCommandsDataBase.add(girr);
-    }
-
-    public GirsHardware getDefaultOutputHardware() {
-        for (GirsHardware hardware : irHardwareList)
-            if (hardware.isOutputDefault())
-                return hardware;
-
-        return null;
-    }
-
-    public GirsHardware getDefaultCapturingHardware() {
-        for (GirsHardware hardware : irHardwareList)
-            if (hardware.isCapturingDefault())
-                return hardware;
-
-        return null;
-    }
-
-    public GirsHardware getDefaultReceivingHardware() {
-        for (GirsHardware hardware : irHardwareList)
-            if (hardware.isReceivingDefault())
-                return hardware;
-
-        return null;
     }
 
     private void loadJni(Element el) {

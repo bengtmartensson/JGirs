@@ -95,15 +95,28 @@ public class NamedRemotes extends Module {
         return database.isEmpty();
     }
 
+    private String getRemoteCommands(String remoteNameFragment) throws RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
+        Remote remote = database.findRemote(remoteNameFragment);
+        if (remote == null)
+            throw new NoSuchRemoteException(remoteNameFragment);
+        return Utils.sortedString(remote.getCommands().keySet());
+    }
+
     private class RemotesCommand implements ICommand {
+
+        private static final String REMOTES = "remotes";
 
         @Override
         public String getName() {
-            return "remotes";
+            return REMOTES;
         }
 
         @Override
-        public String exec(String[] args) {
+        public String exec(String[] args) throws CommandSyntaxException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
+            checkNoArgs(REMOTES, args.length, 0, 1);
+            if (args.length == 1)
+                return getRemoteCommands(args[0]);
+
             Collection<Remote> collection = database.getRemotes();
             List<String> result = new ArrayList<>(collection.size());
             collection.stream().forEach((remote) -> {
@@ -116,20 +129,17 @@ public class NamedRemotes extends Module {
 
     private class CommandsCommand implements ICommand {
 
+        private static final String COMMANDS = "commands";
+
         @Override
         public String getName() {
-            return "commands";
+            return COMMANDS;
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException, RemoteCommandDataBase.AmbigousRemoteException {
-            if (args.length <= 1)
-                throw new CommandSyntaxException("No remote given");
-            String remoteNameFragment = args[1];
-            Remote remote = database.findRemote(remoteNameFragment);
-            if (remote == null)
-                throw new NoSuchRemoteException(remoteNameFragment);
-            return Utils.sortedString(remote.getCommands().keySet());
+        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchParameterException {
+            checkNoArgs(COMMANDS, args.length, 1, 1);
+            return getRemoteCommands(args[0]);
         }
     }
 }

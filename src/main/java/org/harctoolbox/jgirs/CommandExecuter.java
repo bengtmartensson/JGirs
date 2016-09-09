@@ -75,7 +75,9 @@ public class CommandExecuter {
         }
         if (cmd == null)
             throw new NoSuchCommandException(commandName);
-        return cmd.exec(args);
+        String[] rest = new String[args.length-1];
+        System.arraycopy(args, 1, rest, 0, args.length - 1);
+        return cmd.exec(rest);
     }
 
     public void add(ICommand command) {

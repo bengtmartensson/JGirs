@@ -37,9 +37,9 @@ import org.w3c.dom.NodeList;
 
 public final class GirsHardware {
 
-    private static GirsHardware defaultTransmittingHardware = null;
-    private static GirsHardware defaultReceivingHardware = null;
-    private static GirsHardware defaultCapturingHardware = null;
+//    private static GirsHardware defaultTransmittingHardware = null;
+//    private static GirsHardware defaultReceivingHardware = null;
+//    private static GirsHardware defaultCapturingHardware = null;
 
 //    public static List<GirsHardware> singleHardware(List<String> params) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
 //        List<GirsHardware> list = new ArrayList<>(1);
@@ -96,60 +96,60 @@ public final class GirsHardware {
         return newIrHardware(list.get(0), classArray, objectArray);
     }
 
-    /**
-     * @return the defaultSendingHardware
-     */
-    public static GirsHardware getDefaultTransmittingHardware() {
-        return defaultTransmittingHardware;
-    }
-
-    /**
-     * @param aDefaultSendingHardware the defaultSendingHardware to set
-     */
-    public static void setDefaultTransmittingHardware(GirsHardware aDefaultSendingHardware) {
-        defaultTransmittingHardware = aDefaultSendingHardware;
-    }
-
-    /**
-     * @return the defaultReceivingHardware
-     */
-    public static GirsHardware getDefaultReceivingHardware() {
-        return defaultReceivingHardware;
-    }
-
-    /**
-     * @param aDefaultReceivingHardware the defaultReceivingHardware to set
-     */
-    public static void setDefaultReceivingHardware(GirsHardware aDefaultReceivingHardware) {
-        defaultReceivingHardware = aDefaultReceivingHardware;
-    }
-
-    /**
-     * @return the defaultCapturingHardware
-     */
-    public static GirsHardware getDefaultCapturingHardware() {
-        return defaultCapturingHardware;
-    }
-
-    /**
-     * @param aDefaultCapturingHardware the defaultCapturingHardware to set
-     */
-    public static void setDefaultCapturingHardware(GirsHardware aDefaultCapturingHardware) {
-        defaultCapturingHardware = aDefaultCapturingHardware;
-    }
+//    /**
+//     * @return the defaultSendingHardware
+//     */
+//    public static GirsHardware getDefaultTransmittingHardware() {
+//        return defaultTransmittingHardware;
+//    }
+//
+//    /**
+//     * @param aDefaultSendingHardware the defaultSendingHardware to set
+//     */
+//    public static void setDefaultTransmittingHardware(GirsHardware aDefaultSendingHardware) {
+//        defaultTransmittingHardware = aDefaultSendingHardware;
+//    }
+//
+//    /**
+//     * @return the defaultReceivingHardware
+//     */
+//    public static GirsHardware getDefaultReceivingHardware() {
+//        return defaultReceivingHardware;
+//    }
+//
+//    /**
+//     * @param aDefaultReceivingHardware the defaultReceivingHardware to set
+//     */
+//    public static void setDefaultReceivingHardware(GirsHardware aDefaultReceivingHardware) {
+//        defaultReceivingHardware = aDefaultReceivingHardware;
+//    }
+//
+//    /**
+//     * @return the defaultCapturingHardware
+//     */
+//    public static GirsHardware getDefaultCapturingHardware() {
+//        return defaultCapturingHardware;
+//    }
+//
+//    /**
+//     * @param aDefaultCapturingHardware the defaultCapturingHardware to set
+//     */
+//    public static void setDefaultCapturingHardware(GirsHardware aDefaultCapturingHardware) {
+//        defaultCapturingHardware = aDefaultCapturingHardware;
+//    }
 
     private IHarcHardware hardware;
     private String url;
     private String description;
     private String name;
-    private boolean outputDefault;
-    private boolean capturingDefault;
-    private boolean receivingDefault;
+//    private boolean outputDefault;
+//    private boolean capturingDefault;
+//    private boolean receivingDefault;
 
     private GirsHardware() {
-        this.outputDefault = false;
-        this.capturingDefault = false;
-        this.receivingDefault = false;
+//        this.outputDefault = false;
+//        this.capturingDefault = false;
+//        this.receivingDefault = false;
         this.description = null;
         this.url = null;
         this.name = null;
@@ -162,9 +162,9 @@ public final class GirsHardware {
     }
 
     public GirsHardware(Element element) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        capturingDefault = Boolean.parseBoolean(element.getAttribute("capturingdefault"));
-        receivingDefault = Boolean.parseBoolean(element.getAttribute("receivingdefault"));
-        outputDefault = Boolean.parseBoolean(element.getAttribute("outputdefault"));
+//        capturingDefault = Boolean.parseBoolean(element.getAttribute("capturingdefault"));
+//        receivingDefault = Boolean.parseBoolean(element.getAttribute("receivingdefault"));
+//        outputDefault = Boolean.parseBoolean(element.getAttribute("outputdefault"));
         name = element.getAttribute("name");
         description = getChildContent(element, "description");
         url = getChildContent(element, "www");
@@ -182,9 +182,9 @@ public final class GirsHardware {
     }
 
     GirsHardware(List<String> params, String name, boolean capturingDefault, boolean receivingDefault, boolean outputDefault) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException {
-        this.capturingDefault = capturingDefault;
-        this.receivingDefault = receivingDefault;
-        this.outputDefault = outputDefault;
+//        this.capturingDefault = capturingDefault;
+//        this.receivingDefault = receivingDefault;
+//        this.outputDefault = outputDefault;
         this.name = name;
         description = null;
         url = null;
@@ -196,9 +196,9 @@ public final class GirsHardware {
     }
 
     void copyFrom(GirsHardware orig) {
-        this.outputDefault = orig.outputDefault;
-        this.capturingDefault = orig.capturingDefault;
-        this.receivingDefault = orig.receivingDefault;
+//        this.outputDefault = orig.outputDefault;
+//        this.capturingDefault = orig.capturingDefault;
+//        this.receivingDefault = orig.receivingDefault;
         this.description = orig.description;
         this.url = orig.url;
         this.name = orig.name;
@@ -233,17 +233,17 @@ public final class GirsHardware {
         return name;
     }
 
-    boolean isOutputDefault() {
-        return outputDefault;
-    }
-
-    boolean isCapturingDefault() {
-        return capturingDefault;
-    }
-
-    boolean isReceivingDefault() {
-        return receivingDefault;
-    }
+//    boolean isOutputDefault() {
+//        return outputDefault;
+//    }
+//
+//    boolean isCapturingDefault() {
+//        return capturingDefault;
+//    }
+//
+//    boolean isReceivingDefault() {
+//        return receivingDefault;
+//    }
 
 //    private Object[] toObjects(List<String> parameters) {
 //        Object[] objectArray = new Object[parameters.size()];

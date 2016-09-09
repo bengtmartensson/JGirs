@@ -23,7 +23,7 @@ package org.harctoolbox.jgirs;
 public class NoSuchParameterException extends CommandException {
 
     public NoSuchParameterException(String name) {
-        super("No such parameter: " + name);
+        super("No such parameter: \"" + name + "\"");
     }
 
 }

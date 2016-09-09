@@ -18,6 +18,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
+import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.harchardware.IHarcHardware;
 
 /**
  * The Girs Base module that must be implemented.
@@ -59,39 +61,32 @@ public class Base extends Module {
 
     private static class LicenseCommand implements ICommand {
 
+        private static final String LICENSE = "license";
+
         @Override
         public String getName() {
-            return "license";
+            return LICENSE;
         }
 
         @Override
-        public String exec(String[] args) {
+        public String exec(String[] args) throws CommandSyntaxException {
+            checkNoArgs(LICENSE, args.length, 0, 0);
             return Version.licenseString;
-        }
-    }
-
-    private static class VersionCommand implements ICommand {
-
-        @Override
-        public String getName() {
-            return "version";
-        }
-
-        @Override
-        public String exec(String[] args) throws IOException {
-            return Version.versionString;
         }
     }
 
     private static class ModulesCommand implements ICommand {
 
+        private static final String MODULES = "modules";
+
         @Override
         public String getName() {
-            return "modules";
+            return MODULES;
         }
 
         @Override
-        public String exec(String[] args) {
+        public String exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
+            checkNoArgs(MODULES, args.length, 0, 0);
             return Utils.sortedString(Engine.getInstance().getModuleNames());
         }
     }
@@ -103,12 +98,35 @@ public class Base extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException {
+        public String exec(String[] args) throws CommandSyntaxException, NoSuchParameterException {
             if (args.length > 1)
                 throw new CommandSyntaxException(args[0], 0);
             return Utils.sortedString(CommandExecuter.getMainExecutor().getCommandNames());
         }
     }
+
+    private class VersionCommand implements ICommand {
+        private static final String VERSION = "version";
+
+        @Override
+        public String getName() {
+            return VERSION;
+        }
+
+        @Override
+        public String exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchParameterException {
+            checkNoArgs(VERSION, args.length, 0, 1);
+
+            if (args.length == 1) {
+                GirsHardware hardware = Engine.getInstance().getHardware(args[0]);
+                initializeHardware(hardware, IHarcHardware.class);
+                return hardware.getHardware().getVersion();
+            }
+
+            return Version.versionString;
+        }
+    }
+
     private class QuitCommand implements ICommand {
 
         @Override

@@ -146,13 +146,9 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
             } else {
                 // shoot one command
-                try {
-                    for (int i = 0; i < commandLineArgs.count; i++) {
-                        String result = engine.eval(String.join(" ", commandLineArgs.parameters));
-                        System.out.println(result == null ? ERROR : result.isEmpty() ? OK : result);
-                    }
-                } catch (IOException | HarcHardwareException | IrpMasterException | JGirsException ex) {
-                    logger.log(Level.SEVERE, null, ex);
+                for (int i = 0; i < commandLineArgs.count; i++) {
+                    String result = engine.eval(String.join(" ", commandLineArgs.parameters));
+                    System.out.println(result == null ? ERROR : result.isEmpty() ? OK : result);
                 }
             }
         } catch (IOException | IrpMasterException ex) {
@@ -184,15 +180,15 @@ public final class Engine implements ICommandLineDevice, Closeable {
     // Logging (or the interactive debugger) is to be used instead.
 
     private final List<String> outBuffer;
-    private final List<GirsHardware> irHardwareList;
+    private final HashMap<String, GirsHardware> irHardware;
 
     public Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
         this.outBuffer = new ArrayList<>(8);
-        this.irHardwareList = config.getIrHardwareList();
+        this.irHardware = config.getIrHardware();
 
-        GirsHardware.setDefaultCapturingHardware(config.getDefaultCapturingHardware());
-        GirsHardware.setDefaultReceivingHardware(config.getDefaultReceivingHardware());
-        GirsHardware.setDefaultTransmittingHardware(config.getDefaultOutputHardware());
+//        GirsHardware.setDefaultCapturingHardware(config.getDefaultCapturingHardware());
+//        GirsHardware.setDefaultReceivingHardware(config.getDefaultReceivingHardware());
+//        GirsHardware.setDefaultTransmittingHardware(config.getDefaultOutputHardware());
 
         modules = new LinkedHashMap<>(16);
 
@@ -202,14 +198,20 @@ public final class Engine implements ICommandLineDevice, Closeable {
         // May override values in the code
         ParameterModule.getInstance().addAll(config.getOptions());
 
-        ParameterModule.getInstance().setBoolean(ParameterModule.VERBOSITY, config.getBooleanOption(ParameterModule.VERBOSITY));
+        //ParameterModule.getInstance().setBoolean(ParameterModule.VERBOSITY, ParameterModule.getInstance().getBoolean(ParameterModule.VERBOSITY));
+        ParameterModule.getInstance().add(new StringParameter("hardwareList",
+                Utils.sortedString(irHardware.keySet(), " "), "List of available hardware"));
 
         registerModule(Base.newBase());
 
-        if (ParameterModule.getInstance().getString(ParameterModule.IRPPROTOCOLSINI) != null) {
-            renderer = new Renderer(config.getStringOption(ParameterModule.IRPPROTOCOLSINI));
+        try {
+            renderer = new Renderer(ParameterModule.getInstance().getString(ParameterModule.IRPPROTOCOLSINI));
             registerModule(renderer);
+        } catch (NoSuchParameterException ex) {
+            logger.log(Level.WARNING, ParameterModule.IRPPROTOCOLSINI + " not defined; rendering will not be available");
         }
+
+
 
         if (config.getRemoteCommandsDataBase() != null) {
             namedRemotes = new NamedRemotes(config.getRemoteCommandsDataBase());
@@ -235,6 +237,25 @@ public final class Engine implements ICommandLineDevice, Closeable {
         //outBuffer.add(Version.versionString);
     }
 
+    public GirsHardware getHardware(String name) throws NoSuchHardwareException {
+        if (!irHardware.containsKey(name))
+            throw new NoSuchHardwareException(name);
+
+        return irHardware.get(name);
+    }
+
+    public GirsHardware getOutputHardware() throws NoSuchHardwareException, NoSuchParameterException {
+        return getHardware(ParameterModule.getInstance().getString(ParameterModule.OUTPUTDEVICE));
+    }
+
+    public GirsHardware getCaptureHardware() throws NoSuchHardwareException, NoSuchParameterException {
+        return getHardware(ParameterModule.getInstance().getString(ParameterModule.CAPTUREDEVICE));
+    }
+
+    public GirsHardware getReceiveHardware() throws NoSuchHardwareException, NoSuchParameterException {
+        return getHardware(ParameterModule.getInstance().getString(ParameterModule.RECEIVEDEVICE));
+    }
+
     @Override
     public void flushInput() throws IOException {
         //throw new UnsupportedOperationException("Not supported yet.");
@@ -252,19 +273,19 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public synchronized void sendString(String cmd) throws IOException {
-        try {
+        //try {
             String result = eval(cmd);
             outBuffer.add(result);//All(Arrays.asList(result)); //outBuffer.addAll(eval(cmd));
             //for (String str : result)
             //    out.println(str);
-        } catch (JGirsException ex) {
-            outBuffer.add(ERROR + ": " + ex.getMessage());
-            //if (NoSuchCommandException.class.isInstance(ex)
-            //        || AmbigousCommandException.class.isInstance(ex))
-            //    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
-        } catch (IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
+//        } catch (JGirsException ex) {
+//            outBuffer.add(ERROR + ": " + ex.getMessage());
+//            //if (NoSuchCommandException.class.isInstance(ex)
+//            //        || AmbigousCommandException.class.isInstance(ex))
+//            //    err.println("Commands are: " + Base.join(commandExecuter.getCommandNames(true)));
+//        } catch (IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
+//            logger.log(Level.SEVERE, null, ex);
+//        }
     }
 
     @Override
@@ -321,7 +342,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public void close() {
-        irHardwareList.stream().forEach((hardware) -> {
+        irHardware.values().stream().forEach((hardware) -> {
             try {
                 hardware.getHardware().close();
             } catch (IOException ex) {
@@ -346,15 +367,19 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return CommandExecuter.getMainExecutor().getSubCommandNames(command);
     }
 
-    private String eval(String command) throws JGirsException, IOException, HarcHardwareException, IrpMasterException {
+    private String eval(String command) {
         if (command.trim().isEmpty())
             return OK;
 
         String[] tokens = Utils.tokenizer(command.trim());
-        return CommandExecuter.getMainExecutor().exec(tokens);
+        try {
+            return CommandExecuter.getMainExecutor().exec(tokens);
+        } catch (JGirsException | IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
+            return ERROR + ": " + ex.toString();
+        }
     }
 
-    public boolean isVerbosity() {
+    public boolean isVerbosity() throws NoSuchParameterException {
         return ParameterModule.getInstance().getBoolean(ParameterModule.VERBOSITY);
     }
 

@@ -39,19 +39,32 @@ public class Utils {
                 : Class.forName(type);
     }
 
-    public static String sortedString(Iterable<String> things) {
+    public static String quoteStringsWithWhitespace(String string) {
+        return string.matches(".*\\s+.*") ? ("\"" + string + "\"") : string;
+    }
+
+    public static String sortedString(Iterable<String> things, String separator) {
         List<String> list = new ArrayList<>(8);
         for (String string : things) {
-            String s = string.matches(".*\\s+.*") ? ("\"" + string + "\"") : string;
+            String s;
+            if (string.contains("=")) {
+                String[] chunks = string.split("=");
+                s = chunks[0] + "=" + quoteStringsWithWhitespace(chunks[1]);
+            } else
+                s = string.matches(".*\\s+.*") ? ("\"" + string + "\"") : string;
             list.add(s);
         }
 
-        Collections.sort(list);
+        Collections.sort(list, String.CASE_INSENSITIVE_ORDER);
 
-        return String.join(ParameterModule.getInstance().getString(ParameterModule.LISTSEPARATOR), list);
+        return String.join(separator, list);
     }
 
-    public static String sortedString(String[] things) {
+    public static String sortedString(Iterable<String> things) throws NoSuchParameterException {
+        return sortedString(things, ParameterModule.getInstance().getString(ParameterModule.LISTSEPARATOR));
+    }
+
+    public static String sortedString(String[] things) throws NoSuchParameterException {
         return sortedString(Arrays.asList(things));
     }
 
