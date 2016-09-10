@@ -2,14 +2,15 @@
 
 ## Core
 
-* lirc listen
+* lirc listen (port 8765)
 * --immediate-open
 * Socket interface
-* Synonyms
 
 ## RemoteDatabase
 
 ## Logging
+
+## Transmitters
 
 # (Much) LATER (not in first version)
 
@@ -23,3 +24,7 @@
 * MQTT
 * listener mode
 * AMB beacon
+
+# Rejected
+
+* Synonyms

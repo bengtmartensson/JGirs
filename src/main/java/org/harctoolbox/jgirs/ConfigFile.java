@@ -94,19 +94,13 @@ public class ConfigFile {
     private final List<GirsHardware> irHardware;
     private RemoteCommandDataBase remoteCommandsDataBase;
     private final List<Module.ModulePars> moduleList;
-    private final HashMap<String, Integer> integerOptions;
-    private final HashMap<String, String> stringOptions;
-    private final HashMap<String, Boolean> booleanOptions;
-    private final List<Parameter> optionsList;
+    private final HashMap<String, Parameter> optionsList;
 
     public ConfigFile() {
         remoteCommandsDataBase = new RemoteCommandDataBase(true);
         irHardware = new ArrayList<>(8);
         moduleList = new ArrayList<>(4);
-        integerOptions = new HashMap<>(4);
-        booleanOptions = new HashMap<>(4);
-        stringOptions = new HashMap<>(16);
-        optionsList = new ArrayList<>(16);
+        optionsList = new HashMap<>(16);
     }
 
     public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, IrpMasterException {
@@ -121,24 +115,11 @@ public class ConfigFile {
             String name = e.getAttribute("name");
             String type = e.getAttribute(TYPE);
             String value = e.getTextContent();
-            Parameter parameter;
-            switch (type) {
-                case INT:
-                    integerOptions.put(name, Integer.parseInt(value));
-                    parameter = new IntegerParameter(name, Integer.parseInt(value), null);
-                    break;
-                case BOOLEAN:
-                    booleanOptions.put(name, Boolean.parseBoolean(value));
-                    parameter = new BooleanParameter(name, Boolean.parseBoolean(value), null);
-                    break;
-                default: // String
-                    stringOptions.put(name, value);
-                    parameter = new StringParameter(name, value, null);
-                    break;
-            }
-            optionsList.add(parameter);
+            Parameter parameter = type.equals(INT) ? new IntegerParameter(name, Integer.parseInt(value), null)
+                    : type.equals(BOOLEAN)         ? new BooleanParameter(name, Boolean.parseBoolean(value), null)
+                    :                                new StringParameter(name, value, null);
+            optionsList.put(parameter.getName(), parameter);
         }
-        Collections.sort(optionsList, new Parameter.ParameterNameComparator());
 
         nodeList = doc.getElementsByTagName("hardware-item");
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -148,7 +129,7 @@ public class ConfigFile {
             irHardware.add(hw);
         }
 
-        Command.setIrpMaster(stringOptions.get(Parameters.IRPPROTOCOLSINI)); // needed for CSV import
+        Command.setIrpMaster(optionsList.get(Parameters.IRPPROTOCOLSINI).get()); // needed for CSV import
         nodeList = doc.getElementsByTagName("named-remote");
         ArrayList<RemoteSet> remoteSetList = new ArrayList<>(nodeList.getLength());
         for (int i = 0; i < nodeList.getLength(); i++)
@@ -189,62 +170,19 @@ public class ConfigFile {
         return Collections.unmodifiableList(moduleList);
     }
 
-//    /**
-//     * @param name
-//     * @return the stringOptions
-//     */
-//    private String getStringOption(String name) {
-//        return stringOptions.get(name);
-//    }
-//
-//    /**
-//     * @param name
-//     * @param dflt
-//     * @return the booleanOptions
-//     */
-//    private boolean getBooleanOption(String name, boolean dflt) {
-//        return booleanOptions.containsKey(name) ? booleanOptions.get(name) : dflt;
-//    }
-//
-//    /**
-//     * @param name
-//     * @return the booleanOptions
-//     */
-//    private boolean getBooleanOption(String name) {
-//        return getBooleanOption(name, false);
-//    }
-//
-//    /**
-//     * @param name
-//     * @param dflt
-//     * @return the booleanOptions
-//     */
-//    public int getIntegerOption(String name, int dflt) {
-//        return integerOptions.containsKey(name) ? integerOptions.get(name) : dflt;
-//    }
-//
-//    /**
-//     * @param name
-//     * @return the booleanOptions
-//     */
-//    public int getIntegerOption(String name) {
-//        return getIntegerOption(name, -1);
-//    }
-
-//    private void addHardware(GirsHardware hardware) {
-//        irHardware.add(hardware);
-//    }
-
     void setStringOption(String name, String value) {
-        stringOptions.put(name, value);
+        StringParameter parameter = (StringParameter) optionsList.get(name);
+        parameter.set(value);
     }
 
     void setIntegerOption(String name, int value) {
-        integerOptions.put(name, value);
+        IntegerParameter parameter = (IntegerParameter) optionsList.get(name);
+        parameter.set(value);
     }
 
     void setBooleanOption(String name, boolean value) {
-        booleanOptions.put(name, value);
+        BooleanParameter parameter = (BooleanParameter) optionsList.get(name);
+        parameter.set(value);
     }
 
     void addGirr(List<String> girr) throws ParseException, IOException, SAXException, IrpMasterException {
@@ -263,8 +201,8 @@ public class ConfigFile {
         }
     }
 
-    List<Parameter> getOptions() {
-        return Collections.unmodifiableList(optionsList);
+    HashMap<String, Parameter> getOptions() {
+        return optionsList;
     }
 
     public static class NoSuchRemoteTypeException extends Exception {

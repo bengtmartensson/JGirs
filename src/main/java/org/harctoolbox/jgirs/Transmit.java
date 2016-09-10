@@ -270,7 +270,7 @@ public class Transmit extends Module {
 
         @Override
         public String exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
-            int index = 1;
+            int index = 0;
             int count = intParse(args[index++]); // throw NumberFormatException
             int frequency = intParse(args[index++]);
             int introLength = intParse(args[index++]);

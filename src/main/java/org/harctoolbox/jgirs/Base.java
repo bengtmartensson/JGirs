@@ -94,7 +94,7 @@ public class Base extends Module {
     private static class GirsCommandsCommand implements ICommand {
         @Override
         public String getName() {
-            return "girscommands";
+            return "commands";
         }
 
         @Override

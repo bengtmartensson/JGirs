@@ -136,6 +136,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
         try (Engine engine = newEngine()) {
             if (commandLineArgs.parameters.isEmpty()) {
                 engine.greet();
+                if (commandLineArgs.immediateInit)
+                    engine.openAll();
                 String historyFile = commandLineArgs.historyfile != null
                         ? commandLineArgs.historyfile
                         : ReadlineCommander.defaultHistoryFile(commandLineArgs.appName);
@@ -314,6 +316,17 @@ public final class Engine implements ICommandLineDevice, Closeable {
     public void open() throws HarcHardwareException, IOException {
     }
 
+    private void openAll() {
+        irHardware.values().stream().forEach((hardware) -> {
+            try {
+                hardware.getHardware().setVerbosity(isVerbosity());
+                hardware.getHardware().open();
+            } catch (IOException | HarcHardwareException ex) {
+                logger.log(Level.WARNING, "Failed to open " + hardware.getName(), ex);
+            }
+        });
+    }
+
     @Override
     public void close() {
         irHardware.values().stream().forEach((hardware) -> {
@@ -353,8 +366,14 @@ public final class Engine implements ICommandLineDevice, Closeable {
         }
     }
 
-    public boolean isVerbosity() throws NoSuchParameterException {
-        return Parameters.getInstance().getBoolean(Parameters.VERBOSITY);
+    public boolean isVerbosity() {
+        try {
+            return Parameters.getInstance().getBoolean(Parameters.VERBOSITY);
+        } catch (NoSuchParameterException ex) {
+            // Not really a disaster
+            logger.warning(Parameters.VERBOSITY + " is not defined");
+            return false;
+        }
     }
 
     private final static class CommandLineArgs {
@@ -379,6 +398,9 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
         @Parameter(names = {"--historyfile"}, description = "History file for readline")
         private String historyfile = null;//System.getProperty("user.home") + File.separator + ".jgirs.history";
+
+        @Parameter(names = {"--immediate-init"}, description = "Open hardware immediately at start.")
+        private boolean immediateInit = false;
 
         @Parameter(names = {"-i", "--irpprotocolsini"}, description = "IrpMaster protocol file")
         private String irpMasterIni = null;//"IrpProtocols.ini";

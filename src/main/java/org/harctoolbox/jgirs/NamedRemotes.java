@@ -73,7 +73,7 @@ public class NamedRemotes extends Module {
         super();
         this.database = remoteCommandsDataBase;
         addCommand(new RemotesCommand());
-        addCommand(new CommandsCommand());
+        //addCommand(new CommandsCommand());
     }
 
     public RemoteCommandDataBase.RemoteCommand getRemoteCommand(String protocol, Map<String, Long> parameters) {
@@ -127,19 +127,19 @@ public class NamedRemotes extends Module {
         }
     }
 
-    private class CommandsCommand implements ICommand {
-
-        private static final String COMMANDS = "commands";
-
-        @Override
-        public String getName() {
-            return COMMANDS;
-        }
-
-        @Override
-        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchParameterException {
-            checkNoArgs(COMMANDS, args.length, 1, 1);
-            return getRemoteCommands(args[0]);
-        }
-    }
+//    private class CommandsCommand implements ICommand {
+//
+//        private static final String COMMANDS = "commands";
+//
+//        @Override
+//        public String getName() {
+//            return COMMANDS;
+//        }
+//
+//        @Override
+//        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchParameterException {
+//            checkNoArgs(COMMANDS, args.length, 1, 1);
+//            return getRemoteCommands(args[0]);
+//        }
+//    }
 }
