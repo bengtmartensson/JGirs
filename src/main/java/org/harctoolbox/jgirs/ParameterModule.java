@@ -31,7 +31,7 @@ public class ParameterModule extends Module {
     public static final String IRPPROTOCOLSINI = "irpProtocolsIni";
     public static final String VERBOSITY = "verbosity"; // Do not change to the more grammatically correct "verbose"
     public static final String LISTSEPARATOR = "listSeparator";
-    public static final String OUTPUTDEVICE = "outputDevice";
+    public static final String TRANSMITDEVICE = "transmitDevice";
     public static final String CAPTUREDEVICE = "captureDevice";
     public static final String RECEIVEDEVICE = "receiveDevice";
 
@@ -141,7 +141,7 @@ public class ParameterModule extends Module {
         Parameter param = parameterMap.get(name);
         if (!(param instanceof StringParameter))
             throw new Parameter.IncorrectParameterType(STRING);
-        ((StringParameter) param).set(value);
+        param.set(value);
     }
 
 //    private class SetParameterCommand implements ICommand {

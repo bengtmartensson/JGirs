@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Example configuration -->
 <jgirs version="0.0.0">
+    <jni-lib libpath="/local/lib64/libJavaReadline.so"/>
     <options>
         <!-- Names are case sensitive. Some commands may compare or sort case insensitively -->
         <option name="listSeparator">&#10;&#13;</option>
@@ -19,7 +20,7 @@
         <option name="loglevel">INFO</option>
         <option name="clientPassword">LetsReplaceLirc</option>
         <option name="verbosity" type="boolean">false</option> <!-- do not rename -->
-        <option name="outputDevice">nano</option>
+        <option name="transmitDevice">nano</option>
         <option name="captureDevice">nano</option>
         <option name="receiveDevice">nano</option>
         <option name="captureBeginTimeout" type="int">5000</option>
@@ -28,7 +29,7 @@
         <option name="receiveBeginTimeout" type="int">5000</option>
         <option name="receiveEndingTimeout" type="int">30</option>
         <option name="receiveMaxLength" type="int">100</option>
-        <option name="sendingTimeout" type="int">5000</option>
+        <option name="transmitTimeout" type="int">5000</option>
         <option name="connectTimeout" type="int">2000</option>
         <option name="StarWars">May the schwarz be with you!</option>
     </options>
@@ -57,7 +58,7 @@
                 <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>
             </arguments>
         </hardware-item>
-        <hardware-item name="old-globalcache" displayname="Global Caché" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
+        <hardware-item name="old-globalcache" displayname="Global Caché GC-100-6" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
             <description>The old GC-100-06. Connectors: 1: Main blaster; 2: Bedroom; 3: Desktop amplifier (Yamaha RX-V 1400)</description>
             <www url="http://globalcache.earth"/>
             <arguments>
@@ -70,17 +71,11 @@
                 <argument description="device name">/dev/lirc0</argument>
             </arguments>
         </hardware-item>
-        <hardware-item name="nano" displayname="Arduino Nano" class="org.harctoolbox.harchardware.ir.SerialGirsClient">
+        <hardware-item name="nano" displayname="Arduino Nano" class="org.harctoolbox.jgirs.hardware.SerialGirsClient">
             <arguments>
                 <argument description="device name">/dev/arduino_nano_qinheng</argument>
                 <argument type="int" description="baud rate">115200</argument>
             </arguments>
         </hardware-item>
     </hardware>
-
-    <!-- Other Girs servers, that we may be able to communicate with.
-    Better: discover dynamically. -->
-    <girs-servers>
-        <girs-server ip="arduino" port="33333"/>
-    </girs-servers>
 </jgirs>

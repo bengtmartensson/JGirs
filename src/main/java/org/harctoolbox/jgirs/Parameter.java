@@ -56,11 +56,6 @@ public abstract class Parameter /*implements IParameter*/ {
             return p1.name.compareToIgnoreCase(p2.name);
         }
 
-//        @Override
-//        public int compare(Object o1, Object o2) {
-//            return compare((Parameter) o1, (Parameter) o2);
-//        }
-
     }
 
     public static class IncorrectParameterType extends RuntimeException {

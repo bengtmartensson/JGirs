@@ -80,25 +80,16 @@ public class Transmit extends Module {
         super();
         this.renderer = renderer;
         this.irp = irp;
-//        this.currentOutputHardware = currentOutputHardware;
         this.namedRemotes = namedRemotes;
-//        if (currentOutputHardware.getHardware() iIRawIrSender.class.isInstance(hardware))
-//            transmitter = ((IRawIrSender) hardware).getTransmitter();
-//        else if (IRemoteCommandIrSender.class.isInstance(hardware))
-//            transmitter = ((IRemoteCommandIrSender) hardware).getTransmitter();
-//        else
-//            throw new RuntimeException();
 
         addCommand(new TransmitCommand());
         addCommand(new SendCommand());
-//if (IIrSenderStop.class.isInstance(hardware))
         addCommand(new StopCommand());
-//if (ITransmitter.class.isInstance(hardware))
         addCommand(new GetTransmittersCommand());
     }
 
     private String transmit(IrSignal irSignal, int count) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
-        GirsHardware hardware = Engine.getInstance().getOutputHardware();
+        GirsHardware hardware = Engine.getInstance().getTransmitHardware();
         initializeHardware(hardware, IRawIrSender.class);
         IRawIrSender irsender = (IRawIrSender) hardware.getHardware();
         Transmitter transmitter = irsender.getTransmitter();
@@ -120,7 +111,7 @@ public class Transmit extends Module {
 
         @Override
         public String exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException {
-            GirsHardware hardware = Engine.getInstance().getOutputHardware();
+            GirsHardware hardware = Engine.getInstance().getTransmitHardware();
             initializeHardware(hardware, IIrSenderStop.class);
 
             Transmitter transmitter = ((ITransmitter) hardware.getHardware()).getTransmitter();
@@ -137,7 +128,7 @@ public class Transmit extends Module {
 
         @Override
         public String exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchHardwareException, NoSuchParameterException {
-            GirsHardware hardware = Engine.getInstance().getOutputHardware();
+            GirsHardware hardware = Engine.getInstance().getTransmitHardware();
             initializeHardware(hardware, ITransmitter.class);
 
 //        IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();

@@ -17,10 +17,19 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.xml.validation.Schema;
+import org.harctoolbox.IrpMaster.XmlUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 
 public class Utils {
@@ -73,6 +82,20 @@ public class Utils {
         for (int i = 0; i < toks.length; i++)
             toks[i] = toks[i].replaceFirst("^\"", "").replaceFirst("\"$", "");
         return toks;
+    }
+
+    public static Document openXmlUrl(URL url, Schema schema, boolean isNamespaceAware, boolean isXIncludeAware) throws IOException, SAXException {
+        InputStream inputStream = url.openStream();
+        return XmlUtils.openXmlStream(inputStream, schema, isNamespaceAware, isXIncludeAware);
+    }
+
+    public static Document openXmlUrl(String url, Schema schema, boolean isNamespaceAware, boolean isXIncludeAware) throws SAXException, IOException {
+        try {
+            URL u = new URL(url);
+            return openXmlUrl(u, schema, isNamespaceAware, isXIncludeAware);
+        } catch (MalformedURLException ex) {
+        }
+        return XmlUtils.openXmlFile(new File(url), schema, isNamespaceAware, isXIncludeAware);
     }
 
     private Utils() {

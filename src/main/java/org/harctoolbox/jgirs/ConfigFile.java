@@ -30,9 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.xml.validation.Schema;
 import org.harctoolbox.IrpMaster.IrpMasterException;
-import org.harctoolbox.IrpMaster.XmlUtils;
 import org.harctoolbox.girr.Command;
-import org.harctoolbox.girr.CsvImporter;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import static org.harctoolbox.jgirs.ParameterModule.BOOLEAN;
@@ -73,7 +71,7 @@ public class ConfigFile {
 
     private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
         URL url = new URL(element.getAttribute(URL));
-        Document doc = XmlUtils.openXmlUrl(url, null, true, true);
+        Document doc = Utils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
         return remoteSet;
     }
@@ -93,7 +91,7 @@ public class ConfigFile {
         return csvImporter.parseRemoteSet(name, url.toString(), reader);
     }
 
-    private final HashMap<String, GirsHardware> irHardware;
+    private final List<GirsHardware> irHardware;
     private RemoteCommandDataBase remoteCommandsDataBase;
     private final List<Module.ModulePars> moduleList;
     private final HashMap<String, Integer> integerOptions;
@@ -103,7 +101,7 @@ public class ConfigFile {
 
     public ConfigFile() {
         remoteCommandsDataBase = new RemoteCommandDataBase(true);
-        irHardware = new HashMap<>(8);
+        irHardware = new ArrayList<>(8);
         moduleList = new ArrayList<>(4);
         integerOptions = new HashMap<>(4);
         booleanOptions = new HashMap<>(4);
@@ -115,6 +113,7 @@ public class ConfigFile {
         this();
         if (doc == null)
             return;
+
 
         NodeList nodeList = doc.getElementsByTagName("option");
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -146,10 +145,10 @@ public class ConfigFile {
             Element el = (Element) nodeList.item(i);
             loadJni(el);
             GirsHardware hw = new GirsHardware(el);
-            irHardware.put(hw.getName(), hw);
+            irHardware.add(hw);
         }
 
-        Command.setIrpMaster(getStringOption(ParameterModule.IRPPROTOCOLSINI)); // needed for CSV import
+        Command.setIrpMaster(stringOptions.get(ParameterModule.IRPPROTOCOLSINI)); // needed for CSV import
         nodeList = doc.getElementsByTagName("named-remote");
         ArrayList<RemoteSet> remoteSetList = new ArrayList<>(nodeList.getLength());
         for (int i = 0; i < nodeList.getLength(); i++)
@@ -166,14 +165,14 @@ public class ConfigFile {
     }
 
     public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException {
-        this(url != null ? XmlUtils.openXmlUrl(url, (Schema) null, false, true) : null);
+        this(url != null ? Utils.openXmlUrl(url, (Schema) null, false, true) : null);
     }
 
     /**
      * @return the irHardwareList
      */
-    HashMap<String, GirsHardware> getIrHardware() {
-        return irHardware;
+    List<GirsHardware> getIrHardware() {
+        return Collections.unmodifiableList(irHardware);
     }
 
     /**
@@ -190,51 +189,51 @@ public class ConfigFile {
         return Collections.unmodifiableList(moduleList);
     }
 
-    /**
-     * @param name
-     * @return the stringOptions
-     */
-    private String getStringOption(String name) {
-        return stringOptions.get(name);
-    }
+//    /**
+//     * @param name
+//     * @return the stringOptions
+//     */
+//    private String getStringOption(String name) {
+//        return stringOptions.get(name);
+//    }
+//
+//    /**
+//     * @param name
+//     * @param dflt
+//     * @return the booleanOptions
+//     */
+//    private boolean getBooleanOption(String name, boolean dflt) {
+//        return booleanOptions.containsKey(name) ? booleanOptions.get(name) : dflt;
+//    }
+//
+//    /**
+//     * @param name
+//     * @return the booleanOptions
+//     */
+//    private boolean getBooleanOption(String name) {
+//        return getBooleanOption(name, false);
+//    }
+//
+//    /**
+//     * @param name
+//     * @param dflt
+//     * @return the booleanOptions
+//     */
+//    public int getIntegerOption(String name, int dflt) {
+//        return integerOptions.containsKey(name) ? integerOptions.get(name) : dflt;
+//    }
+//
+//    /**
+//     * @param name
+//     * @return the booleanOptions
+//     */
+//    public int getIntegerOption(String name) {
+//        return getIntegerOption(name, -1);
+//    }
 
-    /**
-     * @param name
-     * @param dflt
-     * @return the booleanOptions
-     */
-    private boolean getBooleanOption(String name, boolean dflt) {
-        return booleanOptions.containsKey(name) ? booleanOptions.get(name) : dflt;
-    }
-
-    /**
-     * @param name
-     * @return the booleanOptions
-     */
-    private boolean getBooleanOption(String name) {
-        return getBooleanOption(name, false);
-    }
-
-    /**
-     * @param name
-     * @param dflt
-     * @return the booleanOptions
-     */
-    public int getIntegerOption(String name, int dflt) {
-        return integerOptions.containsKey(name) ? integerOptions.get(name) : dflt;
-    }
-
-    /**
-     * @param name
-     * @return the booleanOptions
-     */
-    public int getIntegerOption(String name) {
-        return getIntegerOption(name, -1);
-    }
-
-    void addHardware(GirsHardware hardware) {
-        irHardware.put(hardware.getName(), hardware);
-    }
+//    private void addHardware(GirsHardware hardware) {
+//        irHardware.add(hardware);
+//    }
 
     void setStringOption(String name, String value) {
         stringOptions.put(name, value);
@@ -248,7 +247,7 @@ public class ConfigFile {
         booleanOptions.put(name, value);
     }
 
-    void addGirs(List<String> girr) throws ParseException, IOException, SAXException, IrpMasterException {
+    void addGirr(List<String> girr) throws ParseException, IOException, SAXException, IrpMasterException {
         remoteCommandsDataBase.add(girr);
     }
 

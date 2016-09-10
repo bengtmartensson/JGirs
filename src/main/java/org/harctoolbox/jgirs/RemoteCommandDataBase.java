@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import org.harctoolbox.IrpMaster.IrpMasterException;
-import org.harctoolbox.IrpMaster.XmlUtils;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
 import org.w3c.dom.Document;
@@ -78,7 +77,7 @@ public class RemoteCommandDataBase {
 //    }
 
     private static RemoteSet parseGirr(URL url) throws java.text.ParseException, IOException, SAXException {
-        Document doc = XmlUtils.openXmlUrl(url, null, true, true);
+        Document doc = Utils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
         return remoteSet;
     }

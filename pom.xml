@@ -7,7 +7,7 @@
     <groupId>org.harctoolbox</groupId>
     <artifactId>JGirs</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <name>JGirs</name>
     <licenses>
         <license>
@@ -115,9 +115,6 @@
                         <manifest>
                             <mainClass>${project.groupId}.jgirs.Engine</mainClass>
                         </manifest>
-                        <!--manifestEntries>
-                            <SplashScreen-Image>images/splash.png</SplashScreen-Image>
-                        </manifestEntries-->
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -212,7 +209,7 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>ReadlineCommander</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>

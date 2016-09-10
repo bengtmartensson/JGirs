@@ -18,15 +18,15 @@ import org.testng.annotations.Test;
  */
 public class UtilsNGTest {
 
-    public UtilsNGTest() {
-    }
-
     @BeforeClass
     public static void setUpClass() throws Exception {
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+    }
+
+    public UtilsNGTest() {
     }
 
     @BeforeMethod
@@ -36,8 +36,6 @@ public class UtilsNGTest {
     @AfterMethod
     public void tearDownMethod() throws Exception {
     }
-
-
 
     /**
      * Test of tokenizer method, of class Utils.
