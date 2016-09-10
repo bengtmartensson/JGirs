@@ -186,11 +186,11 @@ public class Receive extends Module {
             initializeHardware(hardware, IReceive.class);
             IReceive receiver = (IReceive) hardware.getHardware();
 
-            receiver.setBeginTimeout(ParameterModule.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
+            receiver.setBeginTimeout(Parameters.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
             final IrSequence irSequence = receiver.receive();
 
-            final IrSignal irSignal = new IrSignal(ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
-            ReceiveFormat receiveFormat = ((ReceiveFormatParameter) ParameterModule.getInstance().get(RECEIVEFORMAT)).value;
+            final IrSignal irSignal = new IrSignal(Parameters.getInstance().getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
+            ReceiveFormat receiveFormat = ((ReceiveFormatParameter) Parameters.getInstance().get(RECEIVEFORMAT)).value;
             switch (receiveFormat) {
                 case ccf:
                     return irSignal.ccfString();
@@ -199,7 +199,7 @@ public class Receive extends Module {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY));
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
                     List<String> result = new ArrayList<>(decodes.length);
                     for (DecodeIR.DecodedSignal decode : decodes)
                         result.add(decode.toString());
@@ -211,7 +211,7 @@ public class Receive extends Module {
                     boolean success = DecodeIR.loadLibrary();
                     if (!success)
                         return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, ParameterModule.getInstance().getInteger(FALLBACKFREQUENCY));
+                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
                     if (decodes.length == 0)
                         return null;
                     final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());

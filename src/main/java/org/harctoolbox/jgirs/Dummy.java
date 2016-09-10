@@ -22,23 +22,23 @@ import java.util.Date;
 /**
  * A pretty useless module, to serve as an example.
  */
-public class DummyModule extends Module {
+public class Dummy extends Module {
 
-//    public static DummyModule newDummyModule(String nonsense) {
-//        instance = new DummyModule(nonsense);
-//        return (DummyModule) instance;
+//    public static Dummy newDummyModule(String nonsense) {
+//        instance = new Dummy(nonsense);
+//        return (Dummy) instance;
 //    }
 
     private final String nonsense;
 
-    public DummyModule(String nonsense) {
+    public Dummy(String nonsense) {
         super();
         this.nonsense = nonsense;
         addCommand(new DateCommand());
         addCommand(new NonsenseCommand());
     }
 
-    public DummyModule() {
+    public Dummy() {
         this(null);
     }
 

@@ -20,20 +20,20 @@ package org.harctoolbox.jgirs;
 /**
  * This class models transmitters as in HarcHardware.
  */
-public class TransmittersModule extends Module {
+public class Transmitters extends Module {
 
-    private static volatile TransmittersModule instance = null;
+    private static volatile Transmitters instance = null;
 
-    public static TransmittersModule newTransmittersModule() {
+    public static Transmitters newTransmittersModule() {
         if (instance != null)
             throw new InvalidMultipleInstantiation();
 
-        instance = new TransmittersModule();
+        instance = new Transmitters();
         return instance;
     }
     //private final ITransmitter transmitter;
 
-    private TransmittersModule() {
+    private Transmitters() {
         super();
         addCommand(new TransmittersCommand());
     }

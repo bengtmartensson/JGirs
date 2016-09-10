@@ -70,7 +70,7 @@ public class Utils {
     }
 
     public static String sortedString(Iterable<String> things) throws NoSuchParameterException {
-        return sortedString(things, ParameterModule.getInstance().getString(ParameterModule.LISTSEPARATOR));
+        return sortedString(things, Parameters.getInstance().getString(Parameters.LISTSEPARATOR));
     }
 
     public static String sortedString(String[] things) throws NoSuchParameterException {

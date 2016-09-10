@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Models parameters in the Girs server.
  */
-public class ParameterModule extends Module {
+public class Parameters extends Module {
 
     public static final String IRPPROTOCOLSINI = "irpProtocolsIni";
     public static final String VERBOSITY = "verbosity"; // Do not change to the more grammatically correct "verbose"
@@ -39,24 +39,24 @@ public class ParameterModule extends Module {
     public static final String BOOLEAN = "boolean";
     public static final String STRING = "String";
 
-    private static volatile ParameterModule instance = null;
+    private static volatile Parameters instance = null;
 
 
-    public static ParameterModule getInstance() {
+    public static Parameters getInstance() {
         return instance;
     }
 
-    public static ParameterModule newParameterModule() {
+    public static Parameters newParameterModule() {
         if (instance != null)
             throw new InvalidMultipleInstantiation();
 
-        instance = new ParameterModule();
+        instance = new Parameters();
         return instance;
     }
 
     private final HashMap<String, Parameter> parameterMap;
 
-    private ParameterModule() {
+    private Parameters() {
         super();
         this.parameterMap = new HashMap<>(8);
         addCommand(new ParameterCommand());

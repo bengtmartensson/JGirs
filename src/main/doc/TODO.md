@@ -13,6 +13,7 @@
 
 # (Much) LATER (not in first version)
 
+* multithreaded server
 * Recursive loading of remote directories.
 * Client Password
 * Named sockets

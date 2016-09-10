@@ -35,7 +35,7 @@
     </options>
 
     <modules>
-        <module class="org.harctoolbox.jgirs.DummyModule">
+        <module class="org.harctoolbox.jgirs.Dummy">
             <arguments>
                 <argument type="String" description="dummy argument">Let's replace Lirc!</argument>
             </arguments>

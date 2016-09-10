@@ -62,7 +62,7 @@ public abstract class Module {
 
     //private final HashMap<String, ICommand> commands;
     //protected final CommandExecuter commandExecuter;
-    //protected final ParameterModule parameters;
+    //protected final Parameters parameters;
     //private final HashMap<String, IParameter> parameterMap;
 
     protected Module() {
@@ -98,7 +98,7 @@ public abstract class Module {
 //    }
 
     protected final void addParameter(Parameter parameter) {
-        ParameterModule.getInstance().add(parameter);
+        Parameters.getInstance().add(parameter);
     }
 
     List<String> getCommandNames() {

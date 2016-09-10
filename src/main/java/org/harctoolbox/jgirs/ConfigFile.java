@@ -33,8 +33,8 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
-import static org.harctoolbox.jgirs.ParameterModule.BOOLEAN;
-import static org.harctoolbox.jgirs.ParameterModule.INT;
+import static org.harctoolbox.jgirs.Parameters.BOOLEAN;
+import static org.harctoolbox.jgirs.Parameters.INT;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -148,7 +148,7 @@ public class ConfigFile {
             irHardware.add(hw);
         }
 
-        Command.setIrpMaster(stringOptions.get(ParameterModule.IRPPROTOCOLSINI)); // needed for CSV import
+        Command.setIrpMaster(stringOptions.get(Parameters.IRPPROTOCOLSINI)); // needed for CSV import
         nodeList = doc.getElementsByTagName("named-remote");
         ArrayList<RemoteSet> remoteSetList = new ArrayList<>(nodeList.getLength());
         for (int i = 0; i < nodeList.getLength(); i++)

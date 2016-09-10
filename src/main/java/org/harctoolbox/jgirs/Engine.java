@@ -111,18 +111,18 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
         // Some stuff from the command line overrides the data in the configuration file:
         if (commandLineArgs.irpMasterIni != null) {
-            config.setStringOption(ParameterModule.IRPPROTOCOLSINI, commandLineArgs.irpMasterIni);
+            config.setStringOption(Parameters.IRPPROTOCOLSINI, commandLineArgs.irpMasterIni);
         }
 
         if (commandLineArgs.verbosity)
-            config.setBooleanOption(ParameterModule.VERBOSITY, commandLineArgs.verbosity);
+            config.setBooleanOption(Parameters.VERBOSITY, commandLineArgs.verbosity);
 
         if (commandLineArgs.transmitDevice != null)
-            config.setStringOption(ParameterModule.TRANSMITDEVICE, commandLineArgs.transmitDevice);
+            config.setStringOption(Parameters.TRANSMITDEVICE, commandLineArgs.transmitDevice);
         if (commandLineArgs.captureDevice != null)
-            config.setStringOption(ParameterModule.CAPTUREDEVICE, commandLineArgs.captureDevice);
+            config.setStringOption(Parameters.CAPTUREDEVICE, commandLineArgs.captureDevice);
         if (commandLineArgs.receiveDevice != null)
-            config.setStringOption(ParameterModule.RECEIVEDEVICE, commandLineArgs.receiveDevice);
+            config.setStringOption(Parameters.RECEIVEDEVICE, commandLineArgs.receiveDevice);
 
         // Additional Girr files from the command line
         try {
@@ -181,21 +181,21 @@ public final class Engine implements ICommandLineDevice, Closeable {
         modules = new LinkedHashMap<>(16);
 
         // Set up the special modules
-        registerModule(ParameterModule.newParameterModule());
+        registerModule(Parameters.newParameterModule());
 
         // May override values in the code
-        ParameterModule.getInstance().addAll(config.getOptions());
+        Parameters.getInstance().addAll(config.getOptions());
 
-        ParameterModule.getInstance().add(new StringParameter("hardwareList",
+        Parameters.getInstance().add(new StringParameter("hardwareList",
                 Utils.sortedString(irHardware.keySet(), " "), "List of available hardware"));
 
         registerModule(Base.newBase());
 
         try {
-            renderer = new Renderer(ParameterModule.getInstance().getString(ParameterModule.IRPPROTOCOLSINI));
+            renderer = new Renderer(Parameters.getInstance().getString(Parameters.IRPPROTOCOLSINI));
             registerModule(renderer);
         } catch (NoSuchParameterException ex) {
-            logger.log(Level.WARNING, ParameterModule.IRPPROTOCOLSINI + " not defined; rendering will not be available");
+            logger.log(Level.WARNING, Parameters.IRPPROTOCOLSINI + " not defined; rendering will not be available");
         }
 
         if (config.getRemoteCommandsDataBase() != null) {
@@ -207,7 +207,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         registerModule(irp);
 
         registerModule(Transmit.newTransmit(renderer, irp, namedRemotes));
-        registerModule(TransmittersModule.newTransmittersModule());
+        registerModule(Transmitters.newTransmittersModule());
         registerModule(Capture.newCapture());
         registerModule(Receive.newReceive(namedRemotes));
 
@@ -232,15 +232,15 @@ public final class Engine implements ICommandLineDevice, Closeable {
     }
 
     public GirsHardware getTransmitHardware() throws NoSuchHardwareException, NoSuchParameterException {
-        return getHardware(ParameterModule.getInstance().getString(ParameterModule.TRANSMITDEVICE));
+        return getHardware(Parameters.getInstance().getString(Parameters.TRANSMITDEVICE));
     }
 
     public GirsHardware getCaptureHardware() throws NoSuchHardwareException, NoSuchParameterException {
-        return getHardware(ParameterModule.getInstance().getString(ParameterModule.CAPTUREDEVICE));
+        return getHardware(Parameters.getInstance().getString(Parameters.CAPTUREDEVICE));
     }
 
     public GirsHardware getReceiveHardware() throws NoSuchHardwareException, NoSuchParameterException {
-        return getHardware(ParameterModule.getInstance().getString(ParameterModule.RECEIVEDEVICE));
+        return getHardware(Parameters.getInstance().getString(Parameters.RECEIVEDEVICE));
     }
 
     @Override
@@ -290,7 +290,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public void setVerbosity(boolean verbosity) {
-        ParameterModule.getInstance().setBoolean(ParameterModule.VERBOSITY, verbosity);
+        Parameters.getInstance().setBoolean(Parameters.VERBOSITY, verbosity);
     }
 
     // NOTE: This software does not support "debug" as in harchardware.
@@ -354,7 +354,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
     }
 
     public boolean isVerbosity() throws NoSuchParameterException {
-        return ParameterModule.getInstance().getBoolean(ParameterModule.VERBOSITY);
+        return Parameters.getInstance().getBoolean(Parameters.VERBOSITY);
     }
 
     private final static class CommandLineArgs {
