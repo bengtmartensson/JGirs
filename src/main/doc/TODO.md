@@ -6,7 +6,7 @@
 * Socket interface
 * OpenClose
 * API
-* ; in lines
+
 * Bug: '.calSerialPortBuffered.sendString: Sent '
 
 ## RemoteDatabase
@@ -33,5 +33,6 @@
 * Synonyms
 
 # DONE
-* reloca
-* --immediate-opente Dummy
+* relocate Dummy
+* --immediate-open
+* ; in lines

@@ -370,9 +370,30 @@ public final class Engine implements ICommandLineDevice, Closeable {
         if (command.trim().isEmpty())
             return Utils.singletonArrayList(OK);
 
-        String[] tokens = Utils.tokenizer(command.trim());
         try {
-            return CommandExecuter.getMainExecutor().exec(tokens);
+            String[] tokens = Utils.tokenizer(command.trim());
+            List<String> out = new ArrayList<>(8);
+            int beg = 0;
+            for (int i = 0; i < tokens.length; i++) {
+                if (tokens[i].equals(";")) {
+                    String[] args = new String[i - beg];
+                    System.arraycopy(tokens, beg, args, 0, i - beg);
+                    List<String> list = CommandExecuter.getMainExecutor().exec(args);
+                    if (list == null)
+                        return null;
+                    out.addAll(list);
+                    beg = i + 1;
+                }
+            }
+            if (beg < tokens.length) {
+                String[] args = new String[tokens.length - beg];
+                System.arraycopy(tokens, beg, args, 0, tokens.length - beg);
+                List<String> list = CommandExecuter.getMainExecutor().exec(args);
+                if (list == null)
+                        return null;
+                out.addAll(list);
+            }
+            return out;
         } catch (JGirsException | IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
             return Utils.singletonArrayList(ERROR + ": " + ex.toString());
         }
