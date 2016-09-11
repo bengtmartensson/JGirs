@@ -181,7 +181,8 @@ public class Receive extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
+            checkNoArgs(RECEIVE, args.length, 0);
             GirsHardware hardware = Engine.getInstance().getReceiveHardware();
             initializeHardware(hardware, IReceive.class);
             IReceive receiver = (IReceive) hardware.getHardware();
@@ -193,7 +194,7 @@ public class Receive extends Module {
             ReceiveFormat receiveFormat = ((ReceiveFormatParameter) Parameters.getInstance().get(RECEIVEFORMAT)).value;
             switch (receiveFormat) {
                 case ccf:
-                    return irSignal.ccfString();
+                    return Utils.singletonArrayList(irSignal.ccfString());
                 case protocolparameter:
                 {
                     boolean success = DecodeIR.loadLibrary();
@@ -204,7 +205,7 @@ public class Receive extends Module {
                     for (DecodeIR.DecodedSignal decode : decodes)
                         result.add(decode.toString());
 
-                    return String.join(";", result);
+                    return result;
                 }
                 case namedcommand:
                 {
@@ -215,10 +216,10 @@ public class Receive extends Module {
                     if (decodes.length == 0)
                         return null;
                     final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
-                    return cmd != null ? cmd.toString() : null;
+                    return cmd != null ? Utils.singletonArrayList(cmd.toString()) : null;
                 }
                 case raw:
-                    return irSequence.toPrintString(true, false);
+                    return Utils.singletonArrayList(irSequence.toPrintString(true, false));
                 default:
                     throw new RuntimeException("Programming error");
             }

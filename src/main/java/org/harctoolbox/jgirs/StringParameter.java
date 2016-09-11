@@ -41,7 +41,7 @@ final class StringParameter extends Parameter {
 
     @Override
     public String get() {
-        return value;
+        return value.matches(".*\\s.*") ? ( "\"" + value + "\"" ) : value;
     }
 
     /**

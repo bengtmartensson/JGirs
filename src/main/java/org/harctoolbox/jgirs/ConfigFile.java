@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +34,8 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
-import static org.harctoolbox.jgirs.Parameters.BOOLEAN;
-import static org.harctoolbox.jgirs.Parameters.INT;
+import static org.harctoolbox.jgirs.Utils.BOOLEAN;
+import static org.harctoolbox.jgirs.Utils.INT;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -44,11 +45,11 @@ public class ConfigFile {
 
     private static final String LIRC_ENCODING = "WINDOWS-1252";
     private static final String DEFAULT_ENCODING = "WINDOWS-1252";
-    private static final String URL = "url";
-    private static final String GIRR = "girr";
-    private static final String LIRCD = "lircd";
-    private static final String CSV = "csv";
-    private static final String TYPE = "type";
+    private static final String URL     = "url";
+    private static final String GIRR    = "girr";
+    private static final String LIRCD   = "lircd";
+    private static final String CSV     = "csv";
+    private static final String TYPE    = "type";
 
     private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException, IrpMasterException {
         String type = element.getAttribute(TYPE);
@@ -78,7 +79,7 @@ public class ConfigFile {
 
     private static RemoteSet parseCsv(Element element) throws IOException, SAXException, ParseException, IrpMasterException {
         URL url = new URL(element.getAttribute(URL));
-        int commandNameColumn = Integer.parseInt(element.getAttribute("commandName"));
+        int commandNameColumn = Integer.parseInt(element.getAttribute("commandname"));
         int protocolColumn = Integer.parseInt(element.getAttribute("protocol"));
         int DColumn = Integer.parseInt(element.getAttribute("D"));
         int SColumn = Integer.parseInt(element.getAttribute("S"));
@@ -201,8 +202,8 @@ public class ConfigFile {
         }
     }
 
-    HashMap<String, Parameter> getOptions() {
-        return optionsList;
+    Collection<Parameter> getOptions() {
+        return optionsList.values();
     }
 
     public static class NoSuchRemoteTypeException extends Exception {

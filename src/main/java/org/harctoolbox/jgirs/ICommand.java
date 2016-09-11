@@ -18,6 +18,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
+import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -35,12 +36,12 @@ public interface ICommand {
     /**
      * Executes the command
      * @param args argument list in the Unix sense, i.e., containing the command name as the first argument args[0].
-     * @return String to be returned to the client
+     * @return Strings to be returned to the client, null for failure, non-null (possibly a list of length 0) indicates success.
      * @throws java.io.IOException
      * @throws org.harctoolbox.harchardware.HarcHardwareException
      * @throws org.harctoolbox.jgirs.CommandException
      * @throws org.harctoolbox.jgirs.AmbigousCommandException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public String exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousCommandException, IrpMasterException;
+    public List<String> exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousCommandException, IrpMasterException;
 }

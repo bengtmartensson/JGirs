@@ -18,8 +18,11 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.example.jgirs;
 
 import java.util.Date;
+import java.util.List;
+import org.harctoolbox.jgirs.CommandSyntaxException;
 import org.harctoolbox.jgirs.ICommand;
 import org.harctoolbox.jgirs.Module;
+import org.harctoolbox.jgirs.Utils;
 
 /**
  * A pretty useless module, to serve as an example.
@@ -42,40 +45,49 @@ public class Dummy extends Module {
 
     private static class DateCommand implements ICommand {
 
-        @Override
-        public String getName() {
-            return "date";
-        }
-
-        @Override
-        public String exec(String[] args) {
-            return (new Date()).toString();
-        }
-    }
-
-    private class NonsenseCommand implements ICommand {
+        private static final String DATE = "date";
 
         @Override
         public String getName() {
-            return "nonsense";
+            return DATE;
         }
 
         @Override
-        public String exec(String[] args) {
-            return nonsense;
+        public List<String> exec(String[] args) throws CommandSyntaxException {
+            checkNoArgs(DATE, args.length, 0);
+            return Utils.singletonArrayList(new Date().toString());
         }
     }
 
     private static class WhyCommand implements ICommand {
 
+        private static final String WHY = "why";
+
         @Override
         public String getName() {
-            return "why";
+            return WHY;
         }
 
         @Override
-        public String exec(String[] args) {
-            return "Why? Becase this is not Matlab!";
+        public List<String> exec(String[] args) throws CommandSyntaxException {
+            checkNoArgs(WHY, args.length, 0);
+            return Utils.singletonArrayList("Why? Becase this is not Matlab!");
+        }
+    }
+
+    private class NonsenseCommand implements ICommand {
+
+        private static final String NONSENSE = "nonsense";
+
+        @Override
+        public String getName() {
+            return NONSENSE;
+        }
+
+        @Override
+        public List<String> exec(String[] args) throws CommandSyntaxException {
+            checkNoArgs(NONSENSE, args.length, 0);
+            return Utils.singletonArrayList(nonsense);
         }
     }
 }

@@ -47,7 +47,7 @@
         <named-remote              url="file:///home/bengt/harctoolbox/GirrLib/Girr/Coolstream/coolstream_neo.girr"/>
         <!--named-remote type="lircd" url="file:///home/bengt/lirc/lirc-remotes/remotes/yamaha/RX-V995.lircd.conf"/-->
         <named-remote type="csv"   url="file:///home/bengt/harctoolbox/irdb/codes/Philips/Unknown_32PFL5403D/0,-1.csv"
-                      name="Philips RC6-TV" commandName="1" protocol="2" D="3" S="4" F="5" separator=","/>
+                      name="Philips RC6-TV" commandname="1" protocol="2" D="3" S="4" F="5" separator=","/>
         <!--named-remote type="lircd" url="http://lirc.sourceforge.net/remotes/yamaha/RX-V995"/-->
     </named-remotes>
 
@@ -74,7 +74,7 @@
             </arguments>
         </hardware-item>
         <hardware-item name="nano" displayname="Arduino Nano" class="org.harctoolbox.jgirs.hardware.SerialGirsClient">
-            <immediate-open/>
+            <!--immediate-open/-->
             <arguments>
                 <argument description="device name">/dev/arduino_nano_qinheng</argument>
                 <argument type="int" description="baud rate">115200</argument>

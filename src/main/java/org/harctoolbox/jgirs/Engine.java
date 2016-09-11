@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
@@ -144,15 +143,17 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
                 ReadlineCommander.init(commandLineArgs.initfile, historyFile,
                         commandLineArgs.prompt, commandLineArgs.appName);
-                ReadlineCommander.setGoodbyeWord(Base.goodbyeWord);
+                ReadlineCommander.setGoodbyeWord(Base.GOODBYE);
 
                 ReadlineCommander.readEvalPrint(engine, commandLineArgs.waitForAnswer, returnLines);
                 ReadlineCommander.close();
             } else {
                 // shoot one command
                 for (int i = 0; i < commandLineArgs.count; i++) {
-                    String result = engine.eval(String.join(" ", commandLineArgs.parameters));
-                    System.out.println(result == null ? ERROR : result.isEmpty() ? OK : result);
+                    List<String> result = engine.eval(String.join(" ", commandLineArgs.parameters));
+                    System.out.println(result == null ? ERROR
+                            : result.isEmpty() ? OK
+                                    : String.join(System.getProperty("line.separator"), result));
                 }
             }
         } catch (IOException | IrpMasterException ex) {
@@ -266,14 +267,14 @@ public final class Engine implements ICommandLineDevice, Closeable {
         modules.put(module.getName(), module);
     }
 
-    public Set<String> getModuleNames() {
-        return modules.keySet();
+    public List<String> getModuleNames() {
+        return Utils.toSortedList(modules.keySet());
     }
 
     @Override
     public synchronized void sendString(String cmd) throws IOException {
-            String result = eval(cmd);
-            outBuffer.add(result);
+        List<String> result = eval(cmd);
+        outBuffer.addAll(result);
     }
 
     @Override
@@ -349,7 +350,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         });
     }
 
-    public Set<String> getCommandNames() {
+    public List<String> getCommandNames() {
         return CommandExecuter.getMainExecutor().getCommandNames();
     }
 
@@ -361,19 +362,19 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return module.getCommandNames();
     }
 
-    public Set<String> getSubCommandNames(String command) {
+    public List<String> getSubCommandNames(String command) {
         return CommandExecuter.getMainExecutor().getSubCommandNames(command);
     }
 
-    private String eval(String command) {
+    private List<String> eval(String command) {
         if (command.trim().isEmpty())
-            return OK;
+            return Utils.singletonArrayList(OK);
 
         String[] tokens = Utils.tokenizer(command.trim());
         try {
             return CommandExecuter.getMainExecutor().exec(tokens);
         } catch (JGirsException | IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
-            return ERROR + ": " + ex.toString();
+            return Utils.singletonArrayList(ERROR + ": " + ex.toString());
         }
     }
 

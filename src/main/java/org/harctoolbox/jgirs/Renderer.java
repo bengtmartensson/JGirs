@@ -19,6 +19,7 @@ package org.harctoolbox.jgirs;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import org.harctoolbox.IrpMaster.DomainViolationException;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.InvalidRepeatException;
@@ -59,14 +60,17 @@ public class Renderer extends Module {
 
     private class ProtocolsCommand implements ICommand {
 
+        private static final String PROTOCOLS = "protocols";
+
         @Override
         public String getName() {
-            return "protocols";
+            return PROTOCOLS;
         }
 
         @Override
-        public String exec(String[] args) throws NoSuchParameterException {
-            return Utils.sortedString(irpMaster.getNames());
+        public List<String> exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
+            checkNoArgs(PROTOCOLS, args.length, 0);
+            return Utils.toSortedList(irpMaster.getNames());
         }
     }
 }

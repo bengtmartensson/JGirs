@@ -18,15 +18,18 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.IHarcHardware;
 
 /**
- * The Girs Base module that must be implemented.
+ * The Girs Base module containing base commands that must be implemented.
  */
 public class Base extends Module {
 
-    public static final String goodbyeWord = "Bye!";
+    public static final String GOODBYE = "Bye!";
+
     private static volatile Base instance = null;
 
     static Base newBase() {
@@ -37,9 +40,6 @@ public class Base extends Module {
         return instance;
     }
 
-//    private final HashMap<String, Module> modules;
-    //private final CommandExecuter commandExecuter;
-//    private final IHarcHardware hardware;
     private boolean quitRequested = false;
 
     private Base() {
@@ -47,12 +47,8 @@ public class Base extends Module {
         addCommand(new VersionCommand());
         addCommand(new ModulesCommand());
         addCommand(new LicenseCommand());
-        addCommand(new GirsCommandsCommand());
+        addCommand(new CommandsCommand());
         addCommand(new QuitCommand());
-//        this.engine = engine;
-//        this.hardware = hardware;
-//        this.modules = modules;
-        //this.commandExecuter = commandExecuter;
     }
 
     public boolean isQuitRequested() {
@@ -69,9 +65,9 @@ public class Base extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException {
-            checkNoArgs(LICENSE, args.length, 0, 0);
-            return Version.licenseString;
+        public List<String> exec(String[] args) throws CommandSyntaxException {
+            checkNoArgs(LICENSE, args.length, 0);
+            return Utils.singletonArrayList(Version.licenseString);
         }
     }
 
@@ -85,23 +81,25 @@ public class Base extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
-            checkNoArgs(MODULES, args.length, 0, 0);
-            return Utils.sortedString(Engine.getInstance().getModuleNames());
+        public List<String> exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
+            checkNoArgs(MODULES, args.length, 0);
+            List<String> list = new ArrayList<>(Engine.getInstance().getModuleNames());
+            return list;
         }
     }
 
-    private static class GirsCommandsCommand implements ICommand {
+    private static class CommandsCommand implements ICommand {
+        private static final String COMMANDS = "commands";
+
         @Override
         public String getName() {
-            return "commands";
+            return COMMANDS;
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException, NoSuchParameterException {
-            if (args.length > 1)
-                throw new CommandSyntaxException(args[0], 0);
-            return Utils.sortedString(CommandExecuter.getMainExecutor().getCommandNames());
+        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchParameterException {
+            checkNoArgs(COMMANDS, args.length, 0);
+            return CommandExecuter.getMainExecutor().getCommandNames();
         }
     }
 
@@ -114,30 +112,33 @@ public class Base extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchParameterException {
             checkNoArgs(VERSION, args.length, 0, 1);
 
             if (args.length == 1) {
                 GirsHardware hardware = Engine.getInstance().getHardware(args[0]);
                 initializeHardware(hardware, IHarcHardware.class);
-                return hardware.getHardware().getVersion();
+                return Utils.singletonArrayList(hardware.getHardware().getVersion());
             }
 
-            return Version.versionString;
+            return Utils.singletonArrayList(Version.versionString);
         }
     }
 
     private class QuitCommand implements ICommand {
 
+        private final static String QUIT = "quit";
+
         @Override
         public String getName() {
-            return "quit";
+            return QUIT;
         }
 
         @Override
-        public String exec(String[] args) {
+        public List<String> exec(String[] args) throws CommandSyntaxException {
+            checkNoArgs(QUIT, args.length, 0);
             quitRequested = true;
-            return goodbyeWord;
+            return Utils.singletonArrayList(GOODBYE);
         }
     }
 }

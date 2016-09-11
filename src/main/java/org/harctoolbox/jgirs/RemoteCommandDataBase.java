@@ -20,10 +20,9 @@ package org.harctoolbox.jgirs;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -244,15 +243,13 @@ public class RemoteCommandDataBase {
             return hash;
         }
 
-        private ArrayList<String> parameterNamesSorted() {
-            ArrayList<String> list = new ArrayList<>(parameters.keySet());
-            Collections.sort(list);
-            return list;
+        private List<String> parameterNamesSorted() {
+            return Utils.toSortedList(parameters.keySet());
         }
 
         @Override
         public String toString() {
-            ArrayList<String> list = parameterNamesSorted();
+            List<String> list = parameterNamesSorted();
             StringBuilder str = new StringBuilder(protocol);
             list.stream().forEach((param) -> {
                 str.append(" ").append(param).append("=").append(parameters.get(param));
@@ -285,8 +282,8 @@ public class RemoteCommandDataBase {
             int c1 = this.protocol.compareToIgnoreCase(p2.protocol);
             if (c1 != 0)
                 return c1;
-            ArrayList<String> params1 = this.parameterNamesSorted();
-            ArrayList<String> params2 = p2.parameterNamesSorted();
+            List<String> params1 = this.parameterNamesSorted();
+            List<String> params2 = p2.parameterNamesSorted();
             for (int i = 0; i < params1.size(); i++) {
                 String param1 = params1.get(i);
                 String param2 = params2.get(i);

@@ -20,13 +20,13 @@ package org.harctoolbox.jgirs;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
 /**
- * A container class for ICommand.
+ *
  */
 public class CommandExecuter {
 
@@ -42,11 +42,11 @@ public class CommandExecuter {
         commandMap = new HashMap<>(8);
     }
 
-    public Set<String> getCommandNames() {
-        return commandMap.keySet();
+    public List<String> getCommandNames() {
+        return Utils.toSortedList(commandMap.keySet());
     }
 
-    public Set<String> getSubCommandNames(String command) {
+    public List<String> getSubCommandNames(String command) {
         ICommand cmd = commandMap.get(command);
         if (!(cmd instanceof CommandWithSubcommands))
             return null;
@@ -57,7 +57,7 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public String exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException {
+    public List<String> exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException {
         String commandName = args[0];
         ICommand cmd = null;
         if (commandMap.containsKey(commandName))
@@ -82,7 +82,7 @@ public class CommandExecuter {
 
     public void add(ICommand command) {
         if (commandMap.containsKey(command.getName()))
-            throw new RuntimeException("Multiply defined command: " + command.getName());
+            throw new RuntimeException("Multiply defined command: " + command.getName()); // Programmer is to blame
 
         commandMap.put(command.getName(), command);
     }

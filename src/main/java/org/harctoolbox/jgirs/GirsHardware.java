@@ -22,8 +22,10 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Comparator;
 import java.util.List;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.IHarcHardware;
@@ -181,6 +183,14 @@ public final class GirsHardware {
          */
         public Object getObject() {
             return object;
+        }
+    }
+
+    public static class GirsHardwareNameComparator implements Comparator<GirsHardware>, Serializable {
+
+        @Override
+        public int compare(GirsHardware hw1, GirsHardware hw2) {
+            return hw1.name.compareToIgnoreCase(hw2.name);
         }
     }
 }

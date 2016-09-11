@@ -3,9 +3,7 @@
 ## Core
 
 * lirc listen (port 8765)
-* --immediate-open
 * Socket interface
-* relocate Dummy
 * OpenClose
 * API
 * ; in lines
@@ -35,3 +33,5 @@
 * Synonyms
 
 # DONE
+* reloca
+* --immediate-opente Dummy

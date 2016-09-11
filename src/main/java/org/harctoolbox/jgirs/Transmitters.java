@@ -17,6 +17,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.util.List;
+
 /**
  * This class models transmitters as in HarcHardware.
  */
@@ -46,7 +48,7 @@ public class Transmitters extends Module {
         }
 
         @Override
-        public String exec(String[] args) {
+        public List<String> exec(String[] args) {
             return null; // TODO Utils.sortedString(transmitter.getTransmitterNames());
         }
     }

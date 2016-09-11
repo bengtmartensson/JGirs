@@ -17,14 +17,12 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-abstract class CommandException extends JGirsException {
+/**
+ * Thrown if a name fragment matches more than one parameter name.
+ */
+public class AmbigousParameterException extends CommandException {
 
-    CommandException() {
-        super();
+    public AmbigousParameterException(String name) {
+        super("Ambigous parameter name: " + name);
     }
-
-    CommandException(String str) {
-        super(str);
-    }
-
 }

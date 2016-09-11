@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.xml.validation.Schema;
@@ -34,17 +35,21 @@ import org.xml.sax.SAXException;
 
 public class Utils {
 
+    public static final String INT              = "int";
+    public static final String BOOLEAN          = "boolean";
+    public static final String STRING           = "String";
+
     public static Object parseObject(String type, String value) {
         return
-                type.equals("int") ? Integer.parseInt(value)
-                : type.equals("boolean") ? Boolean.parseBoolean(value)
+                type.equals(INT) ? Integer.parseInt(value)
+                : type.equals(BOOLEAN) ? Boolean.parseBoolean(value)
                 : value;
     }
 
     public static Class<?> name2class(String type) throws ClassNotFoundException {
-        return type.equals("int") ? int.class
-                : type.equals("boolean") ? boolean.class
-                : type.equalsIgnoreCase("string") || type.isEmpty() ? String.class
+        return type.equals(INT) ? int.class
+                : type.equals(BOOLEAN) ? boolean.class
+                : type.equalsIgnoreCase(STRING) || type.isEmpty() ? String.class
                 : Class.forName(type);
     }
 
@@ -96,6 +101,18 @@ public class Utils {
         } catch (MalformedURLException ex) {
         }
         return XmlUtils.openXmlFile(new File(url), schema, isNamespaceAware, isXIncludeAware);
+    }
+
+    public static List<String> singletonArrayList(String string) {
+        ArrayList<String> list = new ArrayList<>(1);
+        list.add(string);
+        return list;
+    }
+
+    public static List<String> toSortedList(Collection<String> collection) {
+        ArrayList<String> list = new ArrayList<>(collection);
+        Collections.sort(list, String.CASE_INSENSITIVE_ORDER);
+        return list;
     }
 
     private Utils() {

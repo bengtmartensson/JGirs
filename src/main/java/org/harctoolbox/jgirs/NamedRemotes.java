@@ -95,11 +95,11 @@ public class NamedRemotes extends Module {
         return database.isEmpty();
     }
 
-    private String getRemoteCommands(String remoteNameFragment) throws RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
+    private List<String> getRemoteCommands(String remoteNameFragment) throws RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
         Remote remote = database.findRemote(remoteNameFragment);
         if (remote == null)
             throw new NoSuchRemoteException(remoteNameFragment);
-        return Utils.sortedString(remote.getCommands().keySet());
+        return Utils.toSortedList(remote.getCommands().keySet());
     }
 
     private class RemotesCommand implements ICommand {
@@ -112,7 +112,7 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws CommandSyntaxException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
             checkNoArgs(REMOTES, args.length, 0, 1);
             if (args.length == 1)
                 return getRemoteCommands(args[0]);
@@ -123,7 +123,7 @@ public class NamedRemotes extends Module {
                 result.add(remote.getName());
             });
 
-            return Utils.sortedString(result);
+            return result;
         }
     }
 

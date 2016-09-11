@@ -22,25 +22,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import static org.harctoolbox.jgirs.Utils.BOOLEAN;
+import static org.harctoolbox.jgirs.Utils.INT;
+import static org.harctoolbox.jgirs.Utils.STRING;
 
 /**
  * Models parameters in the Girs server.
  */
 public class Parameters extends Module {
 
-    public static final String IRPPROTOCOLSINI = "irpProtocolsIni";
-    public static final String VERBOSITY = "verbosity"; // Do not change to the more grammatically correct "verbose"
-    public static final String LISTSEPARATOR = "listSeparator";
-    public static final String TRANSMITDEVICE = "transmitDevice";
-    public static final String CAPTUREDEVICE = "captureDevice";
-    public static final String RECEIVEDEVICE = "receiveDevice";
-
-    public static final String INT = "int";
-    public static final String BOOLEAN = "boolean";
-    public static final String STRING = "String";
+    public static final String IRPPROTOCOLSINI  = "irpProtocolsIni";
+    public static final String VERBOSITY        = "verbosity"; // Do not change to the more grammatically correct "verbose"
+    public static final String LISTSEPARATOR    = "listSeparator";
+    public static final String TRANSMITDEVICE   = "transmitDevice";
+    public static final String CAPTUREDEVICE    = "captureDevice";
+    public static final String RECEIVEDEVICE    = "receiveDevice";
 
     private static volatile Parameters instance = null;
-
 
     public static Parameters getInstance() {
         return instance;
@@ -76,10 +74,10 @@ public class Parameters extends Module {
         parameterMap.putAll(newParameters);
     }
 
-    public void addAll(List<Parameter> list) {
-        list.stream().forEach((parameter) -> {
+    public void addAll(Iterable<Parameter> options) {
+        for (Parameter parameter : options) {
             add(parameter);
-        });
+        }
     }
 
     public Parameter get(String name) {
@@ -144,32 +142,6 @@ public class Parameters extends Module {
         param.set(value);
     }
 
-//    private class SetParameterCommand implements ICommand {
-//
-//        @Override
-//        public String getName() {
-//            return "setparameter";
-//        }
-//
-//        @Override
-//        public String[] exec(String[] args) throws NoSuchParameterException {
-//            //int index = 1;
-//            String name = args.get(1);//[index++];
-//            if (!parameterMap.containsKey(name))
-//                throw new NoSuchParameterException(name);
-//            IParameter parameter = parameterMap.get(name);
-//            parameter.set(args.get(2));
-//            return new ArrayList<>(0);
-//        }
-//
-//    }
-
-    public static class AmbigousParameterException extends CommandException {
-        public AmbigousParameterException(String name) {
-            super("Ambigous parameter name: " + name);
-        }
-    }
-
     //    private static class GetParameterCommand implements ICommand {
 //
 //        @Override
@@ -203,7 +175,7 @@ public class Parameters extends Module {
         }
 
         @Override
-        public String exec(String[] args) throws CommandException {
+        public List<String> exec(String[] args) throws CommandException {
             checkNoArgs(PARAMETER, args.length, 0, 2);
             List<String> result;
             switch (args.length) {
@@ -220,6 +192,8 @@ public class Parameters extends Module {
                         if (param.getName().toLowerCase(Locale.US).startsWith(fragment.toLowerCase(Locale.US)))
                             result.add(param.toString());
                     });
+                    if (result.isEmpty())
+                        throw new NoSuchParameterException(fragment);
                 }
                 break;
                 case 2: {
@@ -227,6 +201,8 @@ public class Parameters extends Module {
                     String newValue = args[1];
 
                     Parameter parameter = find(fragment);
+                    if (parameter == null)
+                        throw new NoSuchParameterException(fragment);
                     parameter.set(newValue);
                     result = new ArrayList<>(1);
                     result.add(parameter.toString());
@@ -236,7 +212,7 @@ public class Parameters extends Module {
                     throw new RuntimeException();
             }
 
-            return Utils.sortedString(result);
+            return Utils.toSortedList(result);
         }
     }
 }

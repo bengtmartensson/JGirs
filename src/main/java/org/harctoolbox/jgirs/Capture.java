@@ -18,6 +18,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
+import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.ModulatedIrSequence;
 import org.harctoolbox.harchardware.HarcHardwareException;
@@ -29,16 +30,13 @@ import org.harctoolbox.harchardware.ir.ICapture;
  */
 public class Capture extends Module {
 
-    private static final int defaultCaptureBeginTimeout = 2000;
+    private static final int defaultCaptureBeginTimeout  = 2000;
     private static final int defaultCaptureEndingTimeout = 30;
-    private static final int defaultCaptureLength = 400;
-    //private static final CaptureFormat defaultCaptureFormat = CaptureFormat.raw;
+    private static final int defaultCaptureLength        = 400;
 
-    public static final String RECEIVEBEGINTIMEOUT = "captureBeginTimeout";
+    public static final String RECEIVEBEGINTIMEOUT  = "captureBeginTimeout";
     public static final String RECEIVEENDINGTIMEOUT = "captureEndingTimeout";
-    public static final String RECEIVELENGTH = "captureLength";
-    public static final String FALLBACKFREQUENCY = "fallbackFrequency";
-    public static final String RECEIVEFORMAT = "captureFormat";
+    public static final String RECEIVELENGTH        = "captureLength";
 
     private static volatile Capture instance = null;
 
@@ -149,23 +147,24 @@ public class Capture extends Module {
 //            return "If true, present captures in CCF form.";
 //        }
 //    }
-
     private static class AnalyzeCommand implements ICommand {
+
+        private static final String ANALYZE = "analyze";
 
         @Override
         public String getName() {
-            return "analyze";
+            return ANALYZE;
         }
 
         @Override
-        public String exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
+            checkNoArgs(ANALYZE, args.length, 0);
             IHarcHardware hardware = Engine.getInstance().getCaptureHardware().getHardware();
             if (!(hardware instanceof ICapture))
                 throw new IncompatibleHardwareException("ICapture");
             final ModulatedIrSequence irSequence = ((ICapture) hardware).capture();
-            return irSequence.toPrintString(true, false);
-            //return irSequence == null ? new ArrayList<>(8) : new ArrayList<String>(8) {{ add(useCcfCaptureParameter.getValue() ? irSequence.toIrSignal().ccfString() : irSequence.toPrintString(true, false)); }};
+            return Utils.singletonArrayList(irSequence.toPrintString(true, false));
         }
     }
 }

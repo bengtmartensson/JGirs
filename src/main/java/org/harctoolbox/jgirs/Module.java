@@ -37,6 +37,11 @@ public abstract class Module {
     protected static void checkNoArgs(String name, int length, int min, int max) throws CommandSyntaxException {
         if (length < min  || length > max)
             throw new CommandSyntaxException(name, min, max);
+
+
+    }protected static void checkNoArgs(String name, int length, int required) throws CommandSyntaxException {
+        if (length != required)
+            throw new CommandSyntaxException(name, required);
     }
 
 //    public static Module newModule(String className, Class<?>[] classArray, Object[] objectArray)
@@ -76,17 +81,6 @@ public abstract class Module {
     public String getName() {
         return getClass().getSimpleName();
     }
-
-//    public Collection<ICommand> getCommands() {
-//        return commands.values();
-//    }
-
-//    public ArrayList<String> getCommandNames(boolean sort) {
-//        ArrayList<String> al = new ArrayList<>(commands.keySet());
-//        if (sort)
-//            Collections.sort(al);
-//        return al;
-//    }
 
     protected final void addCommand(ICommand command) {
         //commands.put(command.getName(), command);

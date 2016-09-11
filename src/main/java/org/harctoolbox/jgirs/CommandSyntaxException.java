@@ -31,14 +31,16 @@ public class CommandSyntaxException extends CommandException {
     }
 
     CommandSyntaxException(String name, int noArgs) {
-        super("The command \"" + name + "\" takes " + noArgs + " argument(s).");
+        super("The command \"" + name + "\" takes "
+                + ( noArgs == 0 ? "no arguments"
+                                : ( noArgs + " argument(s)).")));
     }
 
     CommandSyntaxException(String name, int minNoArgs, int maxNoArgs) {
         super(minNoArgs == maxNoArgs
                 ? ("The command \"" + name + "\" takes " + minNoArgs + " argument(s).")
-                : ("The command \"" + name + "\" takes between " + minNoArgs + " and " + maxNoArgs + " arguments.")
-        );
+                : ("The command \"" + name + "\" takes min " + minNoArgs
+                + (maxNoArgs == Integer.MAX_VALUE ? " arguments." : (", max " + maxNoArgs + " arguments."))));
     }
 
     CommandSyntaxException(String name, String reason) {
