@@ -35,7 +35,7 @@
     </options>
 
     <modules>
-        <module class="org.harctoolbox.jgirs.Dummy">
+        <module class="org.example.jgirs.Dummy">
             <arguments>
                 <argument type="String" description="dummy argument">Let's replace Lirc!</argument>
             </arguments>
@@ -74,6 +74,7 @@
             </arguments>
         </hardware-item>
         <hardware-item name="nano" displayname="Arduino Nano" class="org.harctoolbox.jgirs.hardware.SerialGirsClient">
+            <immediate-open/>
             <arguments>
                 <argument description="device name">/dev/arduino_nano_qinheng</argument>
                 <argument type="int" description="baud rate">115200</argument>

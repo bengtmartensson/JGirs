@@ -15,19 +15,16 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see http://www.gnu.org/licenses/.
 */
 
-package org.harctoolbox.jgirs;
+package org.example.jgirs;
 
 import java.util.Date;
+import org.harctoolbox.jgirs.ICommand;
+import org.harctoolbox.jgirs.Module;
 
 /**
  * A pretty useless module, to serve as an example.
  */
 public class Dummy extends Module {
-
-//    public static Dummy newDummyModule(String nonsense) {
-//        instance = new Dummy(nonsense);
-//        return (Dummy) instance;
-//    }
 
     private final String nonsense;
 
@@ -36,6 +33,7 @@ public class Dummy extends Module {
         this.nonsense = nonsense;
         addCommand(new DateCommand());
         addCommand(new NonsenseCommand());
+        addCommand(new WhyCommand());
     }
 
     public Dummy() {
@@ -65,6 +63,19 @@ public class Dummy extends Module {
         @Override
         public String exec(String[] args) {
             return nonsense;
+        }
+    }
+
+    private static class WhyCommand implements ICommand {
+
+        @Override
+        public String getName() {
+            return "why";
+        }
+
+        @Override
+        public String exec(String[] args) {
+            return "Why? Becase this is not Matlab!";
         }
     }
 }

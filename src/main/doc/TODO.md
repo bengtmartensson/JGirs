@@ -5,6 +5,11 @@
 * lirc listen (port 8765)
 * --immediate-open
 * Socket interface
+* relocate Dummy
+* OpenClose
+* API
+* ; in lines
+* Bug: '.calSerialPortBuffered.sendString: Sent '
 
 ## RemoteDatabase
 
@@ -28,3 +33,5 @@
 # Rejected
 
 * Synonyms
+
+# DONE

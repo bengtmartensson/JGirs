@@ -220,6 +220,17 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 logger.log(Level.SEVERE, null, ex);
             }
         });
+
+        irHardware.values().forEach((GirsHardware ghw) -> {
+            if (ghw.isImmediateOpen()) {
+                ghw.getHardware().setVerbosity(isVerbosity());
+                try {
+                    ghw.getHardware().open();
+                } catch (HarcHardwareException | IOException ex) {
+                    logger.log(Level.WARNING, null, ex);
+                }
+            }
+        });
     }
 
     public void greet() {
@@ -333,7 +344,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
             try {
                 hardware.getHardware().close();
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, null, ex);
+                logger.log(Level.WARNING, null, ex);
             }
         });
     }

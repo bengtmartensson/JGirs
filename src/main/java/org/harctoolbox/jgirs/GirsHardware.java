@@ -68,12 +68,14 @@ public final class GirsHardware {
     private String url;
     private String description;
     private String name;
+    private boolean immediateOpen;
 
     private GirsHardware() {
         this.description = null;
         this.url = null;
         this.name = null;
         this.hardware = null;
+        this.immediateOpen = false;
     }
 
     public GirsHardware(IHarcHardware hardware) {
@@ -85,6 +87,7 @@ public final class GirsHardware {
         name = element.getAttribute("name");
         description = getChildContent(element, "description");
         url = getChildContent(element, "www");
+        immediateOpen = element.getElementsByTagName("immediate-open").getLength() > 0;
 
         NodeList args = element.getElementsByTagName("argument");
         Class<?>[] classArray = new Class<?>[args.getLength()];
@@ -142,6 +145,13 @@ public final class GirsHardware {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return the immediateOpen
+     */
+    public boolean isImmediateOpen() {
+        return immediateOpen;
     }
 
     private static class HardwareParameter {
