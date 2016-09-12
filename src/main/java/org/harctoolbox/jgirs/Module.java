@@ -43,7 +43,7 @@ public abstract class Module {
         if (length != required)
             throw new CommandSyntaxException(name, required);
     }
-    
+
     protected Module() {
     }
 
@@ -63,7 +63,7 @@ public abstract class Module {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    protected void initializeHardware(GirsHardware girsHardware, Class<?> requiredClass) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
+    protected static void initializeHardware(GirsHardware girsHardware, Class<?> requiredClass) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
         IHarcHardware hardware = girsHardware.getHardware();
         if (!(requiredClass.isInstance(hardware)))
             throw new IncompatibleHardwareException(requiredClass.getSimpleName());

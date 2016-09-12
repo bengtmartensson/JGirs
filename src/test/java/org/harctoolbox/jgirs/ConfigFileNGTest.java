@@ -90,6 +90,6 @@ public class ConfigFileNGTest {
     public void testGetModuleList() {
         System.out.println("getModuleList");
         List result = instance.getModuleList();
-        assertEquals(result.size(), 1);
+        assertEquals(result.size(), 2);
     }
 }
