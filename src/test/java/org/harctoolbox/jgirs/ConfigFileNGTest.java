@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +50,7 @@ public class ConfigFileNGTest {
         LircHardware.loadLibrary(new File(devSlashLircPath));
         try {
             instance = new ConfigFile(configFilePath);
-        } catch (IOException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | ParseException | IrpMasterException ex) {
+        } catch (JGirsException | IOException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ParseException | IrpMasterException ex) {
             Logger.getLogger(ConfigFileNGTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
@@ -69,8 +70,8 @@ public class ConfigFileNGTest {
     @Test
     public void testGetIrHardware() {
         System.out.println("getIrHardware");
-        List<GirsHardware> result = instance.getIrHardware();
-        assertEquals(result.size(), 4);
+        Collection<GirsHardware> result = instance.getIrHardware();
+        assertEquals(result.size(), 5);
     }
 
     /**

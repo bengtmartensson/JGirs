@@ -1,17 +1,13 @@
 # TODO
 
 ## Core
-
 * lirc listen (port 8765)
 * Socket interface
-* Irp
-* Bug: '.calSerialPortBuffered.sendString: Sent '
 
 ## RemoteDatabase
 
 ## Logging
 
-## Transmitters
 
 # (Much) LATER (not in first version)
 
@@ -36,3 +32,7 @@
 * ; in lines
 * API
 * OpenClose
+* Irp
+* Bug: '.calSerialPortBuffered.sendString: Sent '
+
+## Transmitters

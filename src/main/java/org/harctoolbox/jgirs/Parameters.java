@@ -183,7 +183,7 @@ public class Parameters extends Module {
         public List<String> exec(String[] args) throws CommandException {
             checkNoArgs(PARAMETER, args.length, 0, 2);
             return args.length == 0 ? getParameters()
-                    : args.length == 1 ? getParameterString(args[1])
+                    : args.length == 1 ? getParameterString(args[0])
                     : Utils.singletonArrayList(setParameter(args[0], args[1]));
         }
     }

@@ -19,7 +19,6 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.harctoolbox.IrpMaster.DomainViolationException;
@@ -74,6 +73,23 @@ public class Transmit extends Module {
         return hardware.sendIr(irSignal, count, transmitter);
     }
 
+    private static Transmitter getTransmitter(GirsHardware hardware) {
+        if (!(hardware.getHardware() instanceof ITransmitter))
+            return null;
+
+        if (Transmitters.getInstance() == null)
+            return ((ITransmitter) hardware.getHardware()).getTransmitter(); // the default transmitter
+
+        return Transmitters.getInstance().getTransmitter(hardware);
+    }
+
+    public static boolean stop() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
+        GirsHardware hardware = Engine.getInstance().getTransmitHardware();
+        initializeHardware(hardware, IIrSenderStop.class);
+        Transmitter transmitter = getTransmitter(hardware);
+        return ((IIrSenderStop) hardware.getHardware()).stopIr(transmitter);
+    }
+
     private final Renderer renderer;
     private final Irp irp;
     private final NamedRemotes namedRemotes;
@@ -87,14 +103,14 @@ public class Transmit extends Module {
         addCommand(new TransmitCommand());
         addCommand(new SendCommand());
         addCommand(new StopCommand());
-        addCommand(new GetTransmittersCommand());
     }
+
 
     private boolean transmit(int count, IrSignal irSignal) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
         GirsHardware hardware = Engine.getInstance().getTransmitHardware();
         initializeHardware(hardware, IRawIrSender.class);
         IRawIrSender irsender = (IRawIrSender) hardware.getHardware();
-        Transmitter transmitter = irsender.getTransmitter();
+        Transmitter transmitter = getTransmitter(hardware);
         return transmit(count, irSignal, irsender, transmitter);
     }
 
@@ -136,14 +152,8 @@ public class Transmit extends Module {
         return transmit(count, irSignal);
     }
 
-    public boolean stop() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
-        GirsHardware hardware = Engine.getInstance().getTransmitHardware();
-        initializeHardware(hardware, IIrSenderStop.class);
-        Transmitter transmitter = ((ITransmitter) hardware.getHardware()).getTransmitter();
-        return ((IIrSenderStop) hardware.getHardware()).stopIr(transmitter);
-    }
 
-    private class StopCommand implements ICommand {
+    private static class StopCommand implements ICommand {
 
         private static final String STOP = "stop";
 
@@ -156,28 +166,6 @@ public class Transmit extends Module {
         public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
             checkNoArgs(STOP, args.length, 3, Integer.MAX_VALUE);
             return stop() ? new ArrayList<>(0) : null;
-        }
-    }
-
-    private class GetTransmittersCommand implements ICommand {
-        // TODO
-
-        @Override
-        public String getName() {
-            return "gettransmitters";
-        }
-
-        @Override
-        public List<String> exec(String[] args) throws NoSuchTransmitterException, ExecutionException, CommandSyntaxException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchHardwareException, NoSuchParameterException {
-            GirsHardware hardware = Engine.getInstance().getTransmitHardware();
-            initializeHardware(hardware, ITransmitter.class);
-
-//        IHarcHardware hardware = GirsHardware.getDefaultTransmittingHardware().getHardware();
-//            if (!(hardware instanceof ITransmitter))
-//                throw new ExecutionException("Current hardware does not  support setting transmitters.");
-//            if (args.length > 1)
-//                throw new CommandSyntaxException("gettransmitters", 0);
-            return Arrays.asList(((ITransmitter) hardware.getHardware()).getTransmitterNames());
         }
     }
 
@@ -266,7 +254,7 @@ public class Transmit extends Module {
                 int index = 0;
                 int count = intParse(args[index++]);
                 String irpCode = args[index++];
-                HashMap<String, Long> parameters = Protocol.parseParams(args, 2);
+                HashMap<String, Long> parameters = Protocol.parseParams(args, index);
                 return transmitIrp(count, irpCode, parameters) ? new ArrayList<>(0) : null;
             }
         }

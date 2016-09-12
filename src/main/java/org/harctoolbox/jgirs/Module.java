@@ -44,6 +44,15 @@ public abstract class Module {
             throw new CommandSyntaxException(name, required);
     }
 
+    protected static void initializeHardware(GirsHardware girsHardware, Class<?> requiredClass) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
+        IHarcHardware hardware = girsHardware.getHardware();
+        if (!(requiredClass.isInstance(hardware)))
+            throw new IncompatibleHardwareException(requiredClass.getSimpleName());
+        hardware.setVerbosity(Engine.getInstance().isVerbosity());
+        if (!hardware.isValid())
+            hardware.open();
+    }
+
     protected Module() {
     }
 
@@ -63,14 +72,6 @@ public abstract class Module {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    protected static void initializeHardware(GirsHardware girsHardware, Class<?> requiredClass) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
-        IHarcHardware hardware = girsHardware.getHardware();
-        if (!(requiredClass.isInstance(hardware)))
-            throw new IncompatibleHardwareException(requiredClass.getSimpleName());
-        hardware.setVerbosity(Engine.getInstance().isVerbosity());
-        if (!hardware.isValid())
-            hardware.open();
-    }
 
     public static class ModulePars {
 

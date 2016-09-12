@@ -101,7 +101,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
         try {
             config = new ConfigFile(commandLineArgs.configFile); // ok also if arg == null
-        } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | ParseException | IrpMasterException | IOException ex) {
+        } catch (JGirsException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ParseException | IrpMasterException | IOException ex) {
             //logger.log(Level.SEVERE, null, ex);
             logger.log(Level.SEVERE, "Cannot read config file {0}", commandLineArgs.configFile);
             System.exit(IrpUtils.exitConfigReadError);
@@ -150,7 +150,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
             } else {
                 // shoot one command
                 for (int i = 0; i < commandLineArgs.count; i++) {
-                    List<String> result = engine.eval(String.join(" ", commandLineArgs.parameters));
+                    String commandLine = String.join(" ", commandLineArgs.parameters);
+                    List<String> result = engine.eval(commandLine);
                     System.out.println(result == null ? ERROR
                             : result.isEmpty() ? OK
                                     : String.join(System.getProperty("line.separator"), result));

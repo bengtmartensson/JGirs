@@ -34,6 +34,7 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
 import static org.harctoolbox.jgirs.Utils.BOOLEAN;
 import static org.harctoolbox.jgirs.Utils.INT;
 import org.w3c.dom.Document;
@@ -92,19 +93,19 @@ public class ConfigFile {
         return csvImporter.parseRemoteSet(name, url.toString(), reader);
     }
 
-    private final List<GirsHardware> irHardware;
+    private final HashMap<String, GirsHardware> irHardware;
     private RemoteCommandDataBase remoteCommandsDataBase;
     private final List<Module.ModulePars> moduleList;
     private final HashMap<String, Parameter> optionsList;
 
     public ConfigFile() {
         remoteCommandsDataBase = new RemoteCommandDataBase(true);
-        irHardware = new ArrayList<>(8);
+        irHardware = new HashMap<>(8);
         moduleList = new ArrayList<>(4);
         optionsList = new HashMap<>(16);
     }
 
-    public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, IrpMasterException {
+    public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, IrpMasterException, NonUniqueHardwareName {
         this();
         if (doc == null)
             return;
@@ -127,7 +128,10 @@ public class ConfigFile {
             Element el = (Element) nodeList.item(i);
             loadJni(el);
             GirsHardware hw = new GirsHardware(el);
-            irHardware.add(hw);
+            hw.getHardware().setVerbosity(((BooleanParameter) optionsList.get(VERBOSITY)).getValue());
+            if (irHardware.containsKey(hw.getName()))
+                throw new NonUniqueHardwareName(hw.getName());
+            irHardware.put(hw.getName(), hw);
         }
 
         Command.setIrpMaster(optionsList.get(Parameters.IRPPROTOCOLSINI).get()); // needed for CSV import
@@ -146,15 +150,15 @@ public class ConfigFile {
         }
     }
 
-    public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException {
+    public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException, NonUniqueHardwareName {
         this(url != null ? Utils.openXmlUrl(url, (Schema) null, false, true) : null);
     }
 
     /**
      * @return the irHardwareList
      */
-    List<GirsHardware> getIrHardware() {
-        return Collections.unmodifiableList(irHardware);
+    Collection<GirsHardware> getIrHardware() {
+        return irHardware.values();
     }
 
     /**
@@ -206,10 +210,17 @@ public class ConfigFile {
         return optionsList.values();
     }
 
-    public static class NoSuchRemoteTypeException extends Exception {
+    public static class NoSuchRemoteTypeException extends JGirsException {
 
         public NoSuchRemoteTypeException(String type) {
             super("No such remote type: " + type);
+        }
+    }
+
+    public static class NonUniqueHardwareName extends JGirsException {
+
+        public NonUniqueHardwareName(String name) {
+            super("Non-unique hardware name: " + name);
         }
     }
 }

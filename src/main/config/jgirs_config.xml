@@ -59,11 +59,20 @@
                 <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>
             </arguments>
         </hardware-item>
-        <hardware-item name="old-globalcache" displayname="Global Caché GC-100-6" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
+        <hardware-item name="globalcache" displayname="Global Caché GC-100-6" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
             <description>The old GC-100-06. Connectors: 1: Main blaster; 2: Bedroom; 3: Desktop amplifier (Yamaha RX-V 1400)</description>
             <www url="http://globalcache.earth"/>
             <arguments>
                 <argument type="java.lang.String" description="ip">globalcache.earth</argument>
+                <argument type="boolean" description="initial verbosity (will be overwritten)">false</argument>
+                <argument type="int" description="timeout">10000</argument>
+            </arguments>
+        </hardware-item>
+        <hardware-item name="gc2" displayname="Global Caché GC-100-12" class="org.harctoolbox.harchardware.ir.GlobalCache" critical="true">
+            <description>The "new" GC-100-12.</description>
+            <www url="http://gc2.earth"/>
+            <arguments>
+                <argument type="java.lang.String" description="ip">gc2.earth</argument>
                 <argument type="boolean" description="initial verbosity (will be overwritten)">false</argument>
                 <argument type="int" description="timeout">10000</argument>
             </arguments>
