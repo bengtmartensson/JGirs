@@ -35,10 +35,6 @@ import org.harctoolbox.IrpMaster.UnknownProtocolException;
  */
 public class Renderer extends Module {
 
-//    static Renderer newRenderer(String path) throws FileNotFoundException, IncompatibleArgumentException {
-//        instance = new Renderer(path);
-//        return (Renderer) instance;
-//    }
     private IrpMaster irpMaster;
 
     public Renderer(String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
@@ -54,8 +50,16 @@ public class Renderer extends Module {
         int index = skip;
         String protocol = args[index++];
         HashMap<String, Long> params = Protocol.parseParams(args, index);
-        IrSignal irSignal = irpMaster.newProtocol(protocol).renderIrSignal(params);
-        return irSignal;
+        return render(protocol, params);
+    }
+
+    public IrSignal render(String protocol, HashMap<String, Long> params)
+            throws UnassignedException, ParseException, UnknownProtocolException, DomainViolationException, IncompatibleArgumentException, InvalidRepeatException {
+        return irpMaster.newProtocol(protocol).renderIrSignal(params);
+    }
+
+    public List<String> protocols() {
+        return Utils.toSortedList(irpMaster.getNames());
     }
 
     private class ProtocolsCommand implements ICommand {
@@ -70,7 +74,7 @@ public class Renderer extends Module {
         @Override
         public List<String> exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
             checkNoArgs(PROTOCOLS, args.length, 0);
-            return Utils.toSortedList(irpMaster.getNames());
+            return protocols();
         }
     }
 }

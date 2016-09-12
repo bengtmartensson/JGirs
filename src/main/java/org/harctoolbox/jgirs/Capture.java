@@ -48,105 +48,18 @@ public class Capture extends Module {
         return instance;
     }
 
-    //private final ICapture hardware;
-//    private final StartTimeoutParameter startTimeoutParameter = null;
-//    private final MaxCaptureLengthParameter maxCaptureLengthParameter = null;
-//    private final EndTimeoutParameter endTimeoutParameter = null;
-//    private final UseCcfCaptureParameter useCcfCaptureParameter = null;
-    //private Engine engine;
-
-//    public Capture(ICapture capture) {
-//        this.hardware = capture;
-//        addCommand(new AnalyzeCommand());
-//        startTimeoutParameter = new StartTimeoutParameter(2000);
-//        addParameter(startTimeoutParameter);
-//        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
-//        addParameter(maxCaptureLengthParameter);
-//        endTimeoutParameter = new EndTimeoutParameter(200);
-//        addParameter(endTimeoutParameter);
-//        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
-//        addParameter(useCcfCaptureParameter);
-//    }
+    public static String analyze() throws IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, HarcHardwareException, IOException, IrpMasterException {
+        IHarcHardware hardware = Engine.getInstance().getCaptureHardware().getHardware();
+        if (!(hardware instanceof ICapture))
+            throw new IncompatibleHardwareException("ICapture");
+        final ModulatedIrSequence irSequence = ((ICapture) hardware).capture();
+        return irSequence.toPrintString(true, false);
+    }
 
     private Capture() {
         super();
-        //this.engine = engine;
-        //this.hardware = null;//capture;
-//        addCommand(new AnalyzeCommand());
-//        startTimeoutParameter = new StartTimeoutParameter(2000);
-//        addParameter(startTimeoutParameter);
-//        maxCaptureLengthParameter = new MaxCaptureLengthParameter(2000);
-//        addParameter(maxCaptureLengthParameter);
-//        endTimeoutParameter = new EndTimeoutParameter(200);
-//        addParameter(endTimeoutParameter);
-//        useCcfCaptureParameter = new UseCcfCaptureParameter(false);
-//        addParameter(useCcfCaptureParameter);
     }
 
-//    private static class StartTimeoutParameter extends IntegerParameter {
-//
-//        StartTimeoutParameter(int initValue) {
-//            super(initValue);
-//        }
-//        @Override
-//        public String getName() {
-//            return "starttimeout";
-//        }
-//
-//        @Override
-//        public String getDocumentation() {
-//            return "Timeout in milliseconds while waiting for first pulse";
-//        }
-//    }
-//
-//    private static class MaxCaptureLengthParameter extends IntegerParameter {
-//
-//        MaxCaptureLengthParameter(int initValue) {
-//            super(initValue);
-//        }
-//        @Override
-//        public String getName() {
-//            return "maxcapturelength";
-//        }
-//
-//        @Override
-//        public String getDocumentation() {
-//            return "Maximal capture length in milliseconds";
-//        }
-//    }
-//
-//    private static class EndTimeoutParameter extends IntegerParameter {
-//
-//        EndTimeoutParameter(int initValue) {
-//            super(initValue);
-//        }
-//        @Override
-//        public String getName() {
-//            return "endtimeout";
-//        }
-//
-//        @Override
-//        public String getDocumentation() {
-//            return "Requred silece at end of capture";
-//        }
-//    }
-//
-//    private static class UseCcfCaptureParameter extends BooleanParameter {
-//
-//        UseCcfCaptureParameter(boolean initValue) {
-//            super(initValue);
-//        }
-//
-//        @Override
-//        public String getName() {
-//            return "useccfcapture";
-//        }
-//
-//        @Override
-//        public String getDocumentation() {
-//            return "If true, present captures in CCF form.";
-//        }
-//    }
     private static class AnalyzeCommand implements ICommand {
 
         private static final String ANALYZE = "analyze";
@@ -160,11 +73,7 @@ public class Capture extends Module {
         public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             checkNoArgs(ANALYZE, args.length, 0);
-            IHarcHardware hardware = Engine.getInstance().getCaptureHardware().getHardware();
-            if (!(hardware instanceof ICapture))
-                throw new IncompatibleHardwareException("ICapture");
-            final ModulatedIrSequence irSequence = ((ICapture) hardware).capture();
-            return Utils.singletonArrayList(irSequence.toPrintString(true, false));
+            return Utils.singletonArrayList(analyze());
         }
     }
 }

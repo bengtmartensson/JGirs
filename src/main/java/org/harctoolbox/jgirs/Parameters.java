@@ -18,6 +18,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -62,8 +63,6 @@ public class Parameters extends Module {
         // In this constructor, use add instead of addParameter.
         add(new StringParameter(LISTSEPARATOR, " ", "String to be used between entries in list"));
         add(new BooleanParameter(VERBOSITY, false, "Execute commands verbosely"));
-        //addCommand(new SetParameterCommand());
-        //addCommand(new GetParameterCommand());
     }
 
     public final void add(Parameter parameter) {
@@ -142,28 +141,34 @@ public class Parameters extends Module {
         param.set(value);
     }
 
-    //    private static class GetParameterCommand implements ICommand {
-//
-//        @Override
-//        public String getName() {
-//            return "getparameter";
-//        }
-//
-//        @Override
-//        public String[] exec(String[] args) throws NoSuchParameterException {
-////            int index = 1;
-////            String name = args[index];
-////            if (!allParameters.containsKey(name))
-////                throw new NoSuchParameterException(name);
-////            final IParameter parameter = allParameters.get(name);
-////            return new ArrayString[]() {{ add(parameter.get()); }};
-//            return new ArrayList<>(8);
-//        }
-//    }
-//
-////    public void addParameters(Module module) {
-////        allParameters.putAll(module.getParameters());
-////    }
+    public List<String> getParameters() {
+        List<String> result = new ArrayList<>(parameterMap.size());
+        parameterMap.values().stream().forEach((param) -> {
+            result.add(param.toString());
+        });
+        Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
+        return result;
+    }
+
+    public List<String> getParameterString(String fragment) throws NoSuchParameterException {
+        ArrayList<String> result = new ArrayList<>(4);
+        parameterMap.values().stream().forEach((param) -> {
+            if (param.getName().toLowerCase(Locale.US).startsWith(fragment.toLowerCase(Locale.US)))
+                result.add(param.toString());
+        });
+        if (result.isEmpty())
+            throw new NoSuchParameterException(fragment);
+        Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
+        return result;
+    }
+
+    public String setParameter(String fragment, String newValue) throws AmbigousParameterException, NoSuchParameterException {
+        Parameter parameter = find(fragment);
+        if (parameter == null)
+            throw new NoSuchParameterException(fragment);
+        parameter.set(newValue);
+        return parameter.toString();
+    }
 
     private class ParameterCommand implements ICommand {
 
@@ -177,42 +182,9 @@ public class Parameters extends Module {
         @Override
         public List<String> exec(String[] args) throws CommandException {
             checkNoArgs(PARAMETER, args.length, 0, 2);
-            List<String> result;
-            switch (args.length) {
-                case 0:
-                    result = new ArrayList<>(parameterMap.size());
-                    parameterMap.values().stream().forEach((param) -> {
-                        result.add(param.toString());
-                    });
-                    break;
-                case 1: {
-                    result = new ArrayList<>(4);
-                    String fragment = args[0];
-                    parameterMap.values().stream().forEach((param) -> {
-                        if (param.getName().toLowerCase(Locale.US).startsWith(fragment.toLowerCase(Locale.US)))
-                            result.add(param.toString());
-                    });
-                    if (result.isEmpty())
-                        throw new NoSuchParameterException(fragment);
-                }
-                break;
-                case 2: {
-                    String fragment = args[0];
-                    String newValue = args[1];
-
-                    Parameter parameter = find(fragment);
-                    if (parameter == null)
-                        throw new NoSuchParameterException(fragment);
-                    parameter.set(newValue);
-                    result = new ArrayList<>(1);
-                    result.add(parameter.toString());
-                }
-                break;
-                default:
-                    throw new RuntimeException();
-            }
-
-            return Utils.toSortedList(result);
+            return args.length == 0 ? getParameters()
+                    : args.length == 1 ? getParameterString(args[1])
+                    : Utils.singletonArrayList(setParameter(args[0], args[1]));
         }
     }
 }

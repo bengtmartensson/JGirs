@@ -29,6 +29,14 @@ import org.harctoolbox.jgirs.Utils;
  */
 public class Dummy extends Module {
 
+    public static String date() {
+        return new Date().toString();
+    }
+
+    public static String why() {
+        return "Why? Becase this is not Matlab!";
+    }
+
     private final String nonsense;
 
     public Dummy(String nonsense) {
@@ -43,6 +51,10 @@ public class Dummy extends Module {
         this(null);
     }
 
+    public String nonsense() {
+        return nonsense;
+    }
+
     private static class DateCommand implements ICommand {
 
         private static final String DATE = "date";
@@ -55,7 +67,7 @@ public class Dummy extends Module {
         @Override
         public List<String> exec(String[] args) throws CommandSyntaxException {
             checkNoArgs(DATE, args.length, 0);
-            return Utils.singletonArrayList(new Date().toString());
+            return Utils.singletonArrayList(date());
         }
     }
 
@@ -71,7 +83,7 @@ public class Dummy extends Module {
         @Override
         public List<String> exec(String[] args) throws CommandSyntaxException {
             checkNoArgs(WHY, args.length, 0);
-            return Utils.singletonArrayList("Why? Becase this is not Matlab!");
+            return Utils.singletonArrayList(why());
         }
     }
 
@@ -87,7 +99,7 @@ public class Dummy extends Module {
         @Override
         public List<String> exec(String[] args) throws CommandSyntaxException {
             checkNoArgs(NONSENSE, args.length, 0);
-            return Utils.singletonArrayList(nonsense);
+            return Utils.singletonArrayList(nonsense());
         }
     }
 }

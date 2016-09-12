@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.harctoolbox.IrpMaster.DecodeIR;
+import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.IrSequence;
 import org.harctoolbox.IrpMaster.IrSignal;
 import org.harctoolbox.IrpMaster.IrpMasterException;
@@ -37,11 +38,12 @@ public class Receive extends Module {
     private static final int defaultReceiveLength = 400;
     private static final ReceiveFormat defaultReceiveFormat = ReceiveFormat.raw;
 
-    public static final String RECEIVEBEGINTIMEOUT = "receiveBeginTimeout";
+    public static final String RECEIVEBEGINTIMEOUT  = "receiveBeginTimeout";
     public static final String RECEIVEENDINGTIMEOUT = "receiveEndingTimeout";
-    public static final String RECEIVELENGTH = "receiveLength";
-    public static final String FALLBACKFREQUENCY = "fallbackFrequency";
-    public static final String RECEIVEFORMAT = "receiveFormat";
+    public static final String RECEIVELENGTH        = "receiveLength";
+    public static final String FALLBACKFREQUENCY    = "fallbackFrequency";
+    public static final String RECEIVEFORMAT        = "receiveFormat";
+
     private static volatile Receive instance;
 
     static Module newReceive(NamedRemotes namedRemotes) {
@@ -52,37 +54,7 @@ public class Receive extends Module {
         return instance;
     }
 
-    //private IReceive hardware;
-//    private IntegerParameter beginTimeout;
-//    private IntegerParameter receiveLength;
-//    private IntegerParameter endingTimeout;
-//    private IntegerParameter fallbackFrequency;
-//    private ReceiveFormatParameter receiveFormat;
-
     private final NamedRemotes namedRemotes;
-    //private ReceiveFormat receiveFormat;
-    //private final GirsHardware girsHardware;
-
-//    public Receive(IReceive receiver, NamedRemotes namedRemotes) {
-//        this.namedRemotes = namedRemotes;
-//        this.hardware = receiver;
-//        addCommand(new ReceiveCommand());
-//        timeoutParameter = new TimeoutParameter(2000);
-//        addParameter(timeoutParameter);
-//        this.fallbackFrequencyParameter = new FallbackFrequencyParameter((int) IrpUtils.defaultFrequency);
-//        addParameter(this.fallbackFrequencyParameter);
-//        this.receiveFormatParameter = new ReceiveFormatParameter(defaultReceiveFormat);
-//        addParameter(this.receiveFormatParameter);
-//
-//    }
-
-//    public static Receive newReceive() {
-//        if (instance != null)
-//            throw new InvalidMultipleInstantiation();
-//
-//        instance = new Receive();
-//        return instance;
-//    }
 
     public Receive(NamedRemotes namedRemotes) {
         super();
@@ -99,45 +71,56 @@ public class Receive extends Module {
                 "Format of received codes (to the extent possible). Possible values are: raw, ccf, protocolparameter, namedcommand"));
     }
 
+    public List<String> receive() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, IrpMasterException {
+        GirsHardware hardware = Engine.getInstance().getReceiveHardware();
+        initializeHardware(hardware, IReceive.class);
+        IReceive receiver = (IReceive) hardware.getHardware();
+
+        receiver.setBeginTimeout(Parameters.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
+        IrSequence irSequence = receiver.receive();
+        return formatIrSequence(irSequence);
+    }
+
+    private List<String> formatIrSequence(IrSequence irSequence) throws NoSuchParameterException, IncompatibleArgumentException {
+        ReceiveFormat receiveFormat = ((ReceiveFormatParameter) Parameters.getInstance().get(RECEIVEFORMAT)).value;
+        final IrSignal irSignal = new IrSignal(Parameters.getInstance().getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
+        switch (receiveFormat) {
+            case ccf:
+                return Utils.singletonArrayList(irSignal.ccfString());
+            case protocolparameter: {
+                boolean success = DecodeIR.loadLibrary();
+                if (!success)
+                    return null;
+                DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
+                List<String> result = new ArrayList<>(decodes.length);
+                for (DecodeIR.DecodedSignal decode : decodes)
+                    result.add(decode.toString());
+
+                return result;
+            }
+            case namedcommand: {
+                boolean success = DecodeIR.loadLibrary();
+                if (!success)
+                    return null;
+                DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
+                if (decodes.length == 0)
+                    return null;
+                RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
+                return cmd != null ? Utils.singletonArrayList(cmd.toString()) : null;
+            }
+            case raw:
+                return Utils.singletonArrayList(irSequence.toPrintString(true, false));
+            default:
+                throw new RuntimeException("Programming error");
+        }
+    }
+
     public static enum ReceiveFormat {
         raw,
         ccf,
         protocolparameter,
         namedcommand;
     };
-
-//    private static class TimeoutParameter extends IntegerParameter {
-//
-//        TimeoutParameter(int initValue) {
-//            super(initValue);
-//        }
-//        @Override
-//        public String getName() {
-//            return "receivetimeout";
-//        }
-//
-//        @Override
-//        public String getDocumentation() {
-//            return "Timeout in milliseconds";
-//        }
-//    }
-
-//    private static class FallbackFrequencyParameter extends IntegerParameter {
-//
-//        FallbackFrequencyParameter(int initValue) {
-//            super(initValue);
-//        }
-//
-//        @Override
-//        public String getName() {
-//            return "defaultfrequency";
-//        }
-//
-//        @Override
-//        public String getDocumentation() {
-//            return "Fallback frequency to be used in absence of a measurement.";
-//        }
-//    }
 
     private static class ReceiveFormatParameter extends Parameter {
 
@@ -183,46 +166,8 @@ public class Receive extends Module {
         @Override
         public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
             checkNoArgs(RECEIVE, args.length, 0);
-            GirsHardware hardware = Engine.getInstance().getReceiveHardware();
-            initializeHardware(hardware, IReceive.class);
-            IReceive receiver = (IReceive) hardware.getHardware();
-
-            receiver.setBeginTimeout(Parameters.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
-            final IrSequence irSequence = receiver.receive();
-
-            final IrSignal irSignal = new IrSignal(Parameters.getInstance().getInteger(FALLBACKFREQUENCY), IrpUtils.invalid, irSequence, null, null);
-            ReceiveFormat receiveFormat = ((ReceiveFormatParameter) Parameters.getInstance().get(RECEIVEFORMAT)).value;
-            switch (receiveFormat) {
-                case ccf:
-                    return Utils.singletonArrayList(irSignal.ccfString());
-                case protocolparameter:
-                {
-                    boolean success = DecodeIR.loadLibrary();
-                    if (!success)
-                        return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
-                    List<String> result = new ArrayList<>(decodes.length);
-                    for (DecodeIR.DecodedSignal decode : decodes)
-                        result.add(decode.toString());
-
-                    return result;
-                }
-                case namedcommand:
-                {
-                    boolean success = DecodeIR.loadLibrary();
-                    if (!success)
-                        return null;
-                    DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
-                    if (decodes.length == 0)
-                        return null;
-                    final RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
-                    return cmd != null ? Utils.singletonArrayList(cmd.toString()) : null;
-                }
-                case raw:
-                    return Utils.singletonArrayList(irSequence.toPrintString(true, false));
-                default:
-                    throw new RuntimeException("Programming error");
-            }
+            return receive();
         }
     }
+
 }

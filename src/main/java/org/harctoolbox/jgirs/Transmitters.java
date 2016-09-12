@@ -17,6 +17,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,6 +41,10 @@ public class Transmitters extends Module {
         addCommand(new TransmittersCommand());
     }
 
+    public static List<String> transmitters() {
+        return new ArrayList<>(0); // TODO
+    }
+
     private static class TransmittersCommand implements ICommand {
 
         @Override
@@ -49,7 +54,7 @@ public class Transmitters extends Module {
 
         @Override
         public List<String> exec(String[] args) {
-            return null; // TODO Utils.sortedString(transmitter.getTransmitterNames());
+            return transmitters();
         }
     }
 }

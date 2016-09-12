@@ -43,39 +43,8 @@ public abstract class Module {
         if (length != required)
             throw new CommandSyntaxException(name, required);
     }
-
-//    public static Module newModule(String className, Class<?>[] classArray, Object[] objectArray)
-//            throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-//        String fullHardwareClassName = (className.contains(".") ? "" : "org.harctoolbox.jgirs.") + className;
-//        Class<?> clazz = Class.forName(fullHardwareClassName);
-//        Constructor<?> constructor = clazz.getConstructor(classArray);
-//        return (Module) constructor.newInstance(objectArray);
-//    }
-
-//    public static Module newModule(Element element) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-//        NodeList nodeList = element.getElementsByTagName("argument");
-//        Class<?>[] classArray = new Class<?>[nodeList.getLength()];
-//        Object[] objectArray = new Object[nodeList.getLength()];
-//        for (int i = 0; i < nodeList.getLength(); i++) {
-//            Element e = (Element) nodeList.item(i);
-//            String type = e.getAttribute("type");
-//            classArray[i] = Utils.name2class(type);
-//            objectArray[i] = parseObject(type, e.getTextContent());
-//        }
-//        return newModule(element.getAttribute("class"), classArray, objectArray);
-//    }
-
-    //private final HashMap<String, ICommand> commands;
-    //protected final CommandExecuter commandExecuter;
-    //protected final Parameters parameters;
-    //private final HashMap<String, IParameter> parameterMap;
-
+    
     protected Module() {
-//        if (instance != null)
-//            throw new InvalidMultipleInstantiation();
-        //this.commandExecuter = commandExecuter;
-        //this.parameters = parameters;
-        //parameters = new LinkedHashMap<>(4);
     }
 
     public String getName() {
@@ -83,13 +52,8 @@ public abstract class Module {
     }
 
     protected final void addCommand(ICommand command) {
-        //commands.put(command.getName(), command);
         CommandExecuter.getMainExecutor().add(command);
     }
-
-//    public HashMap<String, IParameter> getParameters() {
-//        return parameters;
-//    }
 
     protected final void addParameter(Parameter parameter) {
         Parameters.getInstance().add(parameter);
@@ -107,10 +71,6 @@ public abstract class Module {
         if (!hardware.isValid())
             hardware.open();
     }
-
-//    void addParametersTo(Parameters parameters) {
-//        parameters.addAll(this.parameters);
-//    }
 
     public static class ModulePars {
 
@@ -130,12 +90,6 @@ public abstract class Module {
                 objectArray[i] = Utils.parseObject(type, e.getTextContent());
             }
         }
-
-//        public ModulePars(String className, Class<?>[] classArray, Object[] objectArray) {
-//            this.className = className;
-//            this.classArray = classArray;
-//            this.objectArray = objectArray;
-//        }
 
         public Module instantiate() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
             String fullHardwareClassName = (className.contains(".") ? "" : "org.harctoolbox.jgirs.") + className;

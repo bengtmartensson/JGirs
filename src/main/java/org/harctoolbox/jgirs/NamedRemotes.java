@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -57,7 +58,6 @@ public class NamedRemotes extends Module {
         return result;
     }
 
-    //private final RemoteSet remoteSet;
     private final RemoteCommandDataBase database;
 
     private NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
@@ -95,11 +95,22 @@ public class NamedRemotes extends Module {
         return database.isEmpty();
     }
 
-    private List<String> getRemoteCommands(String remoteNameFragment) throws RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
+    public List<String> remotes(String remoteNameFragment) throws AmbigousRemoteException, NoSuchRemoteException {
         Remote remote = database.findRemote(remoteNameFragment);
         if (remote == null)
             throw new NoSuchRemoteException(remoteNameFragment);
         return Utils.toSortedList(remote.getCommands().keySet());
+    }
+
+    public List<String> remotes() {
+        Collection<Remote> collection = database.getRemotes();
+        List<String> result = new ArrayList<>(collection.size());
+        collection.stream().forEach((remote) -> {
+            result.add(remote.getName());
+        });
+
+        Collections.sort(result, String.CASE_INSENSITIVE_ORDER);
+        return result;
     }
 
     private class RemotesCommand implements ICommand {
@@ -112,34 +123,9 @@ public class NamedRemotes extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchRemoteException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, AmbigousRemoteException, NoSuchRemoteException {
             checkNoArgs(REMOTES, args.length, 0, 1);
-            if (args.length == 1)
-                return getRemoteCommands(args[0]);
-
-            Collection<Remote> collection = database.getRemotes();
-            List<String> result = new ArrayList<>(collection.size());
-            collection.stream().forEach((remote) -> {
-                result.add(remote.getName());
-            });
-
-            return result;
+            return args.length == 0 ? remotes() : remotes(args[0]);
         }
     }
-
-//    private class CommandsCommand implements ICommand {
-//
-//        private static final String COMMANDS = "commands";
-//
-//        @Override
-//        public String getName() {
-//            return COMMANDS;
-//        }
-//
-//        @Override
-//        public String exec(String[] args) throws CommandSyntaxException, NoSuchRemoteException, RemoteCommandDataBase.AmbigousRemoteException, NoSuchParameterException {
-//            checkNoArgs(COMMANDS, args.length, 1, 1);
-//            return getRemoteCommands(args[0]);
-//        }
-//    }
 }

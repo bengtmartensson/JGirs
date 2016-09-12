@@ -17,13 +17,10 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-/**
- * This is thrown if a non-existing module is requested,
- */
-public class NoSuchModuleException extends CommandException {
 
-    NoSuchModuleException(String name){
-        super("No such module: \"" + name + "\"");
+public class AmbigousRemoteException extends CommandException {
+
+    public AmbigousRemoteException(String fragment) {
+        super("Name " + fragment + " matches more than one remote");
     }
-
 }

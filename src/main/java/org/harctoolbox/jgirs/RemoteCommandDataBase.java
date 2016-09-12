@@ -304,11 +304,4 @@ public class RemoteCommandDataBase {
             return dolly;
         }
     }
-
-    public static class AmbigousRemoteException extends CommandException {
-
-        public AmbigousRemoteException(String fragment) {
-            super("Name " + fragment + " matches more than one remote");
-        }
-    }
 }

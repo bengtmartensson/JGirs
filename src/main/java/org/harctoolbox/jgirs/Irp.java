@@ -27,27 +27,17 @@ import org.harctoolbox.IrpMaster.Protocol;
 import org.harctoolbox.IrpMaster.UnassignedException;
 
 /**
- * This class defines commands for rendering IR signals from their Protocol and parameters.
+ *
  */
 public class Irp extends Module {
 
-//    public static Irp getInstance() {
-//        return (Irp) instance;
-//    }
-//
-//    public static Irp newIrp() {
-//        Irp irp = new Irp();
-//        instance = irp;
-//        return irp;
-//    }
-
-    public Irp() {
-        super();
-    }
-
-    public IrSignal render(String protocolName, HashMap<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
+    public static IrSignal render(String protocolName, HashMap<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
         Protocol protocol = new Protocol("dummy", protocolName, null);
         IrSignal irSignal = protocol.renderIrSignal(parameters);
         return irSignal;
+    }
+    
+    public Irp() {
+        super();
     }
 }

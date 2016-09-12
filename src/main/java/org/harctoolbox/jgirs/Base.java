@@ -40,6 +40,14 @@ public class Base extends Module {
         return instance;
     }
 
+    public static List<String> commands() {
+        return CommandExecuter.getMainExecutor().getCommandNames();
+    }
+
+    public static String version() {
+        return Version.versionString;
+    }
+
     private boolean quitRequested = false;
 
     private Base() {
@@ -53,6 +61,17 @@ public class Base extends Module {
 
     public boolean isQuitRequested() {
         return quitRequested;
+    }
+
+    public String version(String hardwareName) throws IncompatibleHardwareException, IOException, HarcHardwareException, NoSuchParameterException, NoSuchHardwareException {
+        GirsHardware hardware = Engine.getInstance().getHardware(hardwareName);
+        initializeHardware(hardware, IHarcHardware.class);
+        return hardware.getHardware().getVersion();
+    }
+
+    public String quit() {
+        quitRequested = true;
+        return GOODBYE;
     }
 
     private static class LicenseCommand implements ICommand {
@@ -89,6 +108,7 @@ public class Base extends Module {
     }
 
     private static class CommandsCommand implements ICommand {
+
         private static final String COMMANDS = "commands";
 
         @Override
@@ -99,7 +119,7 @@ public class Base extends Module {
         @Override
         public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchParameterException {
             checkNoArgs(COMMANDS, args.length, 0);
-            return CommandExecuter.getMainExecutor().getCommandNames();
+            return commands();
         }
     }
 
@@ -115,13 +135,7 @@ public class Base extends Module {
         public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchParameterException {
             checkNoArgs(VERSION, args.length, 0, 1);
 
-            if (args.length == 1) {
-                GirsHardware hardware = Engine.getInstance().getHardware(args[0]);
-                initializeHardware(hardware, IHarcHardware.class);
-                return Utils.singletonArrayList(hardware.getHardware().getVersion());
-            }
-
-            return Utils.singletonArrayList(Version.versionString);
+            return Utils.singletonArrayList(args.length == 0 ? version() : version(args[0]));
         }
     }
 
@@ -137,8 +151,7 @@ public class Base extends Module {
         @Override
         public List<String> exec(String[] args) throws CommandSyntaxException {
             checkNoArgs(QUIT, args.length, 0);
-            quitRequested = true;
-            return Utils.singletonArrayList(GOODBYE);
+            return Utils.singletonArrayList(quit());
         }
     }
 }
