@@ -23,15 +23,15 @@
         <option name="transmitDevice">nano</option>
         <option name="captureDevice">nano</option>
         <option name="receiveDevice">nano</option>
-        <option name="captureBeginTimeout" type="int">5000</option>
+        <!--option name="captureBeginTimeout" type="int">5000</option>
         <option name="captureEndingTimeout" type="int">200</option>
-        <option name="captureMaxLength" type="int">400</option>
-        <option name="receiveBeginTimeout" type="int">5000</option>
+        <option name="captureMaxLength" type="int">400</option-->
+        <!--option name="receiveBeginTimeout" type="int">5000</option>
         <option name="receiveEndingTimeout" type="int">30</option>
-        <option name="receiveMaxLength" type="int">100</option>
+        <option name="receiveMaxLength" type="int">100</option-->
         <option name="transmitTimeout" type="int">5000</option>
         <option name="connectTimeout" type="int">2000</option>
-        <option name="StarWars">May the schwarz be with you!</option>
+        <option name="SpaceBalls">May the schwarz be with you!</option>
     </options>
 
     <modules>

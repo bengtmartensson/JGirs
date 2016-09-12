@@ -22,7 +22,6 @@ import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.ModulatedIrSequence;
 import org.harctoolbox.harchardware.HarcHardwareException;
-import org.harctoolbox.harchardware.IHarcHardware;
 import org.harctoolbox.harchardware.ir.ICapture;
 
 /**
@@ -30,13 +29,16 @@ import org.harctoolbox.harchardware.ir.ICapture;
  */
 public class Capture extends Module {
 
-    private static final int defaultCaptureBeginTimeout  = 2000;
-    private static final int defaultCaptureEndingTimeout = 30;
+    private static final int defaultCaptureBeginTimeout  = 5000;
+    private static final int defaultCaptureEndingTimeout = 200;
     private static final int defaultCaptureLength        = 400;
 
-    public static final String RECEIVEBEGINTIMEOUT  = "captureBeginTimeout";
-    public static final String RECEIVEENDINGTIMEOUT = "captureEndingTimeout";
-    public static final String RECEIVELENGTH        = "captureLength";
+    public static final String CAPTUREBEGINTIMEOUT  = "captureBeginTimeout";
+    public static final String CAPTUREENDINGTIMEOUT = "captureEndingTimeout";
+    public static final String CAPTURELENGTH        = "captureLength";
+
+    private static final boolean alternatingSigns = true;
+    private static final boolean noSigns = false;
 
     private static volatile Capture instance = null;
 
@@ -48,21 +50,33 @@ public class Capture extends Module {
         return instance;
     }
 
-    public static String analyze() throws IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, HarcHardwareException, IOException, IrpMasterException {
-        IHarcHardware hardware = Engine.getInstance().getCaptureHardware().getHardware();
-        if (!(hardware instanceof ICapture))
-            throw new IncompatibleHardwareException("ICapture");
-        final ModulatedIrSequence irSequence = ((ICapture) hardware).capture();
-        return irSequence.toPrintString(true, false);
+    public static ModulatedIrSequence capture() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, IrpMasterException {
+        GirsHardware hardware = Engine.getInstance().getCaptureHardware();
+        return capture(hardware);
+    }
+
+    public static ModulatedIrSequence capture(GirsHardware hardware) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, IrpMasterException {
+        initializeHardware(hardware, ICapture.class);
+        ICapture capturer = (ICapture) hardware.getHardware();
+        capturer.setBeginTimeout(Parameters.getInstance().getInteger(CAPTUREBEGINTIMEOUT));
+        capturer.setCaptureMaxSize(Parameters.getInstance().getInteger(CAPTURELENGTH));
+        capturer.setEndTimeout(Parameters.getInstance().getInteger(CAPTUREENDINGTIMEOUT));
+        ModulatedIrSequence irSequence = ((ICapture) hardware.getHardware()).capture();
+        return irSequence;
     }
 
     private Capture() {
         super();
+        addCommand(new CaptureCommand());
+        addParameter(new IntegerParameter(CAPTUREBEGINTIMEOUT, defaultCaptureBeginTimeout, null));
+        addParameter(new IntegerParameter(CAPTUREENDINGTIMEOUT, defaultCaptureEndingTimeout, null));
+        addParameter(new IntegerParameter(CAPTURELENGTH, defaultCaptureLength, null));
     }
 
-    private static class AnalyzeCommand implements ICommand {
+    private static class CaptureCommand implements ICommand {
 
         private static final String ANALYZE = "analyze";
+        private static final String SEPARATOR = " ";
 
         @Override
         public String getName() {
@@ -72,8 +86,12 @@ public class Capture extends Module {
         @Override
         public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
-            checkNoArgs(ANALYZE, args.length, 0);
-            return Utils.singletonArrayList(analyze());
+            checkNoArgs(ANALYZE, args.length, 0, 1);
+            ModulatedIrSequence irSequence = args.length == 0 ? capture() : capture(Engine.getInstance().getHardware(args[0]));
+            if (irSequence == null)
+                return null;
+            String string = irSequence.toPrintString(alternatingSigns, noSigns, SEPARATOR);
+            return Utils.singletonArrayList(string);
         }
     }
 }
