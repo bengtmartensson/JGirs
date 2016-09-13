@@ -52,12 +52,12 @@ public class Transmitters extends Module {
         return list;
     }
 
-    public static List<String> transmitters(String hardwareName) throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
+    public static List<String> transmitters(String hardwareName) throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getHardware(hardwareName);
         return transmitters(hardware);
     }
 
-    public static List<String> transmitters() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
+    public static List<String> transmitters() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getTransmitHardware();
         return transmitters(hardware);
     }
@@ -87,13 +87,13 @@ public class Transmitters extends Module {
     }
 
     public void setTransmitter(String hardwareName, String transmitterName)
-            throws NoSuchHardwareException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
+            throws NoSuchHardwareException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getHardware(hardwareName);
         setTransmitter(hardware, transmitterName);
     }
 
     public void setTransmitter(String transmitterName)
-            throws NoSuchHardwareException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException {
+            throws NoSuchHardwareException, IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getTransmitHardware();
         setTransmitter(hardware, transmitterName);
     }
@@ -112,7 +112,7 @@ public class Transmitters extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
             checkNoArgs(GETTRANSMITTERS, args.length, 0, 1);
             return args.length == 0 ? transmitters() : transmitters(args[0]);
         }
@@ -128,7 +128,7 @@ public class Transmitters extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
             checkNoArgs(SETTRANSMITTER, args.length, 1, 2);
             if (args.length == 1)
                 setTransmitter(args[0]);

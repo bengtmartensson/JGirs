@@ -1,17 +1,17 @@
 # TODO
 
 ## Core
-* lirc listen (port 8765)
-* Socket interface
+
+* Server Socket interface
 
 ## RemoteDatabase
 
-## Logging
+# LATER (not in first version)
 
-
-# (Much) LATER (not in first version)
-
-* multithreaded server
+* Web application
+* http(/rest?) api.
+* lirc listen (port 8765)
+* multithreaded server (parameters, state tread private)
 * Recursive loading of remote directories.
 * Client Password
 * Named sockets
@@ -21,6 +21,8 @@
 * MQTT
 * listener mode
 * AMB beacon
+
+## Logging
 
 # Rejected
 

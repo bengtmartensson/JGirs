@@ -115,8 +115,14 @@ public class RemoteCommandDataBase {
         }
     }
 
-    public Remote getRemote(String remoteName) {
-        return remotes.get(remoteName);
+    public Remote getRemote(String remoteName) throws NoSuchRemoteException, AmbigousRemoteException {
+        List<String> list = Utils.findStringsWithPrefix(remotes.keySet(), remoteName);
+        if (list.isEmpty())
+            throw new NoSuchRemoteException(remoteName);
+        if (list.size() > 1)
+            throw new AmbigousRemoteException(remoteName);
+
+        return remotes.get(list.get(0));
     }
 
     public Remote findRemote(String remoteNameFragment) throws AmbigousRemoteException {

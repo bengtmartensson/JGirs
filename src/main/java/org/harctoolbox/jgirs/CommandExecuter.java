@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -57,24 +56,14 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public List<String> exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException {
+    public List<String> exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException, AmbigousHardwareException {
         String commandName = args[0];
-        ICommand cmd = null;
-        if (commandMap.containsKey(commandName))
-            cmd = commandMap.get(commandName);
-        else {
-            for (Map.Entry<String, ICommand> kvp : commandMap.entrySet()) {
-                if (kvp.getKey().startsWith(commandName)) {
-                    if (cmd == null) {
-                        cmd = kvp.getValue();
-                        //break;
-                    } else
-                        throw new AmbigousCommandException(commandName);
-                }
-            }
-        }
-        if (cmd == null)
+        List<String> candidates = Utils.findStringsWithPrefix(commandMap.keySet(), commandName);
+        if (candidates.isEmpty())
             throw new NoSuchCommandException(commandName);
+        if (candidates.size() > 1)
+            throw new AmbigousCommandException(commandName);
+        ICommand cmd = commandMap.get(candidates.get(0));
         String[] rest = new String[args.length-1];
         System.arraycopy(args, 1, rest, 0, args.length - 1);
         return cmd.exec(rest);

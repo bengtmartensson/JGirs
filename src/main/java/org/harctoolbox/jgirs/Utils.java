@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import javax.xml.validation.Schema;
 import org.harctoolbox.IrpMaster.XmlUtils;
 import org.w3c.dom.Document;
@@ -113,6 +114,17 @@ public class Utils {
         ArrayList<String> list = new ArrayList<>(collection);
         Collections.sort(list, String.CASE_INSENSITIVE_ORDER);
         return list;
+    }
+
+    public static List<String> findStringsWithPrefix(Collection<String> collection, String prefix) {
+        List<String> result = new ArrayList<>(8);
+        if (collection.contains(prefix))
+            result.add(prefix);
+        else
+            collection.stream().filter((candidate) -> (candidate.toLowerCase(Locale.US).startsWith(prefix.toLowerCase(Locale.US)))).forEach((candidate) -> {
+                result.add(candidate);
+            });
+        return result;
     }
 
     private Utils() {

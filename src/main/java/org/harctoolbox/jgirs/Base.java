@@ -63,7 +63,7 @@ public class Base extends Module {
         return quitRequested;
     }
 
-    public String version(String hardwareName) throws IncompatibleHardwareException, IOException, HarcHardwareException, NoSuchParameterException, NoSuchHardwareException {
+    public String version(String hardwareName) throws IncompatibleHardwareException, IOException, HarcHardwareException, NoSuchParameterException, NoSuchHardwareException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getHardware(hardwareName);
         initializeHardware(hardware, IHarcHardware.class);
         return hardware.getHardware().getVersion();
@@ -132,7 +132,7 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchHardwareException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchParameterException, AmbigousHardwareException {
             checkNoArgs(VERSION, args.length, 0, 1);
 
             return Utils.singletonArrayList(args.length == 0 ? version() : version(args[0]));

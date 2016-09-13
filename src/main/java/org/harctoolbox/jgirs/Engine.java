@@ -239,22 +239,25 @@ public final class Engine implements ICommandLineDevice, Closeable {
         outBuffer.add(Version.versionString);
     }
 
-    public GirsHardware getHardware(String name) throws NoSuchHardwareException {
-        if (!irHardware.containsKey(name))
+    public GirsHardware getHardware(String name) throws NoSuchHardwareException, AmbigousHardwareException {
+        List<String> candidates = Utils.findStringsWithPrefix(irHardware.keySet(), name);
+        if (candidates.isEmpty())
             throw new NoSuchHardwareException(name);
+        if (candidates.size() > 1)
+            throw new AmbigousHardwareException(name);
 
-        return irHardware.get(name);
+        return irHardware.get(candidates.get(0));
     }
 
-    public GirsHardware getTransmitHardware() throws NoSuchHardwareException, NoSuchParameterException {
+    public GirsHardware getTransmitHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         return getHardware(Parameters.getInstance().getString(Parameters.TRANSMITDEVICE));
     }
 
-    public GirsHardware getCaptureHardware() throws NoSuchHardwareException, NoSuchParameterException {
+    public GirsHardware getCaptureHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         return getHardware(Parameters.getInstance().getString(Parameters.CAPTUREDEVICE));
     }
 
-    public GirsHardware getReceiveHardware() throws NoSuchHardwareException, NoSuchParameterException {
+    public GirsHardware getReceiveHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         return getHardware(Parameters.getInstance().getString(Parameters.RECEIVEDEVICE));
     }
 

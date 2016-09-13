@@ -30,18 +30,18 @@ import org.harctoolbox.harchardware.ir.NoSuchTransmitterException;
  */
 public class OpenClose extends Module {
 
-    public static void open(String name) throws NoSuchHardwareException, HarcHardwareException, IncompatibleHardwareException, IOException, NoSuchParameterException {
+    public static void open(String name) throws NoSuchHardwareException, HarcHardwareException, IncompatibleHardwareException, IOException, NoSuchParameterException, AmbigousHardwareException {
         GirsHardware ghw = Engine.getInstance().getHardware(name);
         initializeHardware(ghw, IHarcHardware.class); // calls open
     }
 
-    public static void close(String name) throws NoSuchHardwareException, HarcHardwareException, IncompatibleHardwareException, IOException, NoSuchParameterException {
+    public static void close(String name) throws NoSuchHardwareException, HarcHardwareException, IncompatibleHardwareException, IOException, NoSuchParameterException, AmbigousHardwareException {
         IHarcHardware hardware = Engine.getInstance().getHardware(name).getHardware();
         if (hardware.isValid())
             hardware.close();
     }
 
-    public static List<String> status(String name) throws NoSuchHardwareException, HarcHardwareException, IncompatibleHardwareException, IOException, NoSuchParameterException {
+    public static List<String> status(String name) throws NoSuchHardwareException, HarcHardwareException, IncompatibleHardwareException, IOException, NoSuchParameterException, AmbigousHardwareException {
         GirsHardware ghw = Engine.getInstance().getHardware(name);
         //initializeHardware(ghw, IHarcHardware.class);
         IHarcHardware hardware = ghw.getHardware();
@@ -68,7 +68,7 @@ public class OpenClose extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
+        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
             checkNoArgs(OPEN, args.length, 1);
             open(args[0]);
             return new ArrayList<>(0);
@@ -85,7 +85,7 @@ public class OpenClose extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
+        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
             checkNoArgs(CLOSE, args.length, 1);
             close(args[0]);
             return new ArrayList<>(0);
@@ -102,7 +102,7 @@ public class OpenClose extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
+        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
             checkNoArgs(STATUS, args.length, 1);
             return status(args[0]);
         }

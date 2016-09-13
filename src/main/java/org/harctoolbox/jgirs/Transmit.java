@@ -83,7 +83,7 @@ public class Transmit extends Module {
         return Transmitters.getInstance().getTransmitter(hardware);
     }
 
-    public static boolean stop() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException {
+    public static boolean stop() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getTransmitHardware();
         initializeHardware(hardware, IIrSenderStop.class);
         Transmitter transmitter = getTransmitter(hardware);
@@ -106,7 +106,7 @@ public class Transmit extends Module {
     }
 
 
-    private boolean transmit(int count, IrSignal irSignal) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+    private boolean transmit(int count, IrSignal irSignal) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getTransmitHardware();
         initializeHardware(hardware, IRawIrSender.class);
         IRawIrSender irsender = (IRawIrSender) hardware.getHardware();
@@ -114,30 +114,30 @@ public class Transmit extends Module {
         return transmit(count, irSignal, irsender, transmitter);
     }
 
-    private boolean transmitCcf(String[] args) throws CommandSyntaxException, IrpMasterException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+    private boolean transmitCcf(String[] args) throws CommandSyntaxException, IrpMasterException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         int count = intParse(args[0]);
         int[] data = Pronto.parseStringArray(args, 1);
         return transmitCcf(count, data);
     }
 
-    public boolean transmitCcf(int count, int[] data) throws CommandSyntaxException, IrpMasterException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+    public boolean transmitCcf(int count, int[] data) throws CommandSyntaxException, IrpMasterException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         IrSignal irSignal = Pronto.ccfSignal(data);
         return transmit(count, irSignal);
     }
 
-    public boolean transmitNamedCommand(int count, String remote, String command) throws HarcHardwareException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException {
+    public boolean transmitNamedCommand(int count, String remote, String command) throws HarcHardwareException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousRemoteException, AmbigousCommandException, AmbigousHardwareException {
         if (namedRemotes == null)
             throw new NoSuchModuleException("NamedRemotes");
         IrSignal irSignal = namedRemotes.render(remote, command);
         return transmit(count, irSignal);
     }
 
-    public boolean transmitRaw(int count, int frequency, int introLength, int repeatLength, int endingLength, int[] data) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchParameterException, NoSuchHardwareException {
+    public boolean transmitRaw(int count, int frequency, int introLength, int repeatLength, int endingLength, int[] data) throws HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchParameterException, NoSuchHardwareException, AmbigousHardwareException {
         IrSignal irSignal = new IrSignal(data, introLength / 2, repeatLength / 2, frequency);
         return transmit(count, irSignal);
     }
 
-    public boolean transmitIrp(int count, String irpCode, HashMap<String, Long> parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException {
+    public boolean transmitIrp(int count, String irpCode, HashMap<String, Long> parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException {
         if (irp == null)
             throw new NoSuchModuleException("Irp");
         IrSignal irSignal = Irp.render(irpCode, parameters);
@@ -145,7 +145,7 @@ public class Transmit extends Module {
     }
 
     public boolean transmitProtocolParameters(int count, String[] args, int skip)
-            throws UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException {
+            throws UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException {
         if (renderer == null)
             throw new NoSuchModuleException("Renderer");
         IrSignal irSignal = renderer.render(args, skip);
@@ -163,7 +163,7 @@ public class Transmit extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
+        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
             checkNoArgs(STOP, args.length, 3, Integer.MAX_VALUE);
             return stop() ? new ArrayList<>(0) : null;
         }
@@ -196,7 +196,7 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+            public List<String> exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
                 return transmitCcf(args) ? new ArrayList<>(0) : null;
             }
         }
@@ -209,7 +209,7 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+            public List<String> exec(String[] args) throws IrpMasterException, CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
                 return transmitCcf(args) ? new ArrayList<>(0) : null;
             }
         }
@@ -224,7 +224,7 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+            public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
                 checkNoArgs(RAW, args.length, 3, Integer.MAX_VALUE);
                 int index = 0;
                 int count = intParse(args[index++]); // throw NumberFormatException
@@ -249,7 +249,7 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException {
+            public List<String> exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException {
                 checkNoArgs(IRP, args.length, 3, Integer.MAX_VALUE);
                 int index = 0;
                 int count = intParse(args[index++]);
@@ -269,7 +269,7 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException {
+            public List<String> exec(String[] args) throws CommandSyntaxException, UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException {
                 checkNoArgs(PROTOCOLPARAMETER, args.length, 3, Integer.MAX_VALUE);
                 int index = 0;
                 int count = intParse(args[index++]);
@@ -287,7 +287,7 @@ public class Transmit extends Module {
             }
 
             @Override
-            public List<String> exec(String[] args) throws ExecutionException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException {
+            public List<String> exec(String[] args) throws ExecutionException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousRemoteException, AmbigousCommandException, AmbigousHardwareException {
                 checkNoArgs(NAME, args.length, 3);
                 int index = 0;
                 int count = intParse(args[index++]);
@@ -308,7 +308,7 @@ public class Transmit extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException {
+        public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IncompatibleArgumentException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
             checkNoArgs(SEND, args.length, 8, Integer.MAX_VALUE);
             int index = 0;
             int count = intParse(args[index++]); // throws NumberFormatException

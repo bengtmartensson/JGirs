@@ -50,7 +50,7 @@ public class Capture extends Module {
         return instance;
     }
 
-    public static ModulatedIrSequence capture() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, IrpMasterException {
+    public static ModulatedIrSequence capture() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, IrpMasterException, AmbigousHardwareException {
         GirsHardware hardware = Engine.getInstance().getCaptureHardware();
         return capture(hardware);
     }
@@ -60,7 +60,7 @@ public class Capture extends Module {
         ICapture capturer = (ICapture) hardware.getHardware();
         capturer.setBeginTimeout(Parameters.getInstance().getInteger(CAPTUREBEGINTIMEOUT));
         capturer.setCaptureMaxSize(Parameters.getInstance().getInteger(CAPTURELENGTH));
-        capturer.setEndTimeout(Parameters.getInstance().getInteger(CAPTUREENDINGTIMEOUT));
+        capturer.setEndingTimeout(Parameters.getInstance().getInteger(CAPTUREENDINGTIMEOUT));
         ModulatedIrSequence irSequence = ((ICapture) hardware.getHardware()).capture();
         return irSequence;
     }
@@ -84,7 +84,7 @@ public class Capture extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException {
+        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             checkNoArgs(ANALYZE, args.length, 0, 1);
             ModulatedIrSequence irSequence = args.length == 0 ? capture() : capture(Engine.getInstance().getHardware(args[0]));

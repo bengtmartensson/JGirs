@@ -43,5 +43,5 @@ public interface ICommand {
      * @throws org.harctoolbox.jgirs.AmbigousCommandException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */
-    public List<String> exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousCommandException, IrpMasterException;
+    public List<String> exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousHardwareException, AmbigousCommandException, IrpMasterException;
 }

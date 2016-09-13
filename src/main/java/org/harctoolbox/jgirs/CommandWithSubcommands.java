@@ -48,7 +48,7 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommandNames();
     }
 
-    public List<String> exec(String[] args) throws IOException, HarcHardwareException, IrpMasterException, CommandException, AmbigousCommandException {
+    public List<String> exec(String[] args) throws IOException, HarcHardwareException, IrpMasterException, CommandException, AmbigousCommandException, AmbigousHardwareException {
         if (args == null || args.length == 0)
             throw new CommandSyntaxException(getName(), "subcommand missing");
         return commandExecuter.exec(args);

@@ -80,13 +80,15 @@ public class NamedRemotes extends Module {
         return database.getRemoteCommand(protocol, parameters);
     }
 
-    public IrSignal render(String remoteName, String commandName) throws IrpMasterException, NoSuchRemoteException, NoSuchCommandException {
-        Remote remote = database.getRemote(remoteName);
-        if (remote == null)
-            throw new NoSuchRemoteException(remoteName);
-        org.harctoolbox.girr.Command command = remote.getCommand(commandName);
-        if (command == null)
-            throw new NoSuchCommandException(commandName);
+    public IrSignal render(String remotePrefix, String commandPrefix) throws IrpMasterException, NoSuchRemoteException, NoSuchCommandException, AmbigousRemoteException, AmbigousCommandException {
+        Remote remote = database.getRemote(remotePrefix);
+        List<String> commandCandidates = Utils.findStringsWithPrefix(remote.getCommands().keySet(), commandPrefix);
+        if (commandCandidates.isEmpty())
+            throw new NoSuchCommandException(commandPrefix);
+        if (commandCandidates.size() > 1)
+            throw new AmbigousCommandException(commandPrefix);
+
+        org.harctoolbox.girr.Command command = remote.getCommand(commandCandidates.get(0));
         IrSignal irSignal = command.toIrSignal();
         return irSignal;
     }
