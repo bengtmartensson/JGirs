@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.xml.validation.Schema;
 import org.harctoolbox.IrpMaster.XmlUtils;
 import org.w3c.dom.Document;
@@ -125,6 +127,36 @@ public class Utils {
                 result.add(candidate);
             });
         return result;
+    }
+
+    public static Map<String, Long> toParameters(long F) {
+        Map<String, Long> parameters = new HashMap<>(1);
+        parameters.put("F", F);
+        return parameters;
+    }
+
+    public static Map<String, Long> toParameters(long D, long F) {
+        Map<String, Long> parameters = new HashMap<>(2);
+        parameters.put("D", D);
+        parameters.put("F", F);
+        return parameters;
+    }
+
+    public static Map<String, Long> toParameters(long D, long S, long F) {
+        Map<String, Long> parameters = new HashMap<>(3);
+        parameters.put("D", D);
+        parameters.put("S", S);
+        parameters.put("F", F);
+        return parameters;
+    }
+
+    public static Map<String, Long> toParameters(long D, long S, long F, long T) {
+        Map<String, Long> parameters = new HashMap<>(4);
+        parameters.put("D", D);
+        parameters.put("S", S);
+        parameters.put("F", F);
+        parameters.put("T", T);
+        return parameters;
     }
 
     private Utils() {

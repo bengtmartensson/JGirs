@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Remote;
@@ -42,31 +41,31 @@ import org.xml.sax.SAXException;
 public class RemoteCommandDataBase {
 
     public static void main(String[] args) {
-        TreeMap<ParameterSet, String> db = new TreeMap<>();
+        TreeMap<ProtocolParameter, String> db = new TreeMap<>();
         Map<String, Long> params = new HashMap<>(16);
         params.put("C", 3L);
         params.put("A", 1L);
-        ParameterSet ba21 = new ParameterSet("proto", params);
+        ProtocolParameter ba21 = new ProtocolParameter("proto", params);
         db.put(ba21, "ba21");
-        ba21 = new ParameterSet("proto", params);
+        ba21 = new ProtocolParameter("proto", params);
         db.put(ba21, "ba21xxx");
         params.put("B", 2L);
-        ba21 = new ParameterSet("aproto", params);
+        ba21 = new ProtocolParameter("aproto", params);
         db.put(ba21, "ba21xx");
         Map<String, Long> ps = new HashMap<>(16);
         ps.put("A", 1L);
         ps.put("B", 2L);
         ps.put("C", 3L);
-        ParameterSet pa = new ParameterSet("proto", ps);
+        ProtocolParameter pa = new ProtocolParameter("proto", ps);
         db.put(pa, "xxx");
-        ParameterSet pb = null;
+        ProtocolParameter pb = null;
         try {
-            pb = (ParameterSet) pa.clone();
+            pb = (ProtocolParameter) pa.clone();
         } catch (CloneNotSupportedException ex) {
         }
         db.put(pb, "godzilla");
 
-        db.entrySet().stream().forEach((kvp) -> {
+        db.entrySet().stream().forEach((java.util.Map.Entry<org.harctoolbox.jgirs.ProtocolParameter, java.lang.String> kvp) -> {
             System.out.println(kvp.getKey() + "\t" + kvp.getValue());
         });
     }
@@ -82,7 +81,7 @@ public class RemoteCommandDataBase {
     }
 
     private Map<String, Remote> remotes;
-    private TreeMap<ParameterSet, RemoteCommand> data;
+    private TreeMap<ProtocolParameter, RemoteCommand> data;
 
     public RemoteCommandDataBase(boolean caseInsensitive) {
         this.data = new TreeMap<>();
@@ -102,7 +101,7 @@ public class RemoteCommandDataBase {
                 RemoteCommand rc = new RemoteCommand(remote, command);
                 String protocol = command.getProtocolName();
                 Map<String, Long> parameters = command.getParameters();
-                ParameterSet params = new ParameterSet(protocol, parameters);
+                ProtocolParameter params = new ProtocolParameter(protocol, parameters);
                 this.data.put(params, rc);
             }
         }
@@ -150,7 +149,7 @@ public class RemoteCommandDataBase {
     }
 
     public RemoteCommand getRemoteCommand(String protocol, Map<String, Long>parameters) {
-        ParameterSet params = new ParameterSet(protocol, parameters);
+        ProtocolParameter params = new ProtocolParameter(protocol, parameters);
         return this.data.get(params);
     }
 
@@ -206,108 +205,5 @@ public class RemoteCommandDataBase {
             return remote.getName() + "/" + command.getName();
         }
 
-    }
-
-    public static class ParameterSet implements Comparable<ParameterSet>, Cloneable {
-        private final Map<String, Long> parameters;
-        private final String protocol;
-
-        @SuppressWarnings("unchecked")
-        public ParameterSet(String protocol, Map<String, Long> parameters) {
-            this.protocol = protocol.toLowerCase(Locale.US);
-            this.parameters = new HashMap<>(parameters.size());
-            parameters.entrySet().stream().forEach((kvp) -> {
-                this.parameters.put(kvp.getKey(), kvp.getValue());
-            });
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            final ParameterSet other = (ParameterSet) obj;
-            if (!this.protocol.equals(other.protocol))
-                return false;
-            if (this.parameters.size() != other.parameters.size())
-                return false;
-            for (Map.Entry<String, Long> kvp : parameters.entrySet()) {
-                String name = kvp.getKey();
-                if (!Objects.equals(kvp.getValue(), other.parameters.get(name)))
-                    return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 97 * hash + Objects.hashCode(this.parameters);
-            hash = 97 * hash + Objects.hashCode(this.protocol);
-            return hash;
-        }
-
-        private List<String> parameterNamesSorted() {
-            return Utils.toSortedList(parameters.keySet());
-        }
-
-        @Override
-        public String toString() {
-            List<String> list = parameterNamesSorted();
-            StringBuilder str = new StringBuilder(protocol);
-            list.stream().forEach((param) -> {
-                str.append(" ").append(param).append("=").append(parameters.get(param));
-            });
-            return str.toString();
-        }
-
-        /*@Override
-        public int compare(ParameterSet p1, ParameterSet p2) {
-        int c1 = p1.protocol.compareToIgnoreCase(p2.protocol);
-        if (c1 != 0)
-        return c1;
-        ArrayList<String> params1 = p1.parameterNamesSorted();
-        ArrayList<String> params2 = p2.parameterNamesSorted();
-        for (int i = 0; i < params1.size(); i++) {
-        String param1 = params1.get(i);
-        String param2 = params1.get(i);
-        int c2 = param1.compareTo(param2);
-        if (c2 != 0)
-        return c2;
-        int c3 = Long.compare(p1.parameters.get(param1), p2.parameters.get(param2));
-        if (c3 != 0)
-        return c3;
-        }
-        return params1.size() == params2.size() ? 0 : 1;
-        }*/
-
-        @Override
-        public int compareTo(ParameterSet p2) {
-            int c1 = this.protocol.compareToIgnoreCase(p2.protocol);
-            if (c1 != 0)
-                return c1;
-            List<String> params1 = this.parameterNamesSorted();
-            List<String> params2 = p2.parameterNamesSorted();
-            for (int i = 0; i < params1.size(); i++) {
-                String param1 = params1.get(i);
-                String param2 = params2.get(i);
-                int c2 = param1.compareTo(param2);
-                if (c2 != 0)
-                    return c2;
-                int c3 = Long.compare(this.parameters.get(param1), p2.parameters.get(param2));
-                if (c3 != 0)
-                    return c3;
-            }
-            return params1.size() == params2.size() ? 0 : 1;
-        }
-
-        @Override
-        public Object clone() throws CloneNotSupportedException {
-            super.clone();
-            ParameterSet dolly = new ParameterSet(protocol, parameters);
-            return dolly;
-        }
     }
 }
