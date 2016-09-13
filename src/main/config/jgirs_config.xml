@@ -31,7 +31,7 @@
         <option name="receiveMaxLength" type="int">100</option-->
         <option name="transmitTimeout" type="int">5000</option>
         <option name="connectTimeout" type="int">2000</option>
-        <option name="SpaceBalls">May the schwarz be with you!</option>
+        <!--option name="SpaceBalls">May the schwarz be with you!</option-->
     </options>
 
     <modules>
@@ -46,7 +46,7 @@
     <named-remotes>
         <named-remote type="girr"  url="file:///home/bengt/harctoolbox/GirrLib/Girr/Yamaha/yamaha_rxv1400.girr"/>
         <named-remote              url="file:///home/bengt/harctoolbox/GirrLib/Girr/Coolstream/coolstream_neo.girr"/>
-        <!--named-remote type="lircd" url="file:///home/bengt/lirc/lirc-remotes/remotes/yamaha/RX-V995.lircd.conf"/-->
+        <named-remote type="lircd" url="file:///home/bengt/lirc/lirc-remotes/remotes/yamaha/RX-V995.lircd.conf"/>
         <named-remote type="csv"   url="file:///home/bengt/harctoolbox/irdb/codes/Philips/Unknown_32PFL5403D/0,-1.csv"
                       name="Philips RC6-TV" commandname="1" protocol="2" D="3" S="4" F="5" separator=","/>
         <!--named-remote type="lircd" url="http://lirc.sourceforge.net/remotes/yamaha/RX-V995"/-->

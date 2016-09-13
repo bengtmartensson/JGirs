@@ -111,10 +111,11 @@ public class ProtocolParameter implements Comparable<ProtocolParameter>, Cloneab
     }
 
     /**
+     * @param parameterName
      * @return the parameters
      */
-    public TreeMap<String, Long> getParameters() {
-        return parameters;
+    public Long getParameter(String parameterName) {
+        return parameters.get(parameterName);
     }
 
     /**

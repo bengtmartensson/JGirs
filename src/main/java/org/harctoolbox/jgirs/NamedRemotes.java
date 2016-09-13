@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,6 +41,8 @@ public class NamedRemotes extends Module {
 
     private static boolean caseInsensitive = true;
 
+    private static volatile NamedRemotes instance = null;
+
     private static RemoteSet readRemoteSet(String file) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
@@ -58,6 +59,17 @@ public class NamedRemotes extends Module {
         return result;
     }
 
+    public static NamedRemotes getInstance() {
+        return instance;
+    }
+
+    public static NamedRemotes newNamedRemotes(RemoteCommandDataBase remoteCommandsDataBase) {
+        if (instance != null)
+            throw new InvalidMultipleInstantiation("NamedRemotes");
+        instance = new NamedRemotes(remoteCommandsDataBase);
+        return instance;
+    }
+
     private final RemoteCommandDataBase database;
 
     private NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
@@ -69,15 +81,15 @@ public class NamedRemotes extends Module {
         this(readRemoteSet(files));
     }
 
-    public NamedRemotes(RemoteCommandDataBase remoteCommandsDataBase) {
+    private NamedRemotes(RemoteCommandDataBase remoteCommandsDataBase) {
         super();
         this.database = remoteCommandsDataBase;
         addCommand(new RemotesCommand());
         //addCommand(new CommandsCommand());
     }
 
-    public RemoteCommandDataBase.RemoteCommand getRemoteCommand(String protocol, Map<String, Long> parameters) {
-        return database.getRemoteCommand(protocol, parameters);
+    public RemoteCommandDataBase.RemoteCommand getRemoteCommand(ProtocolParameter protocolParameters) {
+        return database.getRemoteCommand(protocolParameters);
     }
 
     public IrSignal render(String remotePrefix, String commandPrefix) throws IrpMasterException, NoSuchRemoteException, NoSuchCommandException, AmbigousRemoteException, AmbigousCommandException {
@@ -98,7 +110,7 @@ public class NamedRemotes extends Module {
     }
 
     public List<String> remotes(String remoteNameFragment) throws AmbigousRemoteException, NoSuchRemoteException {
-        Remote remote = database.findRemote(remoteNameFragment);
+        Remote remote = database.getRemote(remoteNameFragment);
         if (remote == null)
             throw new NoSuchRemoteException(remoteNameFragment);
         return Utils.toSortedList(remote.getCommands().keySet());

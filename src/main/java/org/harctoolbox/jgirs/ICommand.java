@@ -40,6 +40,7 @@ public interface ICommand {
      * @throws java.io.IOException
      * @throws org.harctoolbox.harchardware.HarcHardwareException
      * @throws org.harctoolbox.jgirs.CommandException
+     * @throws org.harctoolbox.jgirs.AmbigousHardwareException
      * @throws org.harctoolbox.jgirs.AmbigousCommandException
      * @throws org.harctoolbox.IrpMaster.IrpMasterException
      */

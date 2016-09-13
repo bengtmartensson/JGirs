@@ -46,11 +46,11 @@ public class Receive extends Module {
 
     private static volatile Receive instance;
 
-    public static Module newReceive(NamedRemotes namedRemotes) {
+    public static Module newReceive() {
         if (instance != null)
             throw new InvalidMultipleInstantiation();
 
-        instance = new Receive(namedRemotes);
+        instance = new Receive();
         return instance;
     }
 
@@ -103,25 +103,27 @@ public class Receive extends Module {
         if (decodes.length == 0)
             return null;
 
-        //RemoteCommandDataBase.RemoteCommand cmd = namedRemotes.getRemoteCommand(decodes[0].getProtocol(), decodes[0].getParameters());
-        List<String> list = new ArrayList<>(0);
-        return list != null ? list : null;
+        DecodeIR.DecodedSignal decode = decodes[0];
+        ProtocolParameter protocolParameters = new ProtocolParameter(decode.getProtocol(), decode.getParameters());
+        RemoteCommandDataBase.RemoteCommand cmd = NamedRemotes.getInstance().getRemoteCommand(protocolParameters);
+        List<String> list = new ArrayList<>(1);
+        if (cmd != null)
+            list.add(cmd.toString());
+        return list;
     }
 
     public static List<String> format(IrSequence irSequence, ReceiveFormat receiveFormat)
             throws IncompatibleArgumentException, NoSuchParameterException {
         return
-                receiveFormat == ReceiveFormat.raw ? Utils.singletonArrayList(formatAsRaw(irSequence))
+                irSequence == null ? null
+                : receiveFormat == ReceiveFormat.raw ? Utils.singletonArrayList(formatAsRaw(irSequence))
                 : receiveFormat == ReceiveFormat.ccf ? Utils.singletonArrayList(formatAsCcf(irSequence))
                 : receiveFormat == ReceiveFormat.protocolparameter ? formatAsDecode(irSequence)
                 : formatAsNamedCommands(irSequence);
     }
 
-    private final NamedRemotes namedRemotes;
-
-    public Receive(NamedRemotes namedRemotes) {
+    public Receive() {
         super();
-        this.namedRemotes = namedRemotes;
         addCommand(new ReceiveCommand());
 
         addParameter(new IntegerParameter(RECEIVEBEGINTIMEOUT, defaultReceiveBeginTimeout, "begin timeout for receive"));

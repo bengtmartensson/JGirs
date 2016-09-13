@@ -23,4 +23,8 @@ public class InvalidMultipleInstantiation extends RuntimeException {
     public InvalidMultipleInstantiation() {
     }
 
+    InvalidMultipleInstantiation(String namedRemotes) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

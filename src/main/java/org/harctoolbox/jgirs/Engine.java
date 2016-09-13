@@ -203,7 +203,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         }
 
         if (config.getRemoteCommandsDataBase() != null) {
-            namedRemotes = new NamedRemotes(config.getRemoteCommandsDataBase());
+            namedRemotes = NamedRemotes.newNamedRemotes(config.getRemoteCommandsDataBase());
             registerModule(namedRemotes);
         }
 
@@ -213,7 +213,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         registerModule(Transmit.newTransmit(renderer, irp, namedRemotes));
         registerModule(Transmitters.newTransmittersModule());
         registerModule(Capture.newCapture());
-        registerModule(Receive.newReceive(namedRemotes));
+        registerModule(Receive.newReceive());
 
         config.getModuleList().stream().forEach((module) -> {
             try {

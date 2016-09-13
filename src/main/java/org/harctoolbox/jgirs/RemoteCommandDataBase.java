@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import org.harctoolbox.IrpMaster.IrpMasterException;
@@ -36,43 +34,9 @@ import org.xml.sax.SAXException;
  * This class implements a data base for Remotes and Commands. It is not claimed to be very efficient,
  * and may be replaced by a more efficient implementation, should the need arise.
  *
- * TODO: take left-out default parameters into account.
+ * TODO: take default parameters into account: remove them if they have the default values.
  */
 public class RemoteCommandDataBase {
-
-    public static void main(String[] args) {
-        TreeMap<ProtocolParameter, String> db = new TreeMap<>();
-        Map<String, Long> params = new HashMap<>(16);
-        params.put("C", 3L);
-        params.put("A", 1L);
-        ProtocolParameter ba21 = new ProtocolParameter("proto", params);
-        db.put(ba21, "ba21");
-        ba21 = new ProtocolParameter("proto", params);
-        db.put(ba21, "ba21xxx");
-        params.put("B", 2L);
-        ba21 = new ProtocolParameter("aproto", params);
-        db.put(ba21, "ba21xx");
-        Map<String, Long> ps = new HashMap<>(16);
-        ps.put("A", 1L);
-        ps.put("B", 2L);
-        ps.put("C", 3L);
-        ProtocolParameter pa = new ProtocolParameter("proto", ps);
-        db.put(pa, "xxx");
-        ProtocolParameter pb = null;
-        try {
-            pb = (ProtocolParameter) pa.clone();
-        } catch (CloneNotSupportedException ex) {
-        }
-        db.put(pb, "godzilla");
-
-        db.entrySet().stream().forEach((java.util.Map.Entry<org.harctoolbox.jgirs.ProtocolParameter, java.lang.String> kvp) -> {
-            System.out.println(kvp.getKey() + "\t" + kvp.getValue());
-        });
-    }
-
-//    private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
-//        return parseGirr(new URL(element.getAttribute("url")));
-//    }
 
     private static RemoteSet parseGirr(URL url) throws java.text.ParseException, IOException, SAXException {
         Document doc = Utils.openXmlUrl(url, null, true, true);
@@ -80,8 +44,12 @@ public class RemoteCommandDataBase {
         return remoteSet;
     }
 
-    private Map<String, Remote> remotes;
+    private TreeMap<String, Remote> remotes;
     private TreeMap<ProtocolParameter, RemoteCommand> data;
+
+    public RemoteCommandDataBase() {
+        this(true);
+    }
 
     public RemoteCommandDataBase(boolean caseInsensitive) {
         this.data = new TreeMap<>();
@@ -91,52 +59,47 @@ public class RemoteCommandDataBase {
     public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets, boolean caseInsensitive) throws IrpMasterException {
         this(caseInsensitive);
         for (RemoteSet remoteSet : remoteSets)
-            load(remoteSet);
+            add(remoteSet);
     }
 
-    private void load(RemoteSet remoteSet) throws IrpMasterException {
+    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+        this(true);
+        for (RemoteSet remoteSet : remoteSets)
+            add(remoteSet);
+    }
+
+    private void add(RemoteSet remoteSet) throws IrpMasterException {
         for (Remote remote : remoteSet.getRemotes()) {
-            remotes.put(remote.getName(), remote);
-            for (org.harctoolbox.girr.Command command : remote.getCommands().values()) {
-                RemoteCommand rc = new RemoteCommand(remote, command);
-                String protocol = command.getProtocolName();
-                Map<String, Long> parameters = command.getParameters();
-                ProtocolParameter params = new ProtocolParameter(protocol, parameters);
-                this.data.put(params, rc);
-            }
+            add(remote);
+        }
+    }
+
+    private void add(Remote remote) throws IrpMasterException {
+        remotes.put(remote.getName(), remote);
+        for (org.harctoolbox.girr.Command command : remote.getCommands().values()) {
+            RemoteCommand remoteCommand = new RemoteCommand(remote, command);
+            String protocol = command.getProtocolName();
+            Map<String, Long> parameters = command.getParameters();
+            ProtocolParameter params = new ProtocolParameter(protocol, parameters);
+            data.put(params, remoteCommand);
         }
     }
 
     public void add(Iterable<String> urls) throws ParseException, IOException, SAXException, IrpMasterException {
         for (String url : urls) {
             RemoteSet remoteSet = parseGirr(new URL(url));
-            load(remoteSet);
+            add(remoteSet);
         }
     }
 
-    public Remote getRemote(String remoteName) throws NoSuchRemoteException, AmbigousRemoteException {
-        List<String> list = Utils.findStringsWithPrefix(remotes.keySet(), remoteName);
+    public Remote getRemote(String remoteNamePrefix) throws NoSuchRemoteException, AmbigousRemoteException {
+        List<String> list = Utils.findStringsWithPrefix(remotes.keySet(), remoteNamePrefix);
         if (list.isEmpty())
-            throw new NoSuchRemoteException(remoteName);
+            throw new NoSuchRemoteException(remoteNamePrefix);
         if (list.size() > 1)
-            throw new AmbigousRemoteException(remoteName);
+            throw new AmbigousRemoteException(remoteNamePrefix);
 
         return remotes.get(list.get(0));
-    }
-
-    public Remote findRemote(String remoteNameFragment) throws AmbigousRemoteException {
-        if (remotes.containsKey(remoteNameFragment))
-            return remotes.get(remoteNameFragment);
-
-        Remote candidate = null;
-        for (Remote remote : remotes.values())
-            if (remote.getName().toLowerCase(Locale.US).startsWith(remoteNameFragment.toLowerCase(Locale.US))) {
-                if (candidate != null)
-                    throw new AmbigousRemoteException(remoteNameFragment);
-                candidate = remote;
-            }
-
-        return candidate;
     }
 
     public Collection<Remote> getRemotes() {
@@ -148,9 +111,13 @@ public class RemoteCommandDataBase {
         return remote.getCommand(commandName);
     }
 
-    public RemoteCommand getRemoteCommand(String protocol, Map<String, Long>parameters) {
-        ProtocolParameter params = new ProtocolParameter(protocol, parameters);
-        return this.data.get(params);
+//    public RemoteCommand getRemoteCommand(String protocol, Map<String, Long>parameters) {
+//        ProtocolParameter params = new ProtocolParameter(protocol, parameters);
+//        return data.get(params);
+//    }
+
+    public RemoteCommand getRemoteCommand(ProtocolParameter params) {
+        return data.get(params);
     }
 
     public boolean isEmpty() {
@@ -204,6 +171,5 @@ public class RemoteCommandDataBase {
         public String toString() {
             return remote.getName() + "/" + command.getName();
         }
-
     }
 }

@@ -5,8 +5,6 @@
 * Server Socket interface
 * Main
 
-## RemoteDatabase
-
 # LATER (not in first version)
 
 * Web application
@@ -39,3 +37,5 @@
 * Bug: '.calSerialPortBuffered.sendString: Sent '
 
 ## Transmitters
+
+## RemoteDatabase

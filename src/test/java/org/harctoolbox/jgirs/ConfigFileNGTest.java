@@ -81,7 +81,7 @@ public class ConfigFileNGTest {
     public void testGetRemoteCommandsDataBase() {
         System.out.println("getRemoteCommandsDataBase");
         RemoteCommandDataBase result = instance.getRemoteCommandsDataBase();
-        assertEquals(result.getRemotes().size(), 3);
+        assertEquals(result.getRemotes().size(), 4);
     }
 
     /**
