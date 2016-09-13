@@ -2,9 +2,6 @@
 
 ## Core
 
-* Server Socket interface
-* Main
-
 # LATER (not in first version)
 
 * Web application
@@ -35,6 +32,8 @@
 * OpenClose
 * Irp
 * Bug: '.calSerialPortBuffered.sendString: Sent '
+* Server Socket interface
+* Main
 
 ## Transmitters
 

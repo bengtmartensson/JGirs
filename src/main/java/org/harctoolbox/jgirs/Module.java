@@ -31,9 +31,6 @@ import org.w3c.dom.NodeList;
  */
 public abstract class Module {
 
-    public static final String OK = Engine.OK;
-    public static final String ERROR = Engine.ERROR;
-
     protected static void checkNoArgs(String name, int length, int min, int max) throws CommandSyntaxException {
         if (length < min  || length > max)
             throw new CommandSyntaxException(name, min, max);

@@ -48,6 +48,13 @@ public class Base extends Module {
         return Version.versionString;
     }
 
+    /**
+     * @return the instance
+     */
+    public static Base getInstance() {
+        return instance;
+    }
+
     private boolean quitRequested = false;
 
     private Base() {
@@ -61,6 +68,10 @@ public class Base extends Module {
 
     public boolean isQuitRequested() {
         return quitRequested;
+    }
+
+    public void setQuitRequested(boolean quitRequested) {
+        this.quitRequested = quitRequested;
     }
 
     public String version(String hardwareName) throws IncompatibleHardwareException, IOException, HarcHardwareException, NoSuchParameterException, NoSuchHardwareException, AmbigousHardwareException {

@@ -45,11 +45,11 @@ public class Transmit extends Module {
 
     private static volatile Transmit instance = null;
 
-    static Module newTransmit(Renderer renderer, Irp irp, NamedRemotes namedRemotes) {
+    static Module newTransmit(Renderer renderer, Irp irp) {
         if (instance != null)
             throw new InvalidMultipleInstantiation();
 
-        instance = new Transmit(renderer, irp, namedRemotes);
+        instance = new Transmit(renderer, irp);
         return instance;
     }
 
@@ -92,13 +92,13 @@ public class Transmit extends Module {
 
     private final Renderer renderer;
     private final Irp irp;
-    private final NamedRemotes namedRemotes;
+    //private final NamedRemotes namedRemotes;
 
-    private Transmit(Renderer renderer, Irp irp, NamedRemotes namedRemotes) {
+    private Transmit(Renderer renderer, Irp irp) {
         super();
         this.renderer = renderer;
         this.irp = irp;
-        this.namedRemotes = namedRemotes;
+        //this.namedRemotes = namedRemotes;
 
         addCommand(new TransmitCommand());
         addCommand(new SendCommand());
@@ -126,9 +126,9 @@ public class Transmit extends Module {
     }
 
     public boolean transmitNamedCommand(int count, String remote, String command) throws HarcHardwareException, IrpMasterException, NoSuchRemoteException, NoSuchCommandException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousRemoteException, AmbigousCommandException, AmbigousHardwareException {
-        if (namedRemotes == null)
+        if (NamedRemotes.getInstance() == null)
             throw new NoSuchModuleException("NamedRemotes");
-        IrSignal irSignal = namedRemotes.render(remote, command);
+        IrSignal irSignal = NamedRemotes.getInstance().render(remote, command);
         return transmit(count, irSignal);
     }
 
@@ -179,7 +179,7 @@ public class Transmit extends Module {
                 addCommand(new TransmitIrpCommand());
             if (renderer != null)
                 addCommand(new TransmitProtocolParameterCommand());
-            if (namedRemotes != null)
+            if (NamedRemotes.getInstance() != null)
                 addCommand(new TransmitNameCommand());
         }
 

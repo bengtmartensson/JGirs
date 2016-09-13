@@ -21,14 +21,10 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,134 +33,34 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.IrpMasterException;
-import org.harctoolbox.IrpMaster.IrpUtils;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ICommandLineDevice;
-import org.harctoolbox.readlinecommander.ReadlineCommander;
-import org.xml.sax.SAXException;
+import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
 
 public final class Engine implements ICommandLineDevice, Closeable {
     private static volatile Engine instance = null;
     private static final Logger logger = Logger.getLogger(Engine.class.getName());
 
-    private static JCommander argumentParser;
-    private static final CommandLineArgs commandLineArgs = new CommandLineArgs();
+//    private static JCommander argumentParser;
+//    private static final CommandLineArgs commandLineArgs = new CommandLineArgs();
 
     public  static final String OK = "OK";
     public  static final String ERROR = "ERROR";
-    private static ConfigFile config;
+//    private static ConfigFile config;
 
     public static Engine getInstance() {
         return instance;
     }
 
-    public static Engine newEngine() throws FileNotFoundException, IncompatibleArgumentException {
+    public static Engine newEngine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
         if (instance != null)
             throw new InvalidMultipleInstantiation();
-        instance = new Engine();
+        instance = new Engine(config);
         return instance;
     }
 
-    private static void usage(int exitcode) {
-        StringBuilder str = new StringBuilder(128);
-        argumentParser.usage(str);
-
-        (exitcode == IrpUtils.exitSuccess ? System.out : System.err).println(str);
-        doExit(exitcode); // placifying FindBugs...
-    }
-
-    private static void doExit(int exitcode) {
-        System.exit(exitcode);
-    }
-
-    /**
-     * @param args the command line arguments.
-     */
-    public static void main(String[] args) {
-        argumentParser = new JCommander(commandLineArgs);
-        argumentParser.setProgramName(Version.appName);
-
-        try {
-            argumentParser.parse(args);
-        } catch (ParameterException ex) {
-            System.err.println(ex.getMessage());
-            usage(IrpUtils.exitUsageError);
-        }
-
-        if (commandLineArgs.helpRequested)
-            usage(IrpUtils.exitSuccess);
-
-        if (commandLineArgs.versionRequested) {
-            System.out.println(Version.versionString);
-            doExit(IrpUtils.exitSuccess);
-        }
-
-        try {
-            config = new ConfigFile(commandLineArgs.configFile); // ok also if arg == null
-        } catch (JGirsException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ParseException | IrpMasterException | IOException ex) {
-            //logger.log(Level.SEVERE, null, ex);
-            logger.log(Level.SEVERE, "Cannot read config file {0}", commandLineArgs.configFile);
-            System.exit(IrpUtils.exitConfigReadError);
-            return; // placifying the compiler...
-        }
-
-        // Some stuff from the command line overrides the data in the configuration file:
-        if (commandLineArgs.irpMasterIni != null) {
-            config.setStringOption(Parameters.IRPPROTOCOLSINI, commandLineArgs.irpMasterIni);
-        }
-
-        if (commandLineArgs.verbosity)
-            config.setBooleanOption(Parameters.VERBOSITY, commandLineArgs.verbosity);
-
-        if (commandLineArgs.transmitDevice != null)
-            config.setStringOption(Parameters.TRANSMITDEVICE, commandLineArgs.transmitDevice);
-        if (commandLineArgs.captureDevice != null)
-            config.setStringOption(Parameters.CAPTUREDEVICE, commandLineArgs.captureDevice);
-        if (commandLineArgs.receiveDevice != null)
-            config.setStringOption(Parameters.RECEIVEDEVICE, commandLineArgs.receiveDevice);
-
-        // Additional Girr files from the command line
-        try {
-            config.addGirr(commandLineArgs.girr);
-        } catch (ParseException | IOException | SAXException | IrpMasterException ex) {
-            logger.log(Level.SEVERE, null, ex);
-            System.exit(IrpUtils.exitFatalProgramFailure);
-        }
-
-        final int returnLines = -1; //commandLineArgs.oneLine ? 1 : commandLineArgs.twoLines ? 2 : 0;
-        try (Engine engine = newEngine()) {
-            if (commandLineArgs.parameters.isEmpty()) {
-                engine.greet();
-                if (commandLineArgs.immediateInit)
-                    engine.openAll();
-                String historyFile = commandLineArgs.historyfile != null
-                        ? commandLineArgs.historyfile
-                        : ReadlineCommander.defaultHistoryFile(commandLineArgs.appName);
-
-                ReadlineCommander.init(commandLineArgs.initfile, historyFile,
-                        commandLineArgs.prompt, commandLineArgs.appName);
-                ReadlineCommander.setGoodbyeWord(Base.GOODBYE);
-
-                ReadlineCommander.readEvalPrint(engine, commandLineArgs.waitForAnswer, returnLines);
-                ReadlineCommander.close();
-            } else {
-                // shoot one command
-                for (int i = 0; i < commandLineArgs.count; i++) {
-                    String commandLine = String.join(" ", commandLineArgs.parameters);
-                    List<String> result = engine.eval(commandLine);
-                    System.out.println(result == null ? ERROR
-                            : result.isEmpty() ? OK
-                                    : String.join(System.getProperty("line.separator"), result));
-                }
-            }
-        } catch (IOException | IrpMasterException ex) {
-            logger.log(Level.SEVERE, null, ex);
-            System.exit(IrpUtils.exitFatalProgramFailure);
-        }
-    }
-
     private final HashMap<String, Module> modules;
-    private NamedRemotes namedRemotes = null;
+    //private NamedRemotes namedRemotes = null;
     private Renderer renderer = null;
     private Irp irp = null;
 
@@ -175,7 +71,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
     private final List<String> outBuffer;
     private final HashMap<String, GirsHardware> irHardware;
 
-    public Engine() throws FileNotFoundException, IncompatibleArgumentException {
+    public Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
         this.outBuffer = new ArrayList<>(8);
         this.irHardware = new HashMap<>(config.getIrHardware().size());
         config.getIrHardware().stream().forEach((GirsHardware hw) -> {
@@ -202,15 +98,13 @@ public final class Engine implements ICommandLineDevice, Closeable {
             logger.log(Level.WARNING, Parameters.IRPPROTOCOLSINI + " not defined; rendering will not be available");
         }
 
-        if (config.getRemoteCommandsDataBase() != null) {
-            namedRemotes = NamedRemotes.newNamedRemotes(config.getRemoteCommandsDataBase());
-            registerModule(namedRemotes);
-        }
+        if (config.getRemoteCommandsDataBase() != null)
+            registerModule(NamedRemotes.newNamedRemotes(config.getRemoteCommandsDataBase()));
 
         irp = new Irp();
         registerModule(irp);
 
-        registerModule(Transmit.newTransmit(renderer, irp, namedRemotes));
+        registerModule(Transmit.newTransmit(renderer, irp));
         registerModule(Transmitters.newTransmittersModule());
         registerModule(Capture.newCapture());
         registerModule(Receive.newReceive());
@@ -308,7 +202,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     @Override
     public void setVerbosity(boolean verbosity) {
-        Parameters.getInstance().setBoolean(Parameters.VERBOSITY, verbosity);
+        Parameters.getInstance().setBoolean(VERBOSITY, verbosity);
     }
 
     // NOTE: This software does not support "debug" as in harchardware.
@@ -328,11 +222,15 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return true; //???
     }
 
+    public boolean isQuitRequested() {
+        return Base.getInstance().isQuitRequested();
+    }
+
     @Override
     public void open() throws HarcHardwareException, IOException {
     }
 
-    private void openAll() {
+    void openAll() {
         irHardware.values().stream().forEach((hardware) -> {
             try {
                 hardware.getHardware().setVerbosity(isVerbosity());
@@ -370,7 +268,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return CommandExecuter.getMainExecutor().getSubCommandNames(command);
     }
 
-    private List<String> eval(String command) {
+    List<String> eval(String command) {
         if (command.trim().isEmpty())
             return Utils.singletonArrayList(OK);
 
@@ -405,71 +303,15 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     public boolean isVerbosity() {
         try {
-            return Parameters.getInstance().getBoolean(Parameters.VERBOSITY);
+            return Parameters.getInstance().getBoolean(VERBOSITY);
         } catch (NoSuchParameterException ex) {
             // Not really a disaster
-            logger.warning(Parameters.VERBOSITY + " is not defined");
+            logger.warning(VERBOSITY + " is not defined");
             return false;
         }
     }
 
-    private final static class CommandLineArgs {
-
-        @Parameter(names = {"--appname"}, description = "Appname for finding resourses")
-        private String appName = "JGirs";
-
-        @Parameter(names = {"-c", "--config"}, description = "Pathname to config file")
-        private String configFile = null;
-
-        @Parameter(names = {"-C", "--capturedevice"}, description = "Device to use as default capturing device")
-        private String captureDevice = null;
-
-        //@Parameter(names = {"--charset"}, description = "Charset for inputs")
-        //private String charSet = "US-ASCII";
-
-        @Parameter(names = {"-g", "--girr"}, variableArity = true, description = "Additional remotes in Girr files")
-        private List<String> girr = new ArrayList<>(8);
-
-        @Parameter(names = {"--help", "-?"}, description = "Display help message")
-        private boolean helpRequested = false;
-
-        @Parameter(names = {"--historyfile"}, description = "History file for readline")
-        private String historyfile = null;//System.getProperty("user.home") + File.separator + ".jgirs.history";
-
-        @Parameter(names = {"--immediate-init"}, description = "Open hardware immediately at start.")
-        private boolean immediateInit = false;
-
-        @Parameter(names = {"-i", "--irpprotocolsini"}, description = "IrpMaster protocol file")
-        private String irpMasterIni = null;//"IrpProtocols.ini";
-
-        @Parameter(names = {"--initfile"}, description = "Initfile for readline")
-        private String initfile = null;//System.getProperty("user.home") + File.separator + ".jgirs";
-
-        @Parameter(names = {      "--prompt"}, description = "Interactive prompt for readline")
-        private String prompt = "JGirs> ";
-
-        @Parameter(names = {"-r", "--readline"}, description = "Use the readline library, if available")
-        private boolean readLine;
-
-        @Parameter(names = {"-R", "--receivedevice"}, description = "Device to use as default receiving device")
-        private String receiveDevice = null;
-
-        @Parameter(names = {"-T", "--transmitdevice"}, description = "Device to use as default transmitting device")
-        private String transmitDevice = null;
-
-        @Parameter(names = {"-V", "--version"}, description = "Display version information")
-        private boolean versionRequested;
-
-        @Parameter(names = {"-v", "--verbosity"}, description = "Have some commands executed verbosely")
-        private boolean verbosity;
-
-        @Parameter(names = {"-w", "--waitforanswer"}, description = "Microseconds to wait for answer")
-        private int waitForAnswer;
-
-        @Parameter(names = {"-#", "--count"}, description = "Number of times to send sequence")
-        private int count = 1;
-
-        @Parameter(description = "[parameters]")
-        private ArrayList<String> parameters = new ArrayList<>(8);
+    void init() {
+        Base.getInstance().setQuitRequested(false);
     }
 }
