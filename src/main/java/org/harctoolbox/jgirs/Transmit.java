@@ -19,8 +19,8 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.harctoolbox.IrpMaster.DomainViolationException;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.InvalidRepeatException;
@@ -137,7 +137,7 @@ public class Transmit extends Module {
         return transmit(count, irSignal);
     }
 
-    public boolean transmitIrp(int count, String irpCode, HashMap<String, Long> parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException {
+    public boolean transmitIrp(int count, String irpCode, Map<String, Long> parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException, HarcHardwareException, NoSuchTransmitterException, IrpMasterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException {
         if (irp == null)
             throw new NoSuchModuleException("Irp");
         IrSignal irSignal = Irp.render(irpCode, parameters);
@@ -254,7 +254,7 @@ public class Transmit extends Module {
                 int index = 0;
                 int count = intParse(args[index++]);
                 String irpCode = args[index++];
-                HashMap<String, Long> parameters = Protocol.parseParams(args, index);
+                Map<String, Long> parameters = Protocol.parseParams(args, index);
                 return transmitIrp(count, irpCode, parameters) ? new ArrayList<>(0) : null;
             }
         }

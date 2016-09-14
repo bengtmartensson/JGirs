@@ -18,8 +18,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.harctoolbox.IrpMaster.DomainViolationException;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.InvalidRepeatException;
@@ -49,11 +49,11 @@ public class Renderer extends Module {
     public IrSignal render(String[] args, int skip) throws UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException {
         int index = skip;
         String protocol = args[index++];
-        HashMap<String, Long> params = Protocol.parseParams(args, index);
+        Map<String, Long> params = Protocol.parseParams(args, index);
         return render(protocol, params);
     }
 
-    public IrSignal render(String protocol, HashMap<String, Long> params)
+    public IrSignal render(String protocol, Map<String, Long> params)
             throws UnassignedException, ParseException, UnknownProtocolException, DomainViolationException, IncompatibleArgumentException, InvalidRepeatException {
         return irpMaster.newProtocol(protocol).renderIrSignal(params);
     }

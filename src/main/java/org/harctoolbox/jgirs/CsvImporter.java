@@ -21,6 +21,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
 import org.harctoolbox.girr.Remote;
@@ -36,7 +38,7 @@ public class CsvImporter {
     private static final String S = "S";
     private static final String F = "F";
 
-    private static void getParam(HashMap<String, Long> parameters, String parameterName, int column, String[] chunks) {
+    private static void getParam(Map<String, Long> parameters, String parameterName, int column, String[] chunks) {
         if (column <= 0)
             return;
 
@@ -45,7 +47,7 @@ public class CsvImporter {
             parameters.put(parameterName, value);
     }
 
-    private static String dummyName(HashMap<String, Long> parameters) {
+    private static String dummyName(Map<String, Long> parameters) {
         return D + parameters.get(D)
                 + S + parameters.get(S)
                 + F + parameters.get(F);
@@ -76,7 +78,7 @@ public class CsvImporter {
     private Command parseLine(String line) throws IrpMasterException {
         String[] chunks = line.split(separator);
         String protocol = protocolColumn > 0 ? chunks[protocolColumn-1] : NOPROTOCOL;
-        HashMap<String, Long> parameters = new HashMap<>(3);
+        Map<String, Long> parameters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         getParam(parameters, D, dColumn, chunks);
         getParam(parameters, S, sColumn, chunks);
         getParam(parameters, F, fColumn, chunks);
@@ -85,7 +87,7 @@ public class CsvImporter {
     }
 
     public Remote parseFile(String remoteName, Reader reader) throws IOException  {
-        HashMap<String, Command> commands = new HashMap<>(16);
+        Map<String, Command> commands = new HashMap<>(16);
         try (BufferedReader in = new BufferedReader(reader)) {
 
             while (true) {

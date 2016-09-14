@@ -53,7 +53,7 @@ public class Parameters extends Module {
         return instance;
     }
 
-    private final HashMap<String, Parameter> parameterMap;
+    private final Map<String, Parameter> parameterMap;
 
     private Parameters() {
         super();
@@ -69,7 +69,7 @@ public class Parameters extends Module {
         parameterMap.put(parameter.getName(), parameter);
     }
 
-    public void addAll(HashMap<String, Parameter> newParameters) {
+    public void addAll(Map<String, Parameter> newParameters) {
         parameterMap.putAll(newParameters);
     }
 

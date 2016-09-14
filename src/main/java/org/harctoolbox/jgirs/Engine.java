@@ -26,9 +26,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
@@ -38,15 +39,16 @@ import org.harctoolbox.harchardware.ICommandLineDevice;
 import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
 
 public final class Engine implements ICommandLineDevice, Closeable {
-    private static volatile Engine instance = null;
-    private static final Logger logger = Logger.getLogger(Engine.class.getName());
+    // NOTE: "verbosity" is a silly name for a boolean property, but let's
+    // keep it for compatibility with HardHardware.
+    //private boolean verbosity;
 
-//    private static JCommander argumentParser;
-//    private static final CommandLineArgs commandLineArgs = new CommandLineArgs();
+    private static volatile Engine instance = null;
+
+    private static final Logger logger = Logger.getLogger(Engine.class.getName());
 
     public  static final String OK = "OK";
     public  static final String ERROR = "ERROR";
-//    private static ConfigFile config;
 
     public static Engine getInstance() {
         return instance;
@@ -59,26 +61,22 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return instance;
     }
 
-    private final HashMap<String, Module> modules;
-    //private NamedRemotes namedRemotes = null;
+    private final TreeMap<String, GirsHardware> irHardware;
+    private final TreeMap<String, Module> modules;
+
     private Renderer renderer = null;
     private Irp irp = null;
 
-    // NOTE: "verbosity" is a silly name for a boolean property, but let's
-    // keep it for compatibility with hardhardware.
-    //private boolean verbosity;
-
     private final List<String> outBuffer;
-    private final HashMap<String, GirsHardware> irHardware;
 
     public Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
-        this.outBuffer = new ArrayList<>(8);
-        this.irHardware = new HashMap<>(config.getIrHardware().size());
+        outBuffer = new ArrayList<>(8);
+        irHardware = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         config.getIrHardware().stream().forEach((GirsHardware hw) -> {
             irHardware.put(hw.getName(), hw);
         });
 
-        modules = new LinkedHashMap<>(16);
+        modules = new TreeMap<>();
 
         // Set up the special modules
         registerModule(Parameters.newParameterModule());
@@ -130,7 +128,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
     }
 
     public void greet() {
-        outBuffer.add(Version.versionString);
+        Base.getInstance().version();//outBuffer.add(Version.versionString);
     }
 
     public GirsHardware getHardware(String name) throws NoSuchHardwareException, AmbigousHardwareException {
@@ -165,8 +163,8 @@ public final class Engine implements ICommandLineDevice, Closeable {
         modules.put(module.getName(), module);
     }
 
-    public List<String> getModuleNames() {
-        return Utils.toSortedList(modules.keySet());
+    public Set<String> getModuleNames() {
+        return modules.keySet();
     }
 
     @Override
@@ -207,6 +205,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     // NOTE: This software does not support "debug" as in harchardware.
     // Logging (or the interactive debugger) is to be used instead.
+    // Or the debugger...
     @Override
     public void setDebug(int debug) {
         throw new UnsupportedOperationException();
@@ -252,7 +251,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         });
     }
 
-    public List<String> getCommandNames() {
+    public Set<String> getCommandNames() {
         return CommandExecuter.getMainExecutor().getCommandNames();
     }
 
@@ -264,7 +263,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return module.getCommandNames();
     }
 
-    public List<String> getSubCommandNames(String command) {
+    public Collection<String> getSubCommandNames(String command) {
         return CommandExecuter.getMainExecutor().getSubCommandNames(command);
     }
 
@@ -280,7 +279,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
                 if (tokens[i].equals(";")) {
                     String[] args = new String[i - beg];
                     System.arraycopy(tokens, beg, args, 0, i - beg);
-                    List<String> list = CommandExecuter.getMainExecutor().exec(args);
+                    Collection<String> list = CommandExecuter.getMainExecutor().exec(args);
                     if (list == null)
                         return null;
                     out.addAll(list);
@@ -290,7 +289,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
             if (beg < tokens.length) {
                 String[] args = new String[tokens.length - beg];
                 System.arraycopy(tokens, beg, args, 0, tokens.length - beg);
-                List<String> list = CommandExecuter.getMainExecutor().exec(args);
+                Collection<String> list = CommandExecuter.getMainExecutor().exec(args);
                 if (list == null)
                         return null;
                 out.addAll(list);
@@ -311,7 +310,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
         }
     }
 
-    void init() {
+    public synchronized void init() {
         Base.getInstance().setQuitRequested(false);
     }
 }

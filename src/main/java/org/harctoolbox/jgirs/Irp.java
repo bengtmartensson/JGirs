@@ -17,7 +17,7 @@ this program. If not, see http://www.gnu.org/licenses/.
 
 package org.harctoolbox.jgirs;
 
-import java.util.HashMap;
+import java.util.Map;
 import org.harctoolbox.IrpMaster.DomainViolationException;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.InvalidRepeatException;
@@ -31,12 +31,12 @@ import org.harctoolbox.IrpMaster.UnassignedException;
  */
 public class Irp extends Module {
 
-    public static IrSignal render(String protocolName, HashMap<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
+    public static IrSignal render(String protocolName, Map<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
         Protocol protocol = new Protocol("dummy", protocolName, null);
         IrSignal irSignal = protocol.renderIrSignal(parameters);
         return irSignal;
     }
-    
+
     public Irp() {
         super();
     }

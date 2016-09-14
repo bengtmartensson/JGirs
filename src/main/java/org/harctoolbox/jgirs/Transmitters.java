@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.ITransmitter;
 import org.harctoolbox.harchardware.ir.Transmitter;
@@ -66,7 +67,7 @@ public class Transmitters extends Module {
         return instance;
     }
 
-    private final HashMap<String, Transmitter>transmitterMap;
+    private final Map<String, Transmitter>transmitterMap;
 
     private Transmitters() {
         super();

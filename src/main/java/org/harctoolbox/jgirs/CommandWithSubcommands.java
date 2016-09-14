@@ -19,7 +19,6 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -44,11 +43,11 @@ public abstract class CommandWithSubcommands {
         return commandExecuter.getCommands();
     }
 
-    public List<String> getSubCommandNames() {
+    public Collection<String> getSubCommandNames() {
         return commandExecuter.getCommandNames();
     }
 
-    public List<String> exec(String[] args) throws IOException, HarcHardwareException, IrpMasterException, CommandException, AmbigousCommandException, AmbigousHardwareException {
+    public Collection<String> exec(String[] args) throws IOException, HarcHardwareException, IrpMasterException, CommandException, AmbigousCommandException, AmbigousHardwareException {
         if (args == null || args.length == 0)
             throw new CommandSyntaxException(getName(), "subcommand missing");
         return commandExecuter.exec(args);

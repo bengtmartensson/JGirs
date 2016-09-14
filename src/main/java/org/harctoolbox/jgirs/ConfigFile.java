@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.xml.validation.Schema;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
@@ -93,10 +94,10 @@ public class ConfigFile {
         return csvImporter.parseRemoteSet(name, url.toString(), reader);
     }
 
-    private final HashMap<String, GirsHardware> irHardware;
+    private final Map<String, GirsHardware> irHardware;
     private RemoteCommandDataBase remoteCommandsDataBase;
     private final List<Module.ModulePars> moduleList;
-    private final HashMap<String, Parameter> optionsList;
+    private final Map<String, Parameter> optionsList;
 
     public ConfigFile() {
         remoteCommandsDataBase = new RemoteCommandDataBase(true);

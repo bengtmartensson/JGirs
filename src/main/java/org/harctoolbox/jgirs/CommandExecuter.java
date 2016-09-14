@@ -19,8 +19,10 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 
@@ -35,17 +37,17 @@ public class CommandExecuter {
         return mainExecuter;
     }
 
-    private final HashMap<String, ICommand> commandMap;
+    private final Map<String, ICommand> commandMap;
 
     public CommandExecuter() {
-        commandMap = new HashMap<>(8);
+        commandMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     }
 
-    public List<String> getCommandNames() {
-        return Utils.toSortedList(commandMap.keySet());
+    public Set<String> getCommandNames() {
+        return commandMap.keySet();
     }
 
-    public List<String> getSubCommandNames(String command) {
+    public Collection<String> getSubCommandNames(String command) {
         ICommand cmd = commandMap.get(command);
         if (!(cmd instanceof CommandWithSubcommands))
             return null;
@@ -56,7 +58,7 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public List<String> exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException, AmbigousHardwareException {
+    public Collection<String> exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException, AmbigousHardwareException {
         String commandName = args[0];
         List<String> candidates = Utils.findStringsWithPrefix(commandMap.keySet(), commandName);
         if (candidates.isEmpty())

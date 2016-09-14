@@ -18,8 +18,8 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.IHarcHardware;
 
@@ -40,7 +40,7 @@ public class Base extends Module {
         return instance;
     }
 
-    public static List<String> commands() {
+    public static Set<String> commands() {
         return CommandExecuter.getMainExecutor().getCommandNames();
     }
 
@@ -111,10 +111,9 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
+        public Set<String> exec(String[] args) throws NoSuchParameterException, CommandSyntaxException {
             checkNoArgs(MODULES, args.length, 0);
-            List<String> list = new ArrayList<>(Engine.getInstance().getModuleNames());
-            return list;
+            return Engine.getInstance().getModuleNames();
         }
     }
 
@@ -128,7 +127,7 @@ public class Base extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws CommandSyntaxException, NoSuchParameterException {
+        public Set<String> exec(String[] args) throws CommandSyntaxException, NoSuchParameterException {
             checkNoArgs(COMMANDS, args.length, 0);
             return commands();
         }
