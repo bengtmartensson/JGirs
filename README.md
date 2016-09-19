@@ -1,17 +1,19 @@
 # JGirs
-An IR server, compatible with [Girs](http://www.harctoolbox.org/Girs.html).
-It can be considered as "IrScrutinizer as server", as it builds on the same
+This is an IR server, compatible with [Girs](http://www.harctoolbox.org/Girs.html).
+It can be considered as _IrScrutinizer as server_, as it builds on the same
 components as IrScrutinizer: the renderer IrpMaster,
 the hardware structures of HarcHardware, the Lirc subset Jirc, the Girr support.
 
 JGirs implements the "server" in my [architecture](http://harctoolbox.org/architecture.html).
 (With an presently not yet implemented option, it may be possible for an instance
-instead to fulfil the "listener" role.
+instead to fulfill the "listener" role.
 
 ## Demarcation
 The program  should be kept fairly "dumb", basically executing simple commands.
 It should not be extended with, e.g. embedded script language, macros or the such.
-The usage of IrScrutinizer and JGirs should not overlap.
+(This is instead the domain of a home automation server.)
+
+Also, the usage of IrScrutinizer and JGirs should not overlap.
 
 ## The configuration file
 At start, the program reads a configuration file. This is an XML file consisting
@@ -20,14 +22,14 @@ An XML scheme is planned, but at the time of this writing not yet implemented.
 
 ### Varibles
 A variable in JGirs has as `type` either `string` (default), `int`, or `boolean`. It is
-declared either in  the Java code or in the configuration file. The value can be changed interactively in the server.
+declared either in the Java code or in the configuration file. The value can be changed interactively in the server.
 Some of the functions use the values of these variables.
 
-## Loading of jni native libraries
-It is possible from the configuration file to load jni libraries, that the program or the dynamically
+## Loading of JNI native libraries
+It is possible from the configuration file to load JNI libraries, that the program or the dynamically
 loaded modules or hardware drivers may need. This is done with the `jni-lib` element, allowed as immediate child
 of the root element, and as immediate child of the `module` and `hardware-item` elements. The `jni-lib` must have
-either the `libpath` or the `library` attribute set: the first one contains the complete path to the
+either the `libpath` or the `library` attribute (but not both) set: the first one contains the complete path to the
 jni lib (including both absolute directory path and file extension)
 (to be loaded with [load](https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#load-java.lang.String-),
 while the second one contains the bare library
@@ -82,7 +84,7 @@ It is possible to give several commands by separating them with a semicolon (";"
 Note that the latter must likely be escaped from the shell.
 
 ### Interactive (Readline) mode
-If the program is started without arguments, it goes into interactive mode, reading one line of command, evalualing it,
+If the program is started without arguments, it goes into interactive mode, reading one line of command, evaluating it,
 and printing the result to standard out ("read-eval-print"). This continues until the user issues the `quit` command,
 or enters the end-of-line (Normally Ctrl-D on Unix/Linux, Ctrl-Z on Msdos/Windows).
 If [Java Readline](https://github.com/bengtmartensson/java-readline)
@@ -115,6 +117,10 @@ Without arguments, captures am IR signal using the current default device contai
 in the variable `captureDevice`. With an argument, tries to use that as the
 name of the capturing hardware.
 
+The signal is output in raw format, consisting of a frequency measurement and a number
+of durations in micro seconds. There is no possibility for example to decode the signal.
+For this, instead the `receive` format should be used, or alternatively, IrScrutinizer should be
+used. 
 
 ### commands
 Prints a list of the available commands.
@@ -145,7 +151,15 @@ Ends the session.
 ### receive
 Without arguments, captures am IR signal using the current default device contained
 in the variable `captureDevice`. With an argument, tries to use that as the
-name of the capturing hardware. The variabke
+name of the capturing hardware. The variable `receiveFormat` determines how the received
+signals are presented:
+
+* `raw`:  the raw signal, i.e. its durations in micro seconds, are output.
+* `ccf`: the signal is output in the Pronto Hex format.
+* `protocolparameter`: it is attempted to decode the signal as a known protocol with its parameters.
+Presently, decodeir is invoked for this.
+*  `namedcommand`: it is attempted to identify the received signal as one already present
+in the named command data base.
 
 ###  remotes
 Without arguments, lists the names of the known remotes. With one argument, lists the commands
