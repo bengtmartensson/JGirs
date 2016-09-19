@@ -35,6 +35,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,8 +144,8 @@ public final class JGirs {
     private static void readlineWork(Engine engine, CommandLineArgs commandLineArgs) throws IOException {
         final int returnLines = -1;
         engine.greet();
-        if (commandLineArgs.immediateInit)
-            engine.openAll();
+//        if (commandLineArgs.immediateInit)
+//            engine.openAll();
         String historyFile = commandLineArgs.historyfile != null
                 ? commandLineArgs.historyfile
                 : ReadlineCommander.defaultHistoryFile(commandLineArgs.appName);
@@ -161,10 +162,17 @@ public final class JGirs {
         // shoot one command
         for (int i = 0; i < commandLineArgs.count; i++) {
             String commandLine = String.join(" ", commandLineArgs.parameters);
-            List<String> result = engine.eval(commandLine);
-            System.out.println(result == null ? ERROR
-                    : result.isEmpty() ? OK
-                            : String.join(System.getProperty("line.separator"), result));
+            List<String> result = engine.exec(commandLine);
+            if (result.isEmpty())
+                System.out.println(OK);
+            else {
+                try {
+                    String resultString = Utils.pack(result, Parameters.getInstance().getString("listSeparator"));
+                    System.out.println(resultString);
+                } catch (NoSuchParameterException ex) {
+                    throw new RuntimeException();
+                }
+            }
         }
     }
 
@@ -193,11 +201,20 @@ public final class JGirs {
                     logger.log(Level.INFO, "Connection forcably closed by client");
                     break;
                 }
-                List<String> out = engine.eval(line);
-                out.stream().forEach((str) -> {
-                    toClient.println(str);
-                });
+                Collection<String> out = engine.exec(line);
+                String resultString = packAnswer(out);
+                toClient.println(resultString);
             }
+        }
+    }
+
+    private static String packAnswer(Collection<String> list) {
+        try {
+            return list == null ? ERROR
+                    : list.isEmpty() ? OK
+                    : Utils.pack(list, Parameters.getInstance().getString("listSeparator"));
+        } catch (NoSuchParameterException ex) {
+            throw new RuntimeException();
         }
     }
 
@@ -230,8 +247,8 @@ public final class JGirs {
         @Parameter(names = {"--historyfile"}, description = "History file for readline")
         private String historyfile = null;//System.getProperty("user.home") + File.separator + ".jgirs.history";
 
-        @Parameter(names = {"--immediate-init"}, description = "Open hardware immediately at start.")
-        private boolean immediateInit = false;
+//        @Parameter(names = {"--immediate-init"}, description = "Open hardware immediately at start.")
+//        private boolean immediateInit = false;
 
         @Parameter(names = {"-i", "--irpprotocolsini"}, description = "IrpMaster protocol file")
         private String irpMasterIni = null;//"IrpProtocols.ini";
@@ -257,7 +274,7 @@ public final class JGirs {
         @Parameter(names = {"-T", "--transmitdevice"}, description = "Device to use as default transmitting device")
         private String transmitDevice = null;
 
-        @Parameter(names = {"--tcp"}, description = "IP name/address to listen for connections")
+        @Parameter(names = {"-t", "--tcp"}, description = "Run as TCP server, using address from --ip and port from --port")
         private boolean tcp = false;
 
         @Parameter(names = {"-V", "--version"}, description = "Display version information")

@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.StringJoiner;
 import javax.xml.validation.Schema;
 import org.harctoolbox.IrpMaster.XmlUtils;
 import org.w3c.dom.Document;
@@ -85,11 +86,15 @@ public class Utils {
         return sortedString(Arrays.asList(things));
     }
 
-    public static String[] tokenizer(String s) {
-        String[] toks = s.split("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+    public static String[] tokenizer(String s, String separator) {
+        String[] toks = s.split(separator + "(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
         for (int i = 0; i < toks.length; i++)
-            toks[i] = toks[i].replaceFirst("^\"", "").replaceFirst("\"$", "");
+            toks[i] = toks[i].replaceFirst("\"", "").replaceFirst("\"$", "").trim();
         return toks;
+    }
+
+    public static String[] tokenizer(String s) {
+        return tokenizer(s, "\\s+");
     }
 
     public static Document openXmlUrl(URL url, Schema schema, boolean isNamespaceAware, boolean isXIncludeAware) throws IOException, SAXException {
@@ -157,6 +162,14 @@ public class Utils {
         parameters.put("F", F);
         parameters.put("T", T);
         return parameters;
+    }
+
+    static String pack(Iterable<String> result, String separator) {
+        StringJoiner stringJoiner = new StringJoiner(separator);
+
+        for (String s : result)
+            stringJoiner.add(s.matches("\\s+") ? ("\"" + s + "\"") : s);
+        return stringJoiner.toString();
     }
 
     private Utils() {

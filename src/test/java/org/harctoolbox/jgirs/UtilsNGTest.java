@@ -48,4 +48,17 @@ public class UtilsNGTest {
         String[] result = Utils.tokenizer(s);
         assertEquals(result, expResult);
     }
+
+    /**
+     * Test of tokenizer method, of class Utils.
+     */
+    @Test
+    public void testTokenizer_String_String() {
+        System.out.println("tokenizer");
+        String s = "bla blurb; foo; bar; foobar; \"blarj ; blarr\"; birr";
+        String separator = ";";
+        String[] expResult = new String[] {"bla blurb", "foo", "bar", "foobar", "blarj ; blarr", "birr"};
+        String[] result = Utils.tokenizer(s, separator);
+        assertEquals(result, expResult);
+    }
 }

@@ -25,6 +25,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,20 +36,19 @@ import java.util.logging.Logger;
 import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
 import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
-import org.harctoolbox.harchardware.ICommandLineDevice;
+import org.harctoolbox.harchardware.ICommandExecutor;
 import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
+import org.xml.sax.SAXException;
 
-public final class Engine implements ICommandLineDevice, Closeable {
-    // NOTE: "verbosity" is a silly name for a boolean property, but let's
-    // keep it for compatibility with HardHardware.
-    //private boolean verbosity;
+public final class Engine implements ICommandExecutor, Closeable {
 
     private static volatile Engine instance = null;
 
     private static final Logger logger = Logger.getLogger(Engine.class.getName());
 
-    public  static final String OK = "OK";
-    public  static final String ERROR = "ERROR";
+    public static final String OK      = "OK";
+    public static final String ERROR   = "ERROR";
+    public static final String TIMEOUT = ".";
 
     public static Engine getInstance() {
         return instance;
@@ -61,6 +61,10 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return instance;
     }
 
+    public static Engine newEngine(String url) throws FileNotFoundException, IncompatibleArgumentException, SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, ConfigFile.NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException, ConfigFile.NonUniqueHardwareName {
+        return newEngine(new ConfigFile(url));
+    }
+
     private final TreeMap<String, GirsHardware> irHardware;
     private final TreeMap<String, Module> modules;
 
@@ -69,7 +73,7 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     private final List<String> outBuffer;
 
-    public Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
+    private Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
         outBuffer = new ArrayList<>(8);
         irHardware = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         config.getIrHardware().stream().forEach((GirsHardware hw) -> {
@@ -127,11 +131,11 @@ public final class Engine implements ICommandLineDevice, Closeable {
         });
     }
 
-    public void greet() {
-        Base.getInstance().version();//outBuffer.add(Version.versionString);
+    public String greet() {
+        return getVersion();
     }
 
-    public GirsHardware getHardware(String name) throws NoSuchHardwareException, AmbigousHardwareException {
+    public synchronized GirsHardware getHardware(String name) throws NoSuchHardwareException, AmbigousHardwareException {
         List<String> candidates = Utils.findStringsWithPrefix(irHardware.keySet(), name);
         if (candidates.isEmpty())
             throw new NoSuchHardwareException(name);
@@ -141,20 +145,16 @@ public final class Engine implements ICommandLineDevice, Closeable {
         return irHardware.get(candidates.get(0));
     }
 
-    public GirsHardware getTransmitHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
+    public synchronized GirsHardware getTransmitHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         return getHardware(Parameters.getInstance().getString(Parameters.TRANSMITDEVICE));
     }
 
-    public GirsHardware getCaptureHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
+    public synchronized GirsHardware getCaptureHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         return getHardware(Parameters.getInstance().getString(Parameters.CAPTUREDEVICE));
     }
 
-    public GirsHardware getReceiveHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
+    public synchronized GirsHardware getReceiveHardware() throws NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException {
         return getHardware(Parameters.getInstance().getString(Parameters.RECEIVEDEVICE));
-    }
-
-    @Override
-    public void flushInput() throws IOException {
     }
 
     private void registerModule(Module module) {
@@ -163,144 +163,23 @@ public final class Engine implements ICommandLineDevice, Closeable {
         modules.put(module.getName(), module);
     }
 
-    public Set<String> getModuleNames() {
+    public synchronized Set<String> getModuleNames() {
         return modules.keySet();
     }
 
     @Override
-    public synchronized void sendString(String cmd) throws IOException {
-        List<String> result = eval(cmd);
-        outBuffer.addAll(result);
-    }
-
-    @Override
-    public String readString() throws IOException {
-        return readString(false);
-    }
-
-    @Override
-    public synchronized String readString(boolean wait) throws IOException {
-        if (outBuffer.size() > 0) {
-            String line = outBuffer.get(0);
-            outBuffer.remove(0);
-            return line;
-        } else
-            return null;
-    }
-
-    @Override
-    public boolean ready() {
-        return outBuffer.size() > 0;
-    }
-
-    @Override
-    public String getVersion() {
+    public synchronized String getVersion() {
         return Version.versionString;
     }
 
+    // NOTE: "verbosity" is a silly name for a boolean property, but let's
+    // keep it for compatibility with HardHardware.
     @Override
-    public void setVerbosity(boolean verbosity) {
+    public synchronized void setVerbosity(boolean verbosity) {
         Parameters.getInstance().setBoolean(VERBOSITY, verbosity);
     }
 
-    // NOTE: This software does not support "debug" as in harchardware.
-    // Logging (or the interactive debugger) is to be used instead.
-    // Or the debugger...
-    @Override
-    public void setDebug(int debug) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setTimeout(int timeout) throws IOException {
-        // TODO
-    }
-
-    @Override
-    public boolean isValid() {
-        return true; //???
-    }
-
-    public boolean isQuitRequested() {
-        return Base.getInstance().isQuitRequested();
-    }
-
-    @Override
-    public void open() throws HarcHardwareException, IOException {
-    }
-
-    void openAll() {
-        irHardware.values().stream().forEach((hardware) -> {
-            try {
-                hardware.getHardware().setVerbosity(isVerbosity());
-                hardware.getHardware().open();
-            } catch (IOException | HarcHardwareException ex) {
-                logger.log(Level.WARNING, "Failed to open " + hardware.getName(), ex);
-            }
-        });
-    }
-
-    @Override
-    public void close() {
-        irHardware.values().stream().forEach((hardware) -> {
-            try {
-                hardware.getHardware().close();
-            } catch (IOException ex) {
-                logger.log(Level.WARNING, null, ex);
-            }
-        });
-    }
-
-    public Set<String> getCommandNames() {
-        return CommandExecuter.getMainExecutor().getCommandNames();
-    }
-
-    public List<String> getCommandNames(String moduleName) throws NoSuchModuleException {
-        Module module = modules.get(moduleName);
-        if (module == null)
-            throw new NoSuchModuleException(moduleName);
-
-        return module.getCommandNames();
-    }
-
-    public Collection<String> getSubCommandNames(String command) {
-        return CommandExecuter.getMainExecutor().getSubCommandNames(command);
-    }
-
-    List<String> eval(String command) {
-        if (command.trim().isEmpty())
-            return Utils.singletonArrayList(OK);
-
-        try {
-            String[] tokens = Utils.tokenizer(command.trim());
-            List<String> out = new ArrayList<>(8);
-            int beg = 0;
-            for (int i = 0; i < tokens.length; i++) {
-                if (tokens[i].equals(";")) {
-                    String[] args = new String[i - beg];
-                    System.arraycopy(tokens, beg, args, 0, i - beg);
-                    Collection<String> list = CommandExecuter.getMainExecutor().exec(args);
-                    if (list == null)
-                        return null;
-                    out.addAll(list);
-                    beg = i + 1;
-                }
-            }
-            if (beg < tokens.length) {
-                String[] args = new String[tokens.length - beg];
-                System.arraycopy(tokens, beg, args, 0, tokens.length - beg);
-                Collection<String> list = CommandExecuter.getMainExecutor().exec(args);
-                if (list == null)
-                        return null;
-                out.addAll(list);
-            }
-            return out;
-        } catch (JGirsException | IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
-            return Utils.singletonArrayList(ERROR + ": " + ex.toString());
-        }
-    }
-
-    public boolean isVerbosity() {
+    public synchronized boolean isVerbosity() {
         try {
             return Parameters.getInstance().getBoolean(VERBOSITY);
         } catch (NoSuchParameterException ex) {
@@ -312,5 +191,98 @@ public final class Engine implements ICommandLineDevice, Closeable {
 
     public synchronized void init() {
         Base.getInstance().setQuitRequested(false);
+    }
+
+    // NOTE: This class does not support "debug" as in harchardware.
+    // Logging (or the interactive debugger) is to be used instead.
+    // Or the debugger...
+    @Override
+    public void setDebug(int debug) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public synchronized void setTimeout(int timeout) throws IOException {
+        // TODO
+    }
+
+    @Override
+    public synchronized boolean isValid() {
+        return true; //???
+    }
+
+    public synchronized boolean isQuitRequested() {
+        return Base.getInstance().isQuitRequested();
+    }
+
+    @Override
+    public synchronized void open() throws HarcHardwareException, IOException {
+    }
+
+//    synchronized void openAll() {
+//        irHardware.values().stream().forEach((hardware) -> {
+//            try {
+//                hardware.getHardware().setVerbosity(isVerbosity());
+//                hardware.getHardware().open();
+//            } catch (IOException | HarcHardwareException ex) {
+//                logger.log(Level.WARNING, "Failed to open " + hardware.getName(), ex);
+//            }
+//        });
+//    }
+
+    @Override
+    public synchronized void close() {
+        irHardware.values().stream().forEach((hardware) -> {
+            try {
+                hardware.getHardware().close();
+            } catch (IOException ex) {
+                logger.log(Level.WARNING, null, ex);
+            }
+        });
+    }
+
+    public synchronized Set<String> getCommandNames() {
+        return CommandExecuter.getMainExecutor().getCommandNames();
+    }
+
+//    public List<String> getCommandNames(String moduleName) throws NoSuchModuleException {
+//        Module module = modules.get(moduleName);
+//        if (module == null)
+//            throw new NoSuchModuleException(moduleName);
+//
+//        return module.getCommandNames();
+//    }
+
+    public synchronized Collection<String> getSubCommandNames(String command) {
+        return CommandExecuter.getMainExecutor().getSubCommandNames(command);
+    }
+
+    @Override
+    public synchronized List<String> exec(String command) {
+        String[] semicolonSplit = Utils.tokenizer(command, ";");
+        List<String> result = new ArrayList<>(2*semicolonSplit.length);
+
+        for (String cmd : semicolonSplit) {
+            Collection<String> out = execAtomic(cmd);
+            result.addAll(out);
+        }
+        return result;
+    }
+
+    private synchronized Collection<String> execAtomic(String command) {
+        if (command.isEmpty())
+            return Utils.singletonArrayList(OK);
+
+        if (command.trim().isEmpty())
+            return Utils.singletonArrayList(OK);
+
+        try {
+            String[] tokens = Utils.tokenizer(command.trim());
+            Collection<String> list = CommandExecuter.getMainExecutor().exec(tokens);
+            return list;
+
+        } catch (JGirsException | IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
+            return Utils.singletonArrayList(ERROR + ": " + ex.toString());
+        }
     }
 }

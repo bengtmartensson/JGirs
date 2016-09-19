@@ -32,7 +32,6 @@ import org.harctoolbox.IrpMaster.Protocol;
 import org.harctoolbox.IrpMaster.UnassignedException;
 import org.harctoolbox.IrpMaster.UnknownProtocolException;
 import org.harctoolbox.harchardware.HarcHardwareException;
-import org.harctoolbox.harchardware.ir.IIrSenderStop;
 import org.harctoolbox.harchardware.ir.IRawIrSender;
 import org.harctoolbox.harchardware.ir.ITransmitter;
 import org.harctoolbox.harchardware.ir.NoSuchTransmitterException;
@@ -83,12 +82,13 @@ public class Transmit extends Module {
         return Transmitters.getInstance().getTransmitter(hardware);
     }
 
-    public static boolean stop() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
-        GirsHardware hardware = Engine.getInstance().getTransmitHardware();
-        initializeHardware(hardware, IIrSenderStop.class);
-        Transmitter transmitter = getTransmitter(hardware);
-        return ((IIrSenderStop) hardware.getHardware()).stopIr(transmitter);
-    }
+    // This command is not meaningful as long as the program is single threaded.
+//    public static boolean stop() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException {
+//        GirsHardware hardware = Engine.getInstance().getTransmitHardware();
+//        initializeHardware(hardware, IIrSenderStop.class);
+//        Transmitter transmitter = getTransmitter(hardware);
+//        return ((IIrSenderStop) hardware.getHardware()).stopIr(transmitter);
+//    }
 
     private final Renderer renderer;
     private final Irp irp;
@@ -102,7 +102,7 @@ public class Transmit extends Module {
 
         addCommand(new TransmitCommand());
         addCommand(new SendCommand());
-        addCommand(new StopCommand());
+//        addCommand(new StopCommand());
     }
 
 
@@ -153,21 +153,21 @@ public class Transmit extends Module {
     }
 
 
-    private static class StopCommand implements ICommand {
-
-        private static final String STOP = "stop";
-
-        @Override
-        public String getName() {
-            return STOP;
-        }
-
-        @Override
-        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
-            checkNoArgs(STOP, args.length, 3, Integer.MAX_VALUE);
-            return stop() ? new ArrayList<>(0) : null;
-        }
-    }
+//    private static class StopCommand implements ICommand {
+//
+//        private static final String STOP = "stop";
+//
+//        @Override
+//        public String getName() {
+//            return STOP;
+//        }
+//
+//        @Override
+//        public List<String> exec(String[] args) throws ExecutionException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, HarcHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
+//            checkNoArgs(STOP, args.length, 3, Integer.MAX_VALUE);
+//            return stop() ? new ArrayList<>(0) : null;
+//        }
+//    }
 
     private class TransmitCommand extends CommandWithSubcommands implements ICommand {
 

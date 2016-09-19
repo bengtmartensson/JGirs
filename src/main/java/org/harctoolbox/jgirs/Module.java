@@ -20,7 +20,6 @@ package org.harctoolbox.jgirs;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.IHarcHardware;
 import org.w3c.dom.Element;
@@ -65,9 +64,9 @@ public abstract class Module {
         Parameters.getInstance().add(parameter);
     }
 
-    List<String> getCommandNames() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+//    List<String> getCommandNames() {
+//        throw new UnsupportedOperationException("Not supported yet.");
+//    }
 
 
     public static class ModulePars {

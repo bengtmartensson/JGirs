@@ -23,6 +23,7 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.ModulatedIrSequence;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.ICapture;
+import static org.harctoolbox.jgirs.Engine.TIMEOUT;
 
 /**
  * Module for capturing raw signals.
@@ -88,9 +89,8 @@ public class Capture extends Module {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             checkNoArgs(ANALYZE, args.length, 0, 1);
             ModulatedIrSequence irSequence = args.length == 0 ? capture() : capture(Engine.getInstance().getHardware(args[0]));
-            if (irSequence == null)
-                return null;
-            String string = irSequence.toPrintString(alternatingSigns, noSigns, SEPARATOR);
+            String string = irSequence == null ? TIMEOUT
+                    : irSequence.toPrintString(alternatingSigns, noSigns, SEPARATOR, true);
             return Utils.singletonArrayList(string);
         }
     }

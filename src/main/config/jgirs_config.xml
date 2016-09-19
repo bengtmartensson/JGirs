@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Example configuration -->
-<jgirs version="0.0.0">
-    <jni-lib libpath="/local/lib64/libJavaReadline.so"/>
+<jgirs version="0.0.0"> <!-- version of the specification of this file format. -->
+   <jni-lib libpath="/usr/local/lib64/libJavaReadline.so"/>
     <options>
         <!-- Names are case sensitive. Some commands may compare or sort case insensitively -->
-        <option name="listSeparator">&#10;&#13;</option>
+        <!--option name="listSeparator">&#10;&#13;</option-->
+        <option name="listSeparator"> </option>
         <option name="irpProtocolsIni">/usr/local/share/irscrutinizer/IrpProtocols.ini</option>
         <option name="lircTcpListenAddress">0.0.0.0</option>
         <option name="lircTcpListenPort" type="int">8765</option>
@@ -24,7 +25,7 @@
         <option name="captureDevice">nano</option>
         <option name="receiveDevice">nano</option>
         <!--option name="captureBeginTimeout" type="int">5000</option>
-        <option name="captureEndingTimeout" type="int">200</option>
+        <option name="captureEndingTimeotu" type="int">200</option>
         <option name="captureMaxLength" type="int">400</option-->
         <!--option name="receiveBeginTimeout" type="int">5000</option>
         <option name="receiveEndingTimeout" type="int">30</option>
@@ -34,26 +35,28 @@
         <!--option name="SpaceBalls">May the schwarz be with you!</option-->
     </options>
 
-    <modules>
+    <!--modules>
         <module class="org.harctoolbox.jgirs.OpenClose"/>
         <module class="org.example.jgirs.Dummy">
             <arguments>
                 <argument type="String" description="dummy argument">Let's replace Lirc!</argument>
             </arguments>
         </module>
-    </modules>
+    </modules-->
 
     <named-remotes>
         <named-remote type="girr"  url="file:///home/bengt/harctoolbox/GirrLib/Girr/Yamaha/yamaha_rxv1400.girr"/>
         <named-remote              url="file:///home/bengt/harctoolbox/GirrLib/Girr/Coolstream/coolstream_neo.girr"/>
         <named-remote type="lircd" url="file:///home/bengt/lirc/lirc-remotes/remotes/yamaha/RX-V995.lircd.conf"/>
-        <named-remote type="csv"   url="file:///home/bengt/harctoolbox/irdb/codes/Philips/Unknown_32PFL5403D/0,-1.csv"
+        <!--named-remote type="csv"   url="file:///home/bengt/harctoolbox/irdb/codes/Philips/Unknown_32PFL5403D/0,-1.csv"
+                      name="Philips RC6-TV" commandname="1" protocol="2" D="3" S="4" F="5" separator=","/-->
+        <named-remote type="csv"   url="http://cdn.rawgit.com/probonopd/irdb/master/codes/Philips/Unknown_32PFL5403D/0,-1.csv"
                       name="Philips RC6-TV" commandname="1" protocol="2" D="3" S="4" F="5" separator=","/>
         <!--named-remote type="lircd" url="http://lirc.sourceforge.net/remotes/yamaha/RX-V995"/-->
     </named-remotes>
 
     <hardware>
-        <hardware-item name="myirtoy" displayname="IrToy" class="org.harctoolbox.harchardware.ir.IrToy">
+        <hardware-item name="irtoy" displayname="IrToy" class="org.harctoolbox.harchardware.ir.IrToy">
             <jni-lib libpath="/usr/lib64/rxtx/librxtxSerial.so"/>
             <arguments>
                 <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>

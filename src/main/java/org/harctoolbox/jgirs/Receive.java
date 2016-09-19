@@ -28,6 +28,7 @@ import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.IrpMaster.IrpUtils;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.IReceive;
+import static org.harctoolbox.jgirs.Engine.TIMEOUT;
 
 /**
  * This class implements the receiving commands.
@@ -115,7 +116,7 @@ public class Receive extends Module {
     public static List<String> format(IrSequence irSequence, ReceiveFormat receiveFormat)
             throws IncompatibleArgumentException, NoSuchParameterException {
         return
-                irSequence == null ? null
+                irSequence == null ? Utils.singletonArrayList(TIMEOUT)
                 : receiveFormat == ReceiveFormat.raw ? Utils.singletonArrayList(formatAsRaw(irSequence))
                 : receiveFormat == ReceiveFormat.ccf ? Utils.singletonArrayList(formatAsCcf(irSequence))
                 : receiveFormat == ReceiveFormat.protocolparameter ? formatAsDecode(irSequence)
