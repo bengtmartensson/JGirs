@@ -7,7 +7,7 @@
     <groupId>org.harctoolbox</groupId>
     <artifactId>JGirs</artifactId>
     <packaging>jar</packaging>
-    <version>0.1.0</version>
+    <version>0.1.1dev</version>
     <name>JGirs</name>
     <licenses>
         <license>
