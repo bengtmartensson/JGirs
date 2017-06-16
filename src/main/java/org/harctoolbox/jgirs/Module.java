@@ -44,7 +44,7 @@ public abstract class Module {
         IHarcHardware hardware = girsHardware.getHardware();
         if (!(requiredClass.isInstance(hardware)))
             throw new IncompatibleHardwareException(requiredClass.getSimpleName());
-        hardware.setVerbosity(Engine.getInstance().isVerbosity());
+        hardware.setVerbose(Engine.getInstance().isVerbosity());
         if (!hardware.isValid())
             hardware.open();
     }

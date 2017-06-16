@@ -129,7 +129,7 @@ public class ConfigFile {
             Element el = (Element) nodeList.item(i);
             loadJni(el);
             GirsHardware hw = new GirsHardware(el);
-            hw.getHardware().setVerbosity(((BooleanParameter) optionsList.get(VERBOSITY)).getValue());
+            hw.getHardware().setVerbose(((BooleanParameter) optionsList.get(VERBOSITY)).getValue());
             if (irHardware.containsKey(hw.getName()))
                 throw new NonUniqueHardwareName(hw.getName());
             irHardware.put(hw.getName(), hw);

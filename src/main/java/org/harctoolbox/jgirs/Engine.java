@@ -121,7 +121,7 @@ public final class Engine implements ICommandExecutor, Closeable {
 
         irHardware.values().forEach((GirsHardware ghw) -> {
             if (ghw.isImmediateOpen()) {
-                ghw.getHardware().setVerbosity(isVerbosity());
+                ghw.getHardware().setVerbose(isVerbosity());
                 try {
                     ghw.getHardware().open();
                 } catch (HarcHardwareException | IOException ex) {
@@ -175,7 +175,7 @@ public final class Engine implements ICommandExecutor, Closeable {
     // NOTE: "verbosity" is a silly name for a boolean property, but let's
     // keep it for compatibility with HardHardware.
     @Override
-    public synchronized void setVerbosity(boolean verbosity) {
+    public synchronized void setVerbose(boolean verbosity) {
         Parameters.getInstance().setBoolean(VERBOSITY, verbosity);
     }
 
