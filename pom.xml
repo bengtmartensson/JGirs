@@ -75,25 +75,10 @@
                                 </fileMapper>
                             </fileMappers>
                         </transformationSet>
-                        <!--transformationSet>
-                            <dir>src/main/xdocs</dir>
-                            <outputDir>
-                                ${project.build.directory}/generated-documents
-                            </outputDir>
-                            <includes>
-                                <include>Girr.xml</include>
-                            </includes>
-                            <stylesheet>../tools/xdoc2html.xsl</stylesheet>
-                            <fileMappers>
-                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
-                                    <targetExtension>.html</targetExtension>
-                                </fileMapper>
-                            </fileMappers>
-                        </transformationSet-->
                     </transformationSets>
-                    <catalogs>
+                    <!--catalogs>
                         <catalog>../harctoolboxbundle/schemas/catalog.xml</catalog>
-                    </catalogs>
+                    </catalogs-->
                 </configuration>
 
                 <!-- Use Saxon for xslt 2 -->
@@ -121,6 +106,7 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <descriptors>
+                        <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
                         <descriptor>src/assembly/target.xml</descriptor>
                     </descriptors>
                 </configuration>
