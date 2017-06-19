@@ -1,4 +1,4 @@
-# JGirs
+# JGirs [![Build Status](https://travis-ci.org/bengtmartensson/JGirs.svg?branch=master)](https://travis-ci.org/bengtmartensson/JGirs)
 This is an IR server, compatible with [Girs](http://www.harctoolbox.org/Girs.html).
 It can be considered as _IrScrutinizer as server_, as it builds on the same
 components as IrScrutinizer: the renderer IrpMaster,
@@ -120,7 +120,7 @@ name of the capturing hardware.
 The signal is output in raw format, consisting of a frequency measurement and a number
 of durations in micro seconds. There is no possibility for example to decode the signal.
 For this, instead the `receive` format should be used, or alternatively, IrScrutinizer should be
-used. 
+used.
 
 ### commands
 Prints a list of the available commands.

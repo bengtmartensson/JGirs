@@ -245,7 +245,7 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>HarcHardware</artifactId>
-            <version>1.4</version>
+            <version>1.5dev</version>
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>
@@ -260,12 +260,12 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>Girr</artifactId>
-            <version>1.4</version>
+            <version>1.5dev</version>
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>Jirc</artifactId>
-            <version>1.4</version>
+            <version>1.5dev</version>
         </dependency>
         <dependency>
             <groupId>org.gnu</groupId>
