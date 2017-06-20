@@ -35,5 +35,12 @@
             <outputDirectory/>
             <lineEnding>keep</lineEnding>
         </fileSet>
+        <fileSet>
+            <directory>native</directory>
+            <outputDirectory/>
+            <includes>
+                <include>*/*</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>
