@@ -13,6 +13,10 @@ JGIRSHOME="$(dirname -- "$(readlink -f -- "${0}")" )"
 # Configuration file to use
 CONFIG=${JGIRSHOME}/${project.nameLowercase}_config.xml
 
+# Extra library to search for JNI libraries.
+#EXTRA_JNI_LIBS=/usr/local/lib64:
+EXTRA_JNI_LIBS=
+
 if [ `uname -m` = "armv6l" ] ; then
     ARCH=arml
 elif [ `uname -m` = "x86_64" ] ; then
@@ -62,6 +66,6 @@ fi
 JAR=${JGIRSHOME}/${project.name}-${project.version}-jar-with-dependencies.jar
 
 # Path to the shared libraries
-JAVA_LIBRARY_PATH=${LOAD_RXTX_PATH}${JGIRSHOME}/`uname -s`-${ARCH}
+JAVA_LIBRARY_PATH=${EXTRA_JNI_LIBS}${LOAD_RXTX_PATH}${JGIRSHOME}/`uname -s`-${ARCH}
 
 exec "${JAVA}" -Djava.library.path="${JAVA_LIBRARY_PATH}" ${RXTX_SERIAL_PORTS} -jar "${JAR}" -c "${CONFIG}" "$@"

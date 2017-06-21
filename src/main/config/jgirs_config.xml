@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Example configuration -->
 <jgirs version="0.0.0"> <!-- version of the specification of this file format. -->
-   <jni-lib libpath="/usr/local/lib64/libJavaReadline.so"/>
+   <jni-lib libname="JavaReadline"/>
     <options>
         <!-- Names are case sensitive. Some commands may compare or sort case insensitively -->
         <!--option name="listSeparator">&#10;&#13;</option-->
@@ -57,7 +57,8 @@
 
     <hardware>
         <hardware-item name="irtoy" displayname="IrToy" class="org.harctoolbox.harchardware.ir.IrToy">
-            <jni-lib libpath="/usr/lib64/rxtx/librxtxSerial.so"/>
+            <!--jni-lib libpath="/usr/lib64/rxtx/librxtxSerial.so"/-->
+            <jni-lib libname="rxtxSerial"/>
             <arguments>
                 <argument type="java.lang.String" description="devicename">/dev/irtoy</argument>
             </arguments>
@@ -81,7 +82,7 @@
             </arguments>
         </hardware-item>
         <hardware-item name="hp-mce" displayname="HP MCE" class="org.harctoolbox.harchardware.ir.DevLirc">
-            <jni-lib libpath="/usr/local/lib64/libdevslashlirc.so"/>
+            <jni-lib libname="devslashlirc"/>
             <arguments>
                 <argument description="device name">/dev/lirc0</argument>
             </arguments>

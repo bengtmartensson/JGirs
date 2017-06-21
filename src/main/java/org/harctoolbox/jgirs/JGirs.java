@@ -90,8 +90,7 @@ public final class JGirs {
         ConfigFile config = null;
         try {
             config = readConfig(commandLineArgs);
-        } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | IrpMasterException | IOException | ConfigFile.NonUniqueHardwareName | java.text.ParseException ex) {
-            //Logger.getLogger(JGirs.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | IrpMasterException | IOException | ConfigFile.NonUniqueHardwareName | java.text.ParseException | UnsatisfiedLinkError ex) {
             logger.log(Level.SEVERE, "Could not read the config file: {0}", ex.toString());
             doExit(IrpUtils.exitConfigReadError);
         }
