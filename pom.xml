@@ -235,11 +235,6 @@
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>
-            <artifactId>DevSlashLirc</artifactId>
-            <version>0.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.harctoolbox</groupId>
             <artifactId>ReadlineCommander</artifactId>
             <version>0.1.1</version>
         </dependency>
