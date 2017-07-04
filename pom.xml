@@ -254,12 +254,6 @@
             <version>1.5dev</version>
         </dependency>
         <dependency>
-            <groupId>org.gnu</groupId>
-            <artifactId>Readline</artifactId>
-            <version>0.8.2</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.1</version>
