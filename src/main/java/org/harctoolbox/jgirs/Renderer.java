@@ -21,7 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.harctoolbox.ircore.IrSignal;
 import org.harctoolbox.irp.IrpDatabase;
 import org.harctoolbox.irp.IrpException;
@@ -46,7 +45,8 @@ public class Renderer extends Module {
 
     public IrSignal render(String[] args, int skip) throws IrpException {
         int index = skip;
-        String protocol = args[index++];
+        String protocol = args[index];
+        index++;
         String[] defs = new String[args.length - index];
         System.arraycopy(args, index, defs, 0, args.length - index);
         NameEngine params = NameEngine.parse(args);

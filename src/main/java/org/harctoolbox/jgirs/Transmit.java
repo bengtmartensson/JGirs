@@ -223,6 +223,7 @@ public class Transmit extends Module {
                 return RAW;
             }
 
+            @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
             @Override
             public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException, InvalidArgumentException {
                 checkNoArgs(RAW, args.length, 3, Integer.MAX_VALUE);
@@ -248,6 +249,7 @@ public class Transmit extends Module {
                 return IRP;
             }
 
+            @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
             @Override
             public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException, UnsupportedRepeatException, NameUnassignedException, InvalidNameException, IrpInvalidArgumentException, DomainViolationException, InvalidArgumentException {
                 checkNoArgs(IRP, args.length, 3, Integer.MAX_VALUE);
@@ -274,7 +276,8 @@ public class Transmit extends Module {
             public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousHardwareException, InvalidArgumentException, IrpException {
                 checkNoArgs(PROTOCOLPARAMETER, args.length, 3, Integer.MAX_VALUE);
                 int index = 0;
-                int count = intParse(args[index++]);
+                int count = intParse(args[index]);
+                index++;
                 return transmitProtocolParameters(count, args, index) ? new ArrayList<>(0) : null;
             }
         }
@@ -288,6 +291,7 @@ public class Transmit extends Module {
                 return NAME;
             }
 
+            @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
             @Override
             public List<String> exec(String[] args) throws ExecutionException, NoSuchRemoteException, NoSuchCommandException, HarcHardwareException, NoSuchTransmitterException, IOException, CommandSyntaxException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, NoSuchModuleException, AmbigousRemoteException, AmbigousCommandException, AmbigousHardwareException, IrCoreException, IrpException {
                 checkNoArgs(NAME, args.length, 3);
@@ -309,6 +313,7 @@ public class Transmit extends Module {
             return SEND;
         }
 
+        @SuppressWarnings("ValueOfIncrementOrDecrementUsed")
         @Override
         public List<String> exec(String[] args) throws CommandSyntaxException, HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, AmbigousHardwareException, InvalidArgumentException {
             checkNoArgs(SEND, args.length, 8, Integer.MAX_VALUE);

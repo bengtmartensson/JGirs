@@ -19,7 +19,10 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.IReceive;
 import org.harctoolbox.ircore.IrSequence;
@@ -27,6 +30,10 @@ import org.harctoolbox.ircore.IrSignal;
 import org.harctoolbox.ircore.ModulatedIrSequence;
 import org.harctoolbox.ircore.OddSequenceLengthException;
 import org.harctoolbox.ircore.Pronto;
+import org.harctoolbox.ircore.ThisCannotHappenException;
+import org.harctoolbox.irp.Decoder;
+import org.harctoolbox.irp.IrpDatabase;
+import org.harctoolbox.irp.IrpParseException;
 import static org.harctoolbox.jgirs.Engine.TIMEOUT;
 
 /**
@@ -85,11 +92,14 @@ public class Receive extends Module {
 //        boolean success = DecodeIR.loadLibrary();
 //        if (!success)
 //            return null;
-
-        DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
-        List<String> result = new ArrayList<>(decodes.length);
-        for (DecodeIR.DecodedSignal decode : decodes)
+        ModulatedIrSequence modulatedIrSequence = new ModulatedIrSequence(irSequence, Double.valueOf(Parameters.getInstance().getInteger(FALLBACKFREQUENCY)));
+        Decoder.DecodeTree decodes = instance.decoder.decode(modulatedIrSequence, instance.decoderParams);
+        List<String> result = new ArrayList<>(10);
+        Iterator<Decoder.TrunkDecodeTree> iterator = decodes.iterator();
+        while (iterator.hasNext()) {
+            Decoder.Decode decode = iterator.next().getTrunk();
             result.add(decode.toString());
+        }
 
         return result;
     }
@@ -98,13 +108,14 @@ public class Receive extends Module {
 //        boolean success = DecodeIR.loadLibrary();
 //        if (!success)
 //            return null;
-
-        DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
-        if (decodes.length == 0)
+        ModulatedIrSequence modulatedIrSequence = new ModulatedIrSequence(irSequence, Double.valueOf(Parameters.getInstance().getInteger(FALLBACKFREQUENCY)));
+        Decoder.DecodeTree decodes = instance.decoder.decode(modulatedIrSequence, instance.decoderParams);
+        Iterator<Decoder.TrunkDecodeTree> iterator = decodes.iterator();
+        if (!iterator.hasNext())
             return null;
 
-        DecodeIR.DecodedSignal decode = decodes[0];
-        ProtocolParameter protocolParameters = new ProtocolParameter(decode.getProtocol(), decode.getParameters());
+        Decoder.Decode decode = iterator.next().getTrunk();
+        ProtocolParameter protocolParameters = new ProtocolParameter(decode.getName(), decode.getMap());
         RemoteCommandDataBase.RemoteCommand cmd = NamedRemotes.getInstance().getRemoteCommand(protocolParameters);
         List<String> list = new ArrayList<>(1);
         if (cmd != null)
@@ -122,8 +133,22 @@ public class Receive extends Module {
                 : formatAsNamedCommands(irSequence);
     }
 
+    private final Decoder decoder;
+    private final Decoder.DecoderParameters decoderParams;
+
     public Receive() {
         super();
+        try {
+            IrpDatabase irpDatabase = new IrpDatabase((String) null);
+            decoder = new Decoder(irpDatabase);
+        } catch (IOException | IrpParseException ex) {
+            // If I get here, it is an internal problem; don't expect a user to be able to do anything.
+            Logger.getLogger(Receive.class.getName()).log(Level.SEVERE, null, ex);
+            throw new ThisCannotHappenException();
+        }
+
+        decoderParams = new Decoder.DecoderParameters();
+
         addCommand(new ReceiveCommand());
 
         addParameter(new IntegerParameter(RECEIVEBEGINTIMEOUT, defaultReceiveBeginTimeout, "begin timeout for receive"));

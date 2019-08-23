@@ -26,8 +26,8 @@ import org.xml.sax.SAXException;
  */
 public class ConfigFileNGTest {
 
-    private final static String configFilePath = "src/main/config/jgirs_config.xml";
-    private final static String devSlashLircPath = "/usr/local/lib64/libdevslashlirc.so";
+    private final static String configFilePath = "src/main/config/jgirs_config.xml"; // FIXME
+    private final static String devSlashLircPath = "/usr/local/lib64/libdevslashlirc.so"; // FIXME
 
     @BeforeClass
     public static void setUpClass() throws Exception {
