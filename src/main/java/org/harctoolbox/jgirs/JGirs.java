@@ -34,16 +34,18 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
-import org.harctoolbox.IrpMaster.IrpMasterException;
-import org.harctoolbox.IrpMaster.IrpUtils;
-import org.harctoolbox.IrpMaster.ParseException;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
+import org.harctoolbox.irp.IrpParseException;
+import org.harctoolbox.irp.IrpUtils;
 import static org.harctoolbox.jgirs.Engine.ERROR;
 import static org.harctoolbox.jgirs.Engine.OK;
 import org.harctoolbox.readlinecommander.ReadlineCommander;
@@ -56,7 +58,7 @@ public final class JGirs {
         StringBuilder str = new StringBuilder(128);
         argumentParser.usage(str);
 
-        (exitcode == IrpUtils.exitSuccess ? System.out : System.err).println(str);
+        (exitcode == IrpUtils.EXIT_SUCCESS ? System.out : System.err).println(str);
         doExit(exitcode); // placifying FindBugs...
     }
 
@@ -76,42 +78,42 @@ public final class JGirs {
             argumentParser.parse(args);
         } catch (ParameterException ex) {
             System.err.println(ex.getMessage());
-            usage(IrpUtils.exitUsageError, argumentParser);
+            usage(IrpUtils.EXIT_USAGE_ERROR, argumentParser);
         }
 
         if (commandLineArgs.helpRequested)
-            usage(IrpUtils.exitSuccess, argumentParser);
+            usage(IrpUtils.EXIT_SUCCESS, argumentParser);
 
         if (commandLineArgs.versionRequested) {
             System.out.println(Version.versionString);
-            doExit(IrpUtils.exitSuccess);
+            doExit(IrpUtils.EXIT_SUCCESS);
         }
 
         ConfigFile config = null;
         try {
             config = readConfig(commandLineArgs);
-        } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | IrpMasterException | IOException | ConfigFile.NonUniqueHardwareName | java.text.ParseException | UnsatisfiedLinkError ex) {
+        } catch (SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ConfigFile.NoSuchRemoteTypeException | IOException | ConfigFile.NonUniqueHardwareName | java.text.ParseException | UnsatisfiedLinkError | GirrException | IrpException | IrCoreException | IrpParseException ex) {
             logger.log(Level.SEVERE, "Could not read the config file: {0}", ex.toString());
-            doExit(IrpUtils.exitConfigReadError);
+            doExit(IrpUtils.EXIT_CONFIG_READ_ERROR);
         }
 
         try {
             doWork(config, commandLineArgs);
-        } catch (IOException | IncompatibleArgumentException ex) {
+        } catch (IOException ex) {
             logger.log(Level.SEVERE, "{0}", ex.toString());
-            doExit(IrpUtils.exitFatalProgramFailure);
+            doExit(IrpUtils.EXIT_FATAL_PROGRAM_FAILURE);
         }
     }
 
-    private static ConfigFile readConfig(CommandLineArgs commandLineArgs) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, ConfigFile.NoSuchRemoteTypeException, IrpMasterException, ParseException, IOException, ConfigFile.NonUniqueHardwareName, java.text.ParseException {
+    private static ConfigFile readConfig(CommandLineArgs commandLineArgs) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, ConfigFile.NoSuchRemoteTypeException, GirrException, IrpException, IrCoreException, IrpParseException, ConfigFile.NonUniqueHardwareName, IOException, ParseException {
         ConfigFile config = new ConfigFile(commandLineArgs.configFile); // ok also if arg == null
 
         // Additional Girr files from the command line
         config.addGirr(commandLineArgs.girr);
 
         // Some stuff from the command line overrides the data in the configuration file:
-        if (commandLineArgs.irpMasterIni != null)
-            config.setStringOption(Parameters.IRPPROTOCOLSINI, commandLineArgs.irpMasterIni);
+        if (commandLineArgs.irpProtocolsXml != null)
+            config.setStringOption(Parameters.IRPPROTOCOLSINI, commandLineArgs.irpProtocolsXml);
         if (commandLineArgs.verbosity)
             config.setBooleanOption(Parameters.VERBOSITY, commandLineArgs.verbosity);
         if (commandLineArgs.transmitDevice != null)
@@ -124,12 +126,12 @@ public final class JGirs {
         return config;
     }
 
-    private static void doWork(ConfigFile config, CommandLineArgs commandLineArgs) throws IOException, FileNotFoundException, IncompatibleArgumentException {
+    private static void doWork(ConfigFile config, CommandLineArgs commandLineArgs) throws IOException, FileNotFoundException {
         try (Engine engine = Engine.newEngine(config)) {
             if (commandLineArgs.tcp) {
                 if (!commandLineArgs.parameters.isEmpty()) {
                     logger.log(Level.SEVERE, "Cannot use command arguments together with --tcp.");
-                    doExit(IrpUtils.exitSemanticUsageError);
+                    doExit(IrpUtils.EXIT_SEMANTIC_USAGE_ERROR);
                 }
                 tcpServerWork(engine, commandLineArgs);
             } else if (commandLineArgs.parameters.isEmpty()) {
@@ -249,8 +251,8 @@ public final class JGirs {
 //        @Parameter(names = {"--immediate-init"}, description = "Open hardware immediately at start.")
 //        private boolean immediateInit = false;
 
-        @Parameter(names = {"-i", "--irpprotocolsini"}, description = "IrpMaster protocol file")
-        private String irpMasterIni = null;//"IrpProtocols.ini";
+        @Parameter(names = {"-i", "--irpprotocols"}, description = "IrpProtocols file")
+        private String irpProtocolsXml = null;//"IrpProtocols.ini";
 
         @Parameter(names = {"--ip"}, description = "Local IP name/address to bind to (default 0.0.0.0)")
         private String ipName = "0.0.0.0";

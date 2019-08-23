@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.ircore.InvalidArgumentException;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
 
 /**
  *
@@ -58,7 +60,7 @@ public class CommandExecuter {
         return commandMap.values();
     }
 
-    public Collection<String> exec(String[] args) throws CommandException, IOException, HarcHardwareException, IrpMasterException, AmbigousCommandException, AmbigousHardwareException {
+    public Collection<String> exec(String[] args) throws NoSuchCommandException, AmbigousCommandException, IOException, HarcHardwareException, CommandException, AmbigousHardwareException, IrCoreException, IrpException {
         String commandName = args[0];
         List<String> candidates = Utils.findStringsWithPrefix(commandMap.keySet(), commandName);
         if (candidates.isEmpty())

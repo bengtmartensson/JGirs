@@ -18,48 +18,49 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.harctoolbox.IrpMaster.DomainViolationException;
-import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
-import org.harctoolbox.IrpMaster.InvalidRepeatException;
-import org.harctoolbox.IrpMaster.IrSignal;
-import org.harctoolbox.IrpMaster.IrpMaster;
-import org.harctoolbox.IrpMaster.ParseException;
-import org.harctoolbox.IrpMaster.Protocol;
-import org.harctoolbox.IrpMaster.UnassignedException;
-import org.harctoolbox.IrpMaster.UnknownProtocolException;
+import java.util.Set;
+import org.harctoolbox.ircore.IrSignal;
+import org.harctoolbox.irp.IrpDatabase;
+import org.harctoolbox.irp.IrpException;
+import org.harctoolbox.irp.IrpParseException;
+import org.harctoolbox.irp.NameEngine;
 
 /**
  * Implements rendering commands.
  */
 public class Renderer extends Module {
 
-    private IrpMaster irpMaster;
+    private IrpDatabase irpDatabase;
 
-    public Renderer(String irpMasterIniName) throws FileNotFoundException, IncompatibleArgumentException {
+    public Renderer(String irpProtocolsName) throws FileNotFoundException, IOException, IrpParseException {
         super();
-        if (irpMasterIniName == null)
+        if (irpProtocolsName == null)
             throw new NullPointerException();
-        irpMaster = new IrpMaster(irpMasterIniName);
-        org.harctoolbox.girr.Command.setIrpMaster(irpMaster);
+        irpDatabase = new IrpDatabase(irpProtocolsName);
+        org.harctoolbox.girr.Command.setIrpMaster(irpDatabase);
         addCommand(new ProtocolsCommand());
     }
 
-    public IrSignal render(String[] args, int skip) throws UnassignedException, ParseException, IncompatibleArgumentException, UnknownProtocolException, DomainViolationException, InvalidRepeatException {
+    public IrSignal render(String[] args, int skip) throws IrpException {
         int index = skip;
         String protocol = args[index++];
-        Map<String, Long> params = Protocol.parseParams(args, index);
-        return render(protocol, params);
+        String[] defs = new String[args.length - index];
+        System.arraycopy(args, index, defs, 0, args.length - index);
+        NameEngine params = NameEngine.parse(args);
+        return render(protocol, params.toMap());
     }
 
-    public IrSignal render(String protocol, Map<String, Long> params)
-            throws UnassignedException, ParseException, UnknownProtocolException, DomainViolationException, IncompatibleArgumentException, InvalidRepeatException {
-        return irpMaster.newProtocol(protocol).renderIrSignal(params);
+    public IrSignal render(String protocol, Map<String, Long> params) throws IrpException {
+        return irpDatabase.render(protocol, params);
+        //Master.newProtocol(protocol).renderIrSignal(params);
     }
 
     public List<String> protocols() {
-        return Utils.toSortedList(irpMaster.getNames());
+        return irpDatabase.getNames();
+        //return Utils.toSortedList(irpMaster.getNames());
     }
 
     private class ProtocolsCommand implements ICommand {

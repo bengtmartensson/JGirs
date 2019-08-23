@@ -19,8 +19,10 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.Collection;
-import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.ircore.InvalidArgumentException;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
 
 /**
  * Defines the functions the Commands must implements.
@@ -42,7 +44,8 @@ public interface ICommand {
      * @throws org.harctoolbox.jgirs.CommandException
      * @throws org.harctoolbox.jgirs.AmbigousHardwareException
      * @throws org.harctoolbox.jgirs.AmbigousCommandException
-     * @throws org.harctoolbox.IrpMaster.IrpMasterException
+     * @throws org.harctoolbox.ircore.InvalidArgumentException
+     * @throws org.harctoolbox.irp.IrpException
      */
-    public Collection<String> exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousHardwareException, AmbigousCommandException, IrpMasterException;
+    public Collection<String> exec(String[] args) throws IOException, HarcHardwareException, CommandException, AmbigousHardwareException, AmbigousCommandException, InvalidArgumentException, IrCoreException, IrpException;
 }

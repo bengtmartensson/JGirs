@@ -32,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
 import javax.xml.validation.Schema;
-import org.harctoolbox.IrpMaster.XmlUtils;
+import org.harctoolbox.ircore.XmlUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

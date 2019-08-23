@@ -19,10 +19,10 @@ package org.harctoolbox.jgirs;
 
 import java.io.IOException;
 import java.util.List;
-import org.harctoolbox.IrpMaster.IrpMasterException;
-import org.harctoolbox.IrpMaster.ModulatedIrSequence;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.ICapture;
+import org.harctoolbox.ircore.InvalidArgumentException;
+import org.harctoolbox.ircore.ModulatedIrSequence;
 import static org.harctoolbox.jgirs.Engine.TIMEOUT;
 
 /**
@@ -51,12 +51,12 @@ public class Capture extends Module {
         return instance;
     }
 
-    public static ModulatedIrSequence capture() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, IrpMasterException, AmbigousHardwareException {
+    public static ModulatedIrSequence capture() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException, InvalidArgumentException {
         GirsHardware hardware = Engine.getInstance().getCaptureHardware();
         return capture(hardware);
     }
 
-    public static ModulatedIrSequence capture(GirsHardware hardware) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, IrpMasterException {
+    public static ModulatedIrSequence capture(GirsHardware hardware) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, InvalidArgumentException {
         initializeHardware(hardware, ICapture.class);
         ICapture capturer = (ICapture) hardware.getHardware();
         capturer.setBeginTimeout(Parameters.getInstance().getInteger(CAPTUREBEGINTIMEOUT));
@@ -85,12 +85,12 @@ public class Capture extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
+        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException, InvalidArgumentException {
             //hardware.setTimeout(startTimeoutParameter.value, maxCaptureLengthParameter.value, endTimeoutParameter.value);
             checkNoArgs(ANALYZE, args.length, 0, 1);
             ModulatedIrSequence irSequence = args.length == 0 ? capture() : capture(Engine.getInstance().getHardware(args[0]));
             String string = irSequence == null ? TIMEOUT
-                    : irSequence.toPrintString(alternatingSigns, noSigns, SEPARATOR, true);
+                    : irSequence.toString(alternatingSigns, SEPARATOR);
             return Utils.singletonArrayList(string);
         }
     }

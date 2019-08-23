@@ -23,8 +23,8 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
 
@@ -75,7 +75,7 @@ public class CsvImporter {
         this(1, 2, 3, 4, 5, DEFAULT_SEPARATOR);
     }
 
-    private Command parseLine(String line) throws IrpMasterException {
+    private Command parseLine(String line) throws GirrException {
         String[] chunks = line.split(separator);
         String protocol = protocolColumn > 0 ? chunks[protocolColumn-1] : NOPROTOCOL;
         Map<String, Long> parameters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -86,7 +86,7 @@ public class CsvImporter {
         return new Command(commandName, null, protocol, parameters);
     }
 
-    public Remote parseFile(String remoteName, Reader reader) throws IOException  {
+    public Remote parseFile(String remoteName, Reader reader) throws IOException, GirrException  {
         Map<String, Command> commands = new HashMap<>(16);
         try (BufferedReader in = new BufferedReader(reader)) {
 
@@ -98,14 +98,14 @@ public class CsvImporter {
                 try {
                     Command command = parseLine(line);
                     commands.put(command.getName(), command);
-                } catch (NumberFormatException | IrpMasterException ex) {
+                } catch (NumberFormatException ex) {
                 }
             }
         }
         return new Remote(new Remote.MetaData(remoteName), null, null, commands, null);
     }
 
-    public RemoteSet parseRemoteSet(String remoteName, String source, Reader reader) throws IOException, IrpMasterException {
+    public RemoteSet parseRemoteSet(String remoteName, String source, Reader reader) throws IOException, GirrException {
         Remote remote = parseFile(remoteName, reader);
         return new RemoteSet(null, source, remote);
     }

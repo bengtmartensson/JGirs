@@ -24,9 +24,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.harctoolbox.IrpMaster.IrpMasterException;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -38,7 +40,7 @@ import org.xml.sax.SAXException;
  */
 public class RemoteCommandDataBase {
 
-    private static RemoteSet parseGirr(URL url) throws java.text.ParseException, IOException, SAXException {
+    private static RemoteSet parseGirr(URL url) throws java.text.ParseException, IOException, SAXException, GirrException {
         Document doc = Utils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
         return remoteSet;
@@ -56,25 +58,25 @@ public class RemoteCommandDataBase {
         this.remotes = caseInsensitive ? new TreeMap<>(String.CASE_INSENSITIVE_ORDER) : new TreeMap<>();
     }
 
-    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets, boolean caseInsensitive) throws IrpMasterException {
+    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets, boolean caseInsensitive) throws IrpException, IrCoreException {
         this(caseInsensitive);
         for (RemoteSet remoteSet : remoteSets)
             add(remoteSet);
     }
 
-    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+    public RemoteCommandDataBase(Iterable<RemoteSet> remoteSets) throws IrpException, IrCoreException {
         this(true);
         for (RemoteSet remoteSet : remoteSets)
             add(remoteSet);
     }
 
-    private void add(RemoteSet remoteSet) throws IrpMasterException {
+    private void add(RemoteSet remoteSet) throws IrpException, IrCoreException {
         for (Remote remote : remoteSet.getRemotes()) {
             add(remote);
         }
     }
 
-    private void add(Remote remote) throws IrpMasterException {
+    private void add(Remote remote) throws IrpException, IrCoreException {
         remotes.put(remote.getName(), remote);
         for (org.harctoolbox.girr.Command command : remote.getCommands().values()) {
             RemoteCommand remoteCommand = new RemoteCommand(remote, command);
@@ -85,7 +87,7 @@ public class RemoteCommandDataBase {
         }
     }
 
-    public void add(Iterable<String> urls) throws ParseException, IOException, SAXException, IrpMasterException {
+    public void add(Iterable<String> urls) throws ParseException, IOException, SAXException, IrpException, IrCoreException, GirrException {
         for (String url : urls) {
             RemoteSet remoteSet = parseGirr(new URL(url));
             add(remoteSet);

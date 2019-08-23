@@ -20,14 +20,13 @@ package org.harctoolbox.jgirs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.harctoolbox.IrpMaster.DecodeIR;
-import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
-import org.harctoolbox.IrpMaster.IrSequence;
-import org.harctoolbox.IrpMaster.IrSignal;
-import org.harctoolbox.IrpMaster.IrpMasterException;
-import org.harctoolbox.IrpMaster.IrpUtils;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ir.IReceive;
+import org.harctoolbox.ircore.IrSequence;
+import org.harctoolbox.ircore.IrSignal;
+import org.harctoolbox.ircore.ModulatedIrSequence;
+import org.harctoolbox.ircore.OddSequenceLengthException;
+import org.harctoolbox.ircore.Pronto;
 import static org.harctoolbox.jgirs.Engine.TIMEOUT;
 
 /**
@@ -55,7 +54,7 @@ public class Receive extends Module {
         return instance;
     }
 
-    public static IrSequence receive(GirsHardware hardware) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, IrpMasterException {
+    public static IrSequence receive(GirsHardware hardware) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, OddSequenceLengthException {
         initializeHardware(hardware, IReceive.class);
         IReceive receiver = (IReceive) hardware.getHardware();
         receiver.setBeginTimeout(Parameters.getInstance().getInteger(RECEIVEBEGINTIMEOUT));
@@ -65,27 +64,27 @@ public class Receive extends Module {
         return irSequence;
     }
 
-    public static IrSequence receive() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, IrpMasterException, AmbigousHardwareException {
+    public static IrSequence receive() throws NoSuchHardwareException, NoSuchParameterException, IncompatibleHardwareException, HarcHardwareException, IOException, AmbigousHardwareException, OddSequenceLengthException {
         return receive(Engine.getInstance().getReceiveHardware());
     }
 
-    public static IrSequence receive(String hardwareName) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, IrpMasterException, NoSuchHardwareException, AmbigousHardwareException {
+    public static IrSequence receive(String hardwareName) throws IncompatibleHardwareException, HarcHardwareException, IOException, NoSuchParameterException, NoSuchHardwareException, AmbigousHardwareException, OddSequenceLengthException {
         return receive(Engine.getInstance().getHardware(hardwareName));
     }
 
     public static String formatAsRaw(IrSequence irSequence) {
-        return irSequence.toPrintString(true, false);
+        return irSequence.toString(true);
     }
 
-    public static String formatAsCcf(IrSequence irSequence) throws IncompatibleArgumentException, NoSuchParameterException {
-        IrSignal irSignal = new IrSignal(Parameters.getInstance().getInteger(FALLBACKFREQUENCY), -1, irSequence, null, null);
-        return irSignal.ccfString();
+    public static String formatAsCcf(IrSequence irSequence) throws NoSuchParameterException {
+        IrSignal irSignal = new IrSignal(irSequence, null, null, (double) Parameters.getInstance().getInteger(FALLBACKFREQUENCY), null);
+        return Pronto.toString(irSignal);
     }
 
     public static List<String> formatAsDecode(IrSequence irSequence) throws NoSuchParameterException {
-        boolean success = DecodeIR.loadLibrary();
-        if (!success)
-            return null;
+//        boolean success = DecodeIR.loadLibrary();
+//        if (!success)
+//            return null;
 
         DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
         List<String> result = new ArrayList<>(decodes.length);
@@ -96,9 +95,9 @@ public class Receive extends Module {
     }
 
     public static List<String> formatAsNamedCommands(IrSequence irSequence) throws NoSuchParameterException {
-        boolean success = DecodeIR.loadLibrary();
-        if (!success)
-            return null;
+//        boolean success = DecodeIR.loadLibrary();
+//        if (!success)
+//            return null;
 
         DecodeIR.DecodedSignal[] decodes = DecodeIR.decode(irSequence, Parameters.getInstance().getInteger(FALLBACKFREQUENCY));
         if (decodes.length == 0)
@@ -114,7 +113,7 @@ public class Receive extends Module {
     }
 
     public static List<String> format(IrSequence irSequence, ReceiveFormat receiveFormat)
-            throws IncompatibleArgumentException, NoSuchParameterException {
+            throws NoSuchParameterException {
         return
                 irSequence == null ? Utils.singletonArrayList(TIMEOUT)
                 : receiveFormat == ReceiveFormat.raw ? Utils.singletonArrayList(formatAsRaw(irSequence))
@@ -130,7 +129,7 @@ public class Receive extends Module {
         addParameter(new IntegerParameter(RECEIVEBEGINTIMEOUT, defaultReceiveBeginTimeout, "begin timeout for receive"));
         addParameter(new IntegerParameter(RECEIVELENGTH, defaultReceiveLength, "max number of durations in receive"));
         addParameter(new IntegerParameter(RECEIVEENDINGTIMEOUT, defaultReceiveEndingTimeout, "ending timeout for receive"));
-        addParameter(new IntegerParameter(FALLBACKFREQUENCY, (int) IrpUtils.defaultFrequency,
+        addParameter(new IntegerParameter(FALLBACKFREQUENCY, (int) ModulatedIrSequence.DEFAULT_FREQUENCY,
                 "Fallback frequency (in Hz) to be used in absence of a measurement."));
         addParameter(new ReceiveFormatParameter(RECEIVEFORMAT, defaultReceiveFormat,
                 "Format of received codes (to the extent possible). Possible values are: raw, ccf, protocolparameter, namedcommand"));
@@ -190,7 +189,7 @@ public class Receive extends Module {
         }
 
         @Override
-        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IrpMasterException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException {
+        public List<String> exec(String[] args) throws HarcHardwareException, IOException, IncompatibleHardwareException, NoSuchHardwareException, NoSuchParameterException, CommandSyntaxException, AmbigousHardwareException, OddSequenceLengthException {
             checkNoArgs(RECEIVE, args.length, 0, 1);
             IrSequence irSequence = args.length == 0 ? receive() : receive(args[0]);
             return format(irSequence, ((ReceiveFormatParameter) Parameters.getInstance().get(RECEIVEFORMAT)).getValue());

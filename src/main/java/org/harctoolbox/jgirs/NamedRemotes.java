@@ -27,10 +27,12 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.harctoolbox.IrpMaster.IrSignal;
-import org.harctoolbox.IrpMaster.IrpMasterException;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.girr.Remote;
 import org.harctoolbox.girr.RemoteSet;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.ircore.IrSignal;
+import org.harctoolbox.irp.IrpException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -43,7 +45,7 @@ public class NamedRemotes extends Module {
 
     private static volatile NamedRemotes instance = null;
 
-    private static RemoteSet readRemoteSet(String file) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+    private static RemoteSet readRemoteSet(String file) throws ParserConfigurationException, SAXException, IOException, ParseException, GirrException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
         factory.setXIncludeAware(true);
@@ -52,7 +54,7 @@ public class NamedRemotes extends Module {
         return new RemoteSet(doc);
     }
 
-    private static List<RemoteSet> readRemoteSet(Iterable<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+    private static List<RemoteSet> readRemoteSet(Iterable<String> files) throws ParserConfigurationException, SAXException, IOException, ParseException, GirrException {
         ArrayList<RemoteSet> result = new ArrayList<>(16);
         for (String file : files)
             result.add(readRemoteSet(file));
@@ -72,12 +74,12 @@ public class NamedRemotes extends Module {
 
     private final RemoteCommandDataBase database;
 
-    private NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrpMasterException {
+    private NamedRemotes(Iterable<RemoteSet> remoteSets) throws IrCoreException, IrpException {
         this(new RemoteCommandDataBase(remoteSets, caseInsensitive));
 
     }
 
-    private NamedRemotes(List<String> files) throws ParserConfigurationException, SAXException, IOException, IrpMasterException, ParseException {
+    private NamedRemotes(List<String> files) throws ParserConfigurationException, SAXException, IOException, ParseException, IrCoreException, IrpException, GirrException {
         this(readRemoteSet(files));
     }
 
@@ -92,7 +94,7 @@ public class NamedRemotes extends Module {
         return database.getRemoteCommand(protocolParameters);
     }
 
-    public IrSignal render(String remotePrefix, String commandPrefix) throws IrpMasterException, NoSuchRemoteException, NoSuchCommandException, AmbigousRemoteException, AmbigousCommandException {
+    public IrSignal render(String remotePrefix, String commandPrefix) throws NoSuchRemoteException, NoSuchCommandException, AmbigousRemoteException, AmbigousCommandException, IrCoreException, IrpException {
         Remote remote = database.getRemote(remotePrefix);
         List<String> commandCandidates = Utils.findStringsWithPrefix(remote.getCommands().keySet(), commandPrefix);
         if (commandCandidates.isEmpty())

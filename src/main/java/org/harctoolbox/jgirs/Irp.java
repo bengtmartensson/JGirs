@@ -18,22 +18,22 @@ this program. If not, see http://www.gnu.org/licenses/.
 package org.harctoolbox.jgirs;
 
 import java.util.Map;
-import org.harctoolbox.IrpMaster.DomainViolationException;
-import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
-import org.harctoolbox.IrpMaster.InvalidRepeatException;
-import org.harctoolbox.IrpMaster.IrSignal;
-import org.harctoolbox.IrpMaster.ParseException;
-import org.harctoolbox.IrpMaster.Protocol;
-import org.harctoolbox.IrpMaster.UnassignedException;
+import org.harctoolbox.ircore.IrSignal;
+import org.harctoolbox.irp.DomainViolationException;
+import org.harctoolbox.irp.InvalidNameException;
+import org.harctoolbox.irp.IrpInvalidArgumentException;
+import org.harctoolbox.irp.NameUnassignedException;
+import org.harctoolbox.irp.Protocol;
+import org.harctoolbox.irp.UnsupportedRepeatException;
 
 /**
  *
  */
 public class Irp extends Module {
 
-    public static IrSignal render(String protocolName, Map<String, Long>parameters) throws UnassignedException, ParseException, IncompatibleArgumentException, DomainViolationException, InvalidRepeatException {
-        Protocol protocol = new Protocol("dummy", protocolName, null);
-        IrSignal irSignal = protocol.renderIrSignal(parameters);
+    public static IrSignal render(String protocolName, Map<String, Long>parameters) throws UnsupportedRepeatException, NameUnassignedException, InvalidNameException, IrpInvalidArgumentException, DomainViolationException {
+        Protocol protocol = new Protocol(protocolName);
+        IrSignal irSignal = protocol.toIrSignal(parameters);
         return irSignal;
     }
 

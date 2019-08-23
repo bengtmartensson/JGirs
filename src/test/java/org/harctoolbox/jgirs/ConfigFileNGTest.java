@@ -6,9 +6,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
-import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.devslashlirc.LircHardware;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
+import org.harctoolbox.irp.IrpParseException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 import org.testng.annotations.AfterClass;
@@ -42,7 +45,7 @@ public class ConfigFileNGTest {
         LircHardware.loadLibrary(new File(devSlashLircPath));
         try {
             instance = new ConfigFile(configFilePath);
-        } catch (JGirsException | IOException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ParseException | IrpMasterException ex) {
+        } catch (JGirsException | IOException | SAXException | NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | HarcHardwareException | ParseException | IrpParseException | GirrException | IrpException | IrCoreException ex) {
             instance = null;
         }
     }

@@ -31,10 +31,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.validation.Schema;
-import org.harctoolbox.IrpMaster.IrpMasterException;
 import org.harctoolbox.girr.Command;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
+import org.harctoolbox.irp.IrpParseException;
 import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
 import static org.harctoolbox.jgirs.Utils.BOOLEAN;
 import static org.harctoolbox.jgirs.Utils.INT;
@@ -53,7 +56,7 @@ public class ConfigFile {
     private static final String CSV     = "csv";
     private static final String TYPE    = "type";
 
-    private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException, IrpMasterException {
+    private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException, GirrException {
         String type = element.getAttribute(TYPE);
         if (type.equalsIgnoreCase(LIRCD))
             return parseLirc(element);
@@ -72,14 +75,14 @@ public class ConfigFile {
         return org.harctoolbox.jirc.ConfigFile.parseConfig(reader, url.toString(), true, null, false);
     }
 
-    private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException {
+    private static RemoteSet parseGirr(Element element) throws IOException, SAXException, ParseException, GirrException {
         URL url = new URL(element.getAttribute(URL));
         Document doc = Utils.openXmlUrl(url, null, true, true);
         RemoteSet remoteSet = new RemoteSet(doc);
         return remoteSet;
     }
 
-    private static RemoteSet parseCsv(Element element) throws IOException, SAXException, ParseException, IrpMasterException {
+    private static RemoteSet parseCsv(Element element) throws IOException, SAXException, ParseException, GirrException {
         URL url = new URL(element.getAttribute(URL));
         int commandNameColumn = Integer.parseInt(element.getAttribute("commandname"));
         int protocolColumn = Integer.parseInt(element.getAttribute("protocol"));
@@ -106,7 +109,7 @@ public class ConfigFile {
         optionsList = new HashMap<>(16);
     }
 
-    public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, IrpMasterException, NonUniqueHardwareName {
+    public ConfigFile(Document doc) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, IOException, NoSuchRemoteTypeException, SAXException, ParseException, NonUniqueHardwareName, IrpParseException, GirrException, IrpException, IrCoreException {
         this();
         if (doc == null)
             return;
@@ -151,7 +154,7 @@ public class ConfigFile {
         }
     }
 
-    public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException, NonUniqueHardwareName {
+    public ConfigFile(String url) throws SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, NoSuchRemoteTypeException, ParseException, IOException, NonUniqueHardwareName, IrpParseException, GirrException, IrpException, IrCoreException {
         this(url != null ? Utils.openXmlUrl(url, (Schema) null, false, true) : null);
     }
 
@@ -191,7 +194,7 @@ public class ConfigFile {
         parameter.set(value);
     }
 
-    void addGirr(List<String> girr) throws ParseException, IOException, SAXException, IrpMasterException {
+    void addGirr(List<String> girr) throws ParseException, IOException, SAXException, IrCoreException, IrpException, GirrException {
         remoteCommandsDataBase.add(girr);
     }
 

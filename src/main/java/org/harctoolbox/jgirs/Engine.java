@@ -33,10 +33,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.harctoolbox.IrpMaster.IncompatibleArgumentException;
-import org.harctoolbox.IrpMaster.IrpMasterException;
+import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.harchardware.ICommandExecutor;
+import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpException;
+import org.harctoolbox.irp.IrpParseException;
 import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
 import org.xml.sax.SAXException;
 
@@ -54,14 +56,14 @@ public final class Engine implements ICommandExecutor, Closeable {
         return instance;
     }
 
-    public static Engine newEngine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
+    public static Engine newEngine(ConfigFile config) throws FileNotFoundException {
         if (instance != null)
             throw new InvalidMultipleInstantiation();
         instance = new Engine(config);
         return instance;
     }
 
-    public static Engine newEngine(String url) throws FileNotFoundException, IncompatibleArgumentException, SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, ConfigFile.NoSuchRemoteTypeException, ParseException, IrpMasterException, IOException, ConfigFile.NonUniqueHardwareName {
+    public static Engine newEngine(String url) throws FileNotFoundException, SAXException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, HarcHardwareException, ConfigFile.NoSuchRemoteTypeException, ParseException, IOException, ConfigFile.NonUniqueHardwareName, IrpParseException, GirrException, IrpException, IrCoreException {
         return newEngine(new ConfigFile(url));
     }
 
@@ -73,7 +75,7 @@ public final class Engine implements ICommandExecutor, Closeable {
 
     private final List<String> outBuffer;
 
-    private Engine(ConfigFile config) throws FileNotFoundException, IncompatibleArgumentException {
+    private Engine(ConfigFile config) throws FileNotFoundException {
         outBuffer = new ArrayList<>(8);
         irHardware = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         config.getIrHardware().stream().forEach((GirsHardware hw) -> {
@@ -96,7 +98,7 @@ public final class Engine implements ICommandExecutor, Closeable {
         try {
             renderer = new Renderer(Parameters.getInstance().getString(Parameters.IRPPROTOCOLSINI));
             registerModule(renderer);
-        } catch (NoSuchParameterException ex) {
+        } catch (NoSuchParameterException | IOException | IrpParseException ex) {
             logger.log(Level.WARNING, Parameters.IRPPROTOCOLSINI + " not defined; rendering will not be available");
         }
 
@@ -281,7 +283,7 @@ public final class Engine implements ICommandExecutor, Closeable {
             Collection<String> list = CommandExecuter.getMainExecutor().exec(tokens);
             return list;
 
-        } catch (JGirsException | IOException | HarcHardwareException | IrpMasterException | RuntimeException ex) {
+        } catch (JGirsException | IOException | HarcHardwareException | IrCoreException | IrpException | RuntimeException ex) {
             return Utils.singletonArrayList(ERROR + ": " + ex.toString());
         }
     }
