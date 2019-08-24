@@ -236,7 +236,7 @@
         <dependency>
             <groupId>org.harctoolbox</groupId>
             <artifactId>ReadlineCommander</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.harctoolbox</groupId>
