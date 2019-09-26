@@ -17,23 +17,29 @@ CONFIG=${JGIRSHOME}/${project.nameLowercase}_config.xml
 #EXTRA_JNI_LIBS=/usr/local/lib64:
 EXTRA_JNI_LIBS=
 
-if [ `uname -m` = "armv6l" ] ; then
-    ARCH=arml
-elif [ `uname -m` = "x86_64" ] ; then
-    ARCH=amd64
-else
-    ARCH=i386
+SYSTEM=`uname -s`
+if [ ${SYSTEM} = "Darwin" ] ; then
+    SYSTEM=Mac\ OS\ X
 fi
 
-# Use a system supplied librxtxSerial.so if present.
-# Fedora: dnf install rxtx
-# Ubunto >= 16: apt-get install librxtx-java
-if [ -f /usr/lib64/rxtx/librxtxSerial.so ] ; then
-    LOAD_RXTX_PATH=/usr/lib64/rxtx:
+if [ `uname -m` = "armv6l" ] ; then
+    ARCH=arml
+elif [ `uname -m` = "x86_64" -a "${SYSTEM}" != "Mac OS X" ] ; then
+    ARCH=amd64
+else
+    ARCH=`uname -m`
 fi
-if [ -f /usr/lib/rxtx/librxtxSerial.so ] ; then
-    LOAD_RXTX_PATH=/usr/lib/rxtx:
-fi
+
+
+## Use a system supplied librxtxSerial.so if present and working.
+## Fedora: dnf install rxtx
+## Ubunto >= 16: apt-get install librxtx-java
+#if [ -f /usr/lib64/rxtx/librxtxSerial.so ] ; then
+#    LOAD_RXTX_PATH=/usr/lib64/rxtx:
+#fi
+#if [ -f /usr/lib/rxtx/librxtxSerial.so ] ; then
+#    LOAD_RXTX_PATH=/usr/lib/rxtx:
+#fi
 
 # Use if you need /dev/ttyACM* (IrToy, many Arduino types) and your rxtx does not support it
 #RXTX_SERIAL_PORTS=-Dgnu.io.rxtx.SerialPorts=/dev/ttyS0:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
@@ -66,6 +72,6 @@ fi
 JAR=${JGIRSHOME}/${project.name}-${project.version}-jar-with-dependencies.jar
 
 # Path to the shared libraries
-JAVA_LIBRARY_PATH=${EXTRA_JNI_LIBS}${LOAD_RXTX_PATH}${JGIRSHOME}/`uname -s`-${ARCH}
+JAVA_LIBRARY_PATH=${EXTRA_JNI_LIBS}${LOAD_RXTX_PATH}${JGIRSHOME}/${SYSTEM}-${ARCH}
 
 exec "${JAVA}" -Djava.library.path="${JAVA_LIBRARY_PATH}" ${RXTX_SERIAL_PORTS} -jar "${JAR}" -c "${CONFIG}" "$@"
