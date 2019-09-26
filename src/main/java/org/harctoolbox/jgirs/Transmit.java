@@ -134,7 +134,7 @@ public class Transmit extends Module {
     }
 
     public boolean transmitRaw(int count, int frequency, int introLength, int repeatLength, int endingLength, int[] data) throws HarcHardwareException, NoSuchTransmitterException, IOException, IncompatibleHardwareException, NoSuchParameterException, NoSuchHardwareException, AmbigousHardwareException, InvalidArgumentException {
-        IrSignal irSignal = new IrSignal(data, introLength / 2, repeatLength / 2, frequency);
+        IrSignal irSignal = new IrSignal(data, introLength, repeatLength, frequency);
         return transmit(count, irSignal);
     }
 
