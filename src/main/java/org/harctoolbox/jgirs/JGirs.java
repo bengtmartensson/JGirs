@@ -113,7 +113,7 @@ public final class JGirs {
 
         // Some stuff from the command line overrides the data in the configuration file:
         if (commandLineArgs.irpProtocolsXml != null)
-            config.setStringOption(Parameters.IRPPROTOCOLSINI, commandLineArgs.irpProtocolsXml);
+            config.setStringOption(Parameters.IRPPROTOCOLSXML, commandLineArgs.irpProtocolsXml);
         if (commandLineArgs.verbosity)
             config.setBooleanOption(Parameters.VERBOSITY, commandLineArgs.verbosity);
         if (commandLineArgs.transmitDevice != null)

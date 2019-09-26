@@ -32,7 +32,7 @@ import static org.harctoolbox.jgirs.Utils.STRING;
  */
 public class Parameters extends Module {
 
-    public static final String IRPPROTOCOLSINI  = "irpProtocolsIni";
+    public static final String IRPPROTOCOLSXML  = "irpProtocolsXml";
     public static final String VERBOSITY        = "verbosity"; // Do not change to the more grammatically correct "verbose"
     public static final String LISTSEPARATOR    = "listSeparator";
     public static final String TRANSMITDEVICE   = "transmitDevice";

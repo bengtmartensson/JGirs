@@ -20,6 +20,7 @@ Any value defined here will override the pom.xml file value but is only applicab
         <configurations>
             <configuration id="help" profiles=""/>
             <configuration id="nullhardware" profiles=""/>
+            <configuration id="null" profiles=""/>
         </configurations>
     </config-data>
 </project-shared-configuration>

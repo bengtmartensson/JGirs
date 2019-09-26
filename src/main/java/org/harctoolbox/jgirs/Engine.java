@@ -96,10 +96,10 @@ public final class Engine implements ICommandExecutor, Closeable {
         registerModule(Base.newBase());
 
         try {
-            renderer = new Renderer(Parameters.getInstance().getString(Parameters.IRPPROTOCOLSINI));
+            renderer = new Renderer(Parameters.getInstance().getString(Parameters.IRPPROTOCOLSXML));
             registerModule(renderer);
         } catch (NoSuchParameterException | IOException | IrpParseException ex) {
-            logger.log(Level.WARNING, Parameters.IRPPROTOCOLSINI + " not defined; rendering will not be available");
+            logger.log(Level.WARNING, Parameters.IRPPROTOCOLSXML + " not defined; rendering will not be available");
         }
 
         if (config.getRemoteCommandsDataBase() != null)

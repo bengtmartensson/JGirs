@@ -20,6 +20,7 @@ package org.harctoolbox.jgirs;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -75,15 +76,19 @@ public class CsvImporter {
         this(1, 2, 3, 4, 5, DEFAULT_SEPARATOR);
     }
 
-    private Command parseLine(String line) throws GirrException {
+    private Command parseLine(String line) throws GirrException, ParseException {
         String[] chunks = line.split(separator);
-        String protocol = protocolColumn > 0 ? chunks[protocolColumn-1] : NOPROTOCOL;
-        Map<String, Long> parameters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        getParam(parameters, D, dColumn, chunks);
-        getParam(parameters, S, sColumn, chunks);
-        getParam(parameters, F, fColumn, chunks);
-        String commandName = commandNameColumn > 0 ? chunks[commandNameColumn-1] : dummyName(parameters);
-        return new Command(commandName, null, protocol, parameters);
+        try {
+            String protocol = protocolColumn > 0 ? chunks[protocolColumn - 1] : NOPROTOCOL;
+            Map<String, Long> parameters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            getParam(parameters, D, dColumn, chunks);
+            getParam(parameters, S, sColumn, chunks);
+            getParam(parameters, F, fColumn, chunks);
+            String commandName = commandNameColumn > 0 ? chunks[commandNameColumn - 1] : dummyName(parameters);
+            return new Command(commandName, null, protocol, parameters);
+        } catch (IndexOutOfBoundsException ex) {
+            throw new ParseException("Could not parse string: " + line, 0);
+        }
     }
 
     public Remote parseFile(String remoteName, Reader reader) throws IOException, GirrException  {
@@ -98,7 +103,7 @@ public class CsvImporter {
                 try {
                     Command command = parseLine(line);
                     commands.put(command.getName(), command);
-                } catch (NumberFormatException ex) {
+                } catch (NumberFormatException | ParseException ex) {
                 }
             }
         }

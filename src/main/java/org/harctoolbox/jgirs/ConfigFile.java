@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.xml.validation.Schema;
 import org.harctoolbox.girr.Command;
@@ -36,6 +37,7 @@ import org.harctoolbox.girr.GirrException;
 import org.harctoolbox.girr.RemoteSet;
 import org.harctoolbox.harchardware.HarcHardwareException;
 import org.harctoolbox.ircore.IrCoreException;
+import org.harctoolbox.irp.IrpDatabase;
 import org.harctoolbox.irp.IrpException;
 import org.harctoolbox.irp.IrpParseException;
 import static org.harctoolbox.jgirs.Parameters.VERBOSITY;
@@ -57,15 +59,18 @@ public class ConfigFile {
     private static final String TYPE    = "type";
 
     private static RemoteSet parseRemoteSet(Element element) throws NoSuchRemoteTypeException, IOException, SAXException, ParseException, GirrException {
-        String type = element.getAttribute(TYPE);
-        if (type.equalsIgnoreCase(LIRCD))
-            return parseLirc(element);
-        else if (type.equalsIgnoreCase(GIRR) || type.isEmpty())
-            return parseGirr(element);
-        else if (type.equalsIgnoreCase(CSV) || type.isEmpty())
-            return parseCsv(element);
-        else
-            throw new NoSuchRemoteTypeException(type);
+        String type = element.getAttribute(TYPE).toLowerCase(Locale.US);
+        switch (type) {
+            case LIRCD:
+                return parseLirc(element);
+            case GIRR:
+            case "":
+                return parseGirr(element);
+            case CSV:
+                return parseCsv(element);
+            default:
+                throw new NoSuchRemoteTypeException(type);
+        }
     }
 
     private static RemoteSet parseLirc(Element element) throws MalformedURLException, IOException {
@@ -138,7 +143,8 @@ public class ConfigFile {
             irHardware.put(hw.getName(), hw);
         }
 
-        Command.setIrpMaster(optionsList.get(Parameters.IRPPROTOCOLSINI).get()); // needed for CSV import
+        IrpDatabase irpDatabase = new IrpDatabase(optionsList.get(Parameters.IRPPROTOCOLSXML).get());
+        Command.setIrpMaster(irpDatabase); // needed for CSV import
         nodeList = doc.getElementsByTagName("named-remote");
         ArrayList<RemoteSet> remoteSetList = new ArrayList<>(nodeList.getLength());
         for (int i = 0; i < nodeList.getLength(); i++)
